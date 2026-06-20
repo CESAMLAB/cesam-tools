@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="pic/Logo-CESAM-Couleur-vect-dark.png">
-    <img src="pic/Logo-CESAM-Couleur-vect.png" alt="CESAM-Lab" height="84">
-  </picture>
+  <img src="pic/Logo-CESAM-Couleur-vect-card.png" alt="CESAM-Lab" height="84">
 </p>
 
 # cesam-tools — Boîte à outils CESAM-Lab
