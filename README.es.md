@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="pic/Logo-CESAM-Couleur-vect.png" alt="CESAM-Lab" height="84">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="pic/Logo-CESAM-Couleur-vect-dark.png">
+    <img src="pic/Logo-CESAM-Couleur-vect.png" alt="CESAM-Lab" height="84">
+  </picture>
 </p>
 
 # cesam-tools — Caja de herramientas CESAM-Lab
