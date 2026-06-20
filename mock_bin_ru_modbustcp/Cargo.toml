@@ -1,0 +1,41 @@
+[package]
+name = "mock_bin_ru_modbustcp"
+description = "Régulateur industriel simulé : régulation PID/TOR sur fonction de transfert, serveur Modbus TCP et interface graphique."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+# Nom commercial de l'exécutable produit : ORME (Open Regulator Modbus Emulator).
+# Le nom de paquet reste `mock_bin_ru_modbustcp` (sélecteur `cargo -p`).
+[[bin]]
+name = "orme"
+path = "src/main.rs"
+
+[features]
+# Interface graphique embarquée. Activée par défaut (poste de travail).
+# La désactiver (`--no-default-features`) produit un binaire « headless » : le
+# serveur Modbus et la simulation tournent sans IHM (idéal Raspberry Pi sans écran,
+# et cross-compilation ARM sans dépendances graphiques).
+default = ["gui", "rtu"]
+gui = ["dep:eframe", "dep:egui_plot", "dep:image"]
+# Transport Modbus RTU série (RS485). Tire `tokio-serial` (dépendance native :
+# sous Linux, ouverture du port via termios). La désactiver
+# (`--no-default-features`) produit un binaire Modbus TCP seul.
+rtu = ["dep:tokio-serial", "tokio-modbus/rtu-server"]
+
+[dependencies]
+mock_lib_control = { workspace = true, features = ["serde"] }
+anyhow = { workspace = true }
+tokio = { workspace = true }
+ractor = { workspace = true }
+tokio-modbus = { workspace = true }
+tokio-serial = { workspace = true, optional = true }
+eframe = { workspace = true, optional = true }
+egui_plot = { workspace = true, optional = true }
+image = { workspace = true, optional = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"

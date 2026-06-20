@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=ORME
+GenericName=Régulateur simulé (Modbus TCP/RTU)
+Comment=Simulateur d'unité de régulation industrielle — CESAM-Lab
+Exec=orme
+Icon=orme
+Terminal=false
+Categories=Utility;Engineering;Development;
+# Doit correspondre à l'app_id Wayland / WM_CLASS X11 défini dans main.rs.
+StartupWMClass=orme

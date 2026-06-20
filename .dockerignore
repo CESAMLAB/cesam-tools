@@ -1,0 +1,6 @@
+# Contexte de build Docker minimal : seuls les binaires headless préparés sont
+# envoyés au démon (évite d'expédier target/ qui pèse plusieurs Go).
+*
+!dist
+dist/*
+!dist/_docker

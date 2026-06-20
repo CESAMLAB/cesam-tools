@@ -1,0 +1,33 @@
+# Artefacts de compilation Rust / Cargo
+/target
+**/target
+
+# Sauvegardes / fichiers temporaires
+*.bk
+*.swp
+*~
+*.orig
+
+# Fichiers d'environnement locaux
+.env
+.env.local
+
+# Configuration runtime générée par les instruments (par utilisateur)
+mock_ru_modbustcp.toml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE (JetBrains / VS Code) — config locale, non versionnée
+.idea/
+.vscode/
+
+# Notes de revue interne (analyses critiques, non destinées au dépôt public)
+/analyse/
+
+# Claude Code (réglages locaux non partagés)
+.claude/settings.local.json
+
+# Binaires de distribution générés par scripts/build-release.sh
+/dist

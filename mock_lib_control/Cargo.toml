@@ -1,0 +1,17 @@
+[package]
+name = "mock_lib_control"
+description = "Briques de régulation réutilisables (PID, TOR, fonctions de transfert) pour les simulateurs d'instruments industriels."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[features]
+# Active la (dé)sérialisation de PidConfig / ControllerKind (utilisée pour la persistance TOML).
+serde = ["dep:serde"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"], optional = true }
+
+[dev-dependencies]

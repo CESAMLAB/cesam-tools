@@ -1,0 +1,27 @@
+# Image d'exécution headless multi-arch d'ORME (régulateur simulé).
+#
+# Les binaires sont compilés EN AMONT (sans IHM, via `cross`) puis simplement
+# copiés ici selon l'architecture cible — aucune compilation dans l'image, donc
+# pas besoin de QEMU pour assembler le multi-arch.
+#
+# Construite par `scripts/build-prod.sh` avec `docker buildx`.
+FROM debian:bookworm-slim
+
+# Renseigné automatiquement par buildx : "amd64" ou "arm64".
+ARG TARGETARCH
+
+LABEL org.opencontainers.image.title="orme" \
+      org.opencontainers.image.description="ORME — Open Regulator Modbus Emulator : régulateur industriel simulé, serveur Modbus TCP/RTU (headless)" \
+      org.opencontainers.image.licenses="MIT"
+
+# Binaire headless correspondant à l'architecture (préparé dans dist/_docker/<arch>/).
+COPY dist/_docker/${TARGETARCH}/orme /usr/local/bin/orme
+
+# Port Modbus TCP par défaut.
+EXPOSE 5502
+
+# Répertoire de travail : y monter un volume pour fournir/persister
+# `mock_ru_modbustcp.toml` (sinon valeurs par défaut). Cf. variable MOCK_CONFIG.
+WORKDIR /data
+
+ENTRYPOINT ["/usr/local/bin/orme"]

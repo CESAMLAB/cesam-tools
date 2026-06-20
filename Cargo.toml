@@ -1,0 +1,50 @@
+[workspace]
+resolver = "2"
+members = [
+    "mock_lib_control",
+    "mock_bin_ru_modbustcp",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["tmenard <t.menard@cesam-lab.com>"]
+repository = ""
+rust-version = "1.85"
+
+# Dépendances partagées par les membres du workspace.
+# Chaque crate les active avec `dep.workspace = true`.
+[workspace.dependencies]
+# --- Async / acteurs ---
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync"] }
+ractor = { version = "0.15" }
+
+# --- Modbus TCP (serveur/esclave) ---
+tokio-modbus = { version = "0.17", default-features = false, features = ["tcp-server"] }
+# --- Modbus RTU série (RS485), activé par la feature `rtu` du binaire ---
+# default-features = false : on ouvre le port par chemin, sans énumération libudev.
+tokio-serial = { version = "5.4", default-features = false }
+
+# --- Interface graphique ---
+eframe = "0.33"
+egui_plot = "0.34"
+# Décodage des logos PNG (textures IHM + icône de fenêtre). Déjà tiré par eframe ;
+# default-features = false : on ne garde que le décodeur PNG.
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+# --- Gestion d'erreurs ---
+# anyhow : frontière process (binaires). thiserror : types d'erreur des libs.
+anyhow = "1"
+
+# --- Journalisation ---
+log = "0.4"
+env_logger = "0.11"
+
+# --- Membres internes ---
+mock_lib_control = { path = "mock_lib_control" }
+
+# Profil release : binaire de simulation léger et rapide.
+[profile.release]
+opt-level = 3
+lto = "thin"
