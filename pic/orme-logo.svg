@@ -1,5 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 240" width="760" height="240">
   <title>ORME — Open Regulator Modbus Emulator</title>
+  <style>
+    .ink { fill: #1A171B; }
+    .sub { fill: #6E6A70; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #ECECEC; }
+      .sub { fill: #B7B3B9; }
+    }
+  </style>
   <g transform="translate(20,0)">
     <g>
     <circle cx="110" cy="110" r="74" fill="#1A171B"/>
@@ -29,9 +37,9 @@
   </g>
   </g>
   <text x="250" y="118" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="104" font-weight="800"
-        fill="#1A171B" letter-spacing="2">OR<tspan fill="#F29400">ME</tspan></text>
+        class="ink" letter-spacing="2">OR<tspan fill="#F29400">ME</tspan></text>
   <text x="252" y="158" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="27" font-weight="600"
-        fill="#6E6A70" letter-spacing="0.5"
+        class="sub" letter-spacing="0.5"
         textLength="470" lengthAdjust="spacingAndGlyphs">Open Regulator Modbus Emulator</text>
   <text x="252" y="192" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="23" font-weight="700"
         fill="#F29400" font-style="italic">« Ouvrez le bus. »</text>
