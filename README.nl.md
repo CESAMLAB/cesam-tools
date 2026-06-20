@@ -6,6 +6,11 @@
 
 *🌍 [English](README.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Italiano](README.it.md) · [Português](README.pt.md) · **Nederlands** · [Polski](README.pl.md)*
 
+<p align="center">
+  <a href="https://github.com/CESAMLAB/cesam-tools/releases/latest"><img src="https://img.shields.io/github/v/release/CESAMLAB/cesam-tools?label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
+</p>
+
 Rust-workspace die de **tools van CESAM-Lab** verzamelt, te beginnen met
 **simulatoren van industriële instrumenten**: virtuele apparaten die een
 realistisch fysiek gedrag reproduceren en communiceren via veldprotocollen.
@@ -65,6 +70,27 @@ Een volledige virtuele industriële regelaar:
   verlopen via berichten (geen slot op de bedrijfslogica).
 - **`tokio-modbus`**: Modbus TCP- en RTU-serieel-server (trait `Service`).
 - **`eframe`/`egui`**: grafische interface op de hoofdthread.
+
+## Downloaden
+
+Voorgecompileerde binaries zijn beschikbaar op de pagina [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) — **geen Rust-toolchain vereist**.
+
+| Platform | GUI | Headless (alleen TCP, geen GUI) |
+|----------|-----|---------------------------------|
+| Linux x86_64 | [`orme-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64) | [`orme-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64-headless) |
+| Windows x86_64 | [`orme-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`orme-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64) | [`orme-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64-headless) |
+
+```bash
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi
+./orme-linux-x86_64
+```
+
+Linux-/RPi-binaries zijn dynamisch gelinkt aan glibc en hebben een desktopomgeving (X11/Wayland) nodig voor de GUI. Op **Wayland** installeer je het desktopitem voor het pictogram in de taakbalk: `scripts/install-desktop.sh`. Controleer de integriteit met de gepubliceerde checksums:
+
+```bash
+sha256sum -c SHA256SUMS
+```
 
 ## Snel starten
 

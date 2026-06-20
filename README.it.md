@@ -6,6 +6,11 @@
 
 *🌍 [English](README.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Español](README.es.md) · **Italiano** · [Português](README.pt.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md)*
 
+<p align="center">
+  <a href="https://github.com/CESAMLAB/cesam-tools/releases/latest"><img src="https://img.shields.io/github/v/release/CESAMLAB/cesam-tools?label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
+</p>
+
 Workspace Rust che riunisce gli **strumenti di CESAM-Lab**, a cominciare da
 **simulatori di strumenti industriali**: apparecchi virtuali che
 riproducono un comportamento fisico realistico e comunicano tramite protocolli
@@ -66,6 +71,27 @@ Un regolatore industriale virtuale completo:
   mutazioni passano per messaggi (nessun lock sulla logica di business).
 - **`tokio-modbus`**: server Modbus TCP e RTU seriale (trait `Service`).
 - **`eframe`/`egui`**: interfaccia grafica sul thread principale.
+
+## Download
+
+I binari precompilati sono disponibili nella pagina [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) — **nessuna toolchain Rust necessaria**.
+
+| Piattaforma | GUI | Headless (solo TCP, senza GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`orme-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64) | [`orme-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64-headless) |
+| Windows x86_64 | [`orme-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`orme-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64) | [`orme-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64-headless) |
+
+```bash
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi
+./orme-linux-x86_64
+```
+
+I binari Linux/RPi sono collegati dinamicamente a glibc e richiedono un ambiente desktop (X11/Wayland) per la GUI. Su **Wayland**, installa la voce desktop per l'icona nella barra delle applicazioni: `scripts/install-desktop.sh`. Verifica l'integrità con i checksum pubblicati:
+
+```bash
+sha256sum -c SHA256SUMS
+```
 
 ## Avvio rapido
 

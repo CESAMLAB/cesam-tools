@@ -6,6 +6,11 @@
 
 *🌍 [English](README.md) · [Français](README.fr.md) · **Deutsch** · [Español](README.es.md) · [Italiano](README.it.md) · [Português](README.pt.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md)*
 
+<p align="center">
+  <a href="https://github.com/CESAMLAB/cesam-tools/releases/latest"><img src="https://img.shields.io/github/v/release/CESAMLAB/cesam-tools?label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
+</p>
+
 Rust-Workspace, der die **Werkzeuge von CESAM-Lab** zusammenfasst, beginnend mit
 **Simulatoren für Industrieinstrumente**: virtuelle Geräte, die ein realistisches
 physikalisches Verhalten nachbilden und über Feldprotokolle kommunizieren.
@@ -66,6 +71,27 @@ Ein vollständiger virtueller Industrieregler:
   laufen über Nachrichten (keine Sperre auf der Geschäftslogik).
 - **`tokio-modbus`**: Modbus-Server TCP und seriell RTU (Trait `Service`).
 - **`eframe`/`egui`**: grafische Oberfläche auf dem Haupt-Thread.
+
+## Download
+
+Vorkompilierte Binärdateien sind auf der [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest)-Seite verfügbar — **keine Rust-Toolchain erforderlich**.
+
+| Plattform | GUI | Headless (nur TCP, ohne GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`orme-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64) | [`orme-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64-headless) |
+| Windows x86_64 | [`orme-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`orme-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64) | [`orme-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64-headless) |
+
+```bash
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi
+./orme-linux-x86_64
+```
+
+Die Linux-/RPi-Binärdateien sind dynamisch mit glibc verknüpft und benötigen für die GUI eine Desktop-Umgebung (X11/Wayland). Installieren Sie unter **Wayland** den Desktop-Eintrag für das Taskleistensymbol: `scripts/install-desktop.sh`. Überprüfen Sie die Integrität mit den veröffentlichten Prüfsummen:
+
+```bash
+sha256sum -c SHA256SUMS
+```
 
 ## Schnellstart
 

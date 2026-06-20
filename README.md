@@ -6,6 +6,11 @@
 
 *🌍 **English** · [Français](README.fr.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [Italiano](README.it.md) · [Português](README.pt.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md)*
 
+<p align="center">
+  <a href="https://github.com/CESAMLAB/cesam-tools/releases/latest"><img src="https://img.shields.io/github/v/release/CESAMLAB/cesam-tools?label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
+</p>
+
 A Rust workspace gathering the **CESAM-Lab tools**, starting with **simulators of
 industrial instruments**: virtual devices that reproduce realistic physical
 behavior and communicate via field protocols. Useful for developing, testing and
@@ -64,6 +69,27 @@ A complete virtual industrial controller:
   messages (no lock on the business logic).
 - **`tokio-modbus`**: Modbus TCP and serial RTU server (`Service` trait).
 - **`eframe`/`egui`**: graphical interface on the main thread.
+
+## Download
+
+Prebuilt binaries are available on the [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) page — **no Rust toolchain required**.
+
+| Platform | GUI | Headless (TCP only, no GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`orme-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64) | [`orme-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64-headless) |
+| Windows x86_64 | [`orme-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`orme-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64) | [`orme-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64-headless) |
+
+```bash
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi
+./orme-linux-x86_64
+```
+
+Linux/RPi binaries are dynamically linked to glibc and need a desktop environment (X11/Wayland) for the GUI. On **Wayland**, install the desktop entry for the taskbar icon: `scripts/install-desktop.sh`. Verify integrity with the published checksums:
+
+```bash
+sha256sum -c SHA256SUMS
+```
 
 ## Quick start
 

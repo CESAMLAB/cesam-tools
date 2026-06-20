@@ -6,6 +6,11 @@
 
 *🌍 [English](README.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · **Español** · [Italiano](README.it.md) · [Português](README.pt.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md)*
 
+<p align="center">
+  <a href="https://github.com/CESAMLAB/cesam-tools/releases/latest"><img src="https://img.shields.io/github/v/release/CESAMLAB/cesam-tools?label=release" alt="Latest release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="License: MIT"></a>
+</p>
+
 Workspace Rust que agrupa las **herramientas de CESAM-Lab**, empezando por
 **simuladores de instrumentos industriales**: equipos virtuales que
 reproducen un comportamiento físico realista y se comunican mediante protocolos
@@ -66,6 +71,27 @@ Un regulador industrial virtual completo:
   mutaciones pasan por mensajes (sin bloqueo sobre la lógica de negocio).
 - **`tokio-modbus`**: servidor Modbus TCP y RTU serie (trait `Service`).
 - **`eframe`/`egui`**: interfaz gráfica en el hilo principal.
+
+## Descarga
+
+Hay binarios precompilados disponibles en la página de [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) — **sin necesidad de la cadena de herramientas Rust**.
+
+| Plataforma | IHM | Headless (solo TCP, sin IHM) |
+|------------|-----|------------------------------|
+| Linux x86_64 | [`orme-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64) | [`orme-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-linux-x86_64-headless) |
+| Windows x86_64 | [`orme-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64 bits) | [`orme-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64) | [`orme-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64-headless) |
+
+```bash
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi
+./orme-linux-x86_64
+```
+
+Los binarios Linux/RPi están enlazados dinámicamente con glibc y necesitan un entorno de escritorio (X11/Wayland) para la IHM. En **Wayland**, instala la entrada de escritorio para el icono en la barra de tareas: `scripts/install-desktop.sh`. Verifica la integridad con las sumas de comprobación publicadas:
+
+```bash
+sha256sum -c SHA256SUMS
+```
 
 ## Arranque rápido
 
