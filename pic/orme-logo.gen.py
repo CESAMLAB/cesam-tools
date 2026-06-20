@@ -74,9 +74,15 @@ icon = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="
 '''
 open("orme-icon.svg", "w").write(icon)
 
-# --- Lockup horizontal 760×220 (icône + texte) ---
+# --- Lockup horizontal 760×240 (icône + texte) ---
+# Hauteur 240 (et non 220) pour ne pas tronquer les pieds du « bus » sous le cadran
+# (nœuds à y≈230). Le sous-titre est figé à une largeur fixe via `textLength` +
+# `lengthAdjust` : il occupe toujours la même place QUELLE QUE SOIT la police du
+# visiteur (GitHub n'a pas DejaVu Sans et substituait une police plus large, d'où
+# le « Emulator » coupé à droite). Largeur de référence = rendu DejaVu Sans @27.
 FONT = "'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif"
-logo = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" width="760" height="220">
+SUBTITLE_W = 470  # largeur fixe du sous-titre (px du viewBox) -> fin à x=252+470=722 < 760
+logo = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 240" width="760" height="240">
   <title>ORME — Open Regulator Modbus Emulator</title>
   <g transform="translate(20,0)">
     {dial(110, 110)}
@@ -84,7 +90,8 @@ logo = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 220" width="
   <text x="250" y="118" font-family="{FONT}" font-size="104" font-weight="800"
         fill="{DARK}" letter-spacing="2">OR<tspan fill="{ORANGE}">ME</tspan></text>
   <text x="252" y="158" font-family="{FONT}" font-size="27" font-weight="600"
-        fill="{GREY}" letter-spacing="0.5">Open Regulator Modbus Emulator</text>
+        fill="{GREY}" letter-spacing="0.5"
+        textLength="{SUBTITLE_W}" lengthAdjust="spacingAndGlyphs">Open Regulator Modbus Emulator</text>
   <text x="252" y="192" font-family="{FONT}" font-size="23" font-weight="700"
         fill="{ORANGE}" font-style="italic">« Ouvrez le bus. »</text>
 </svg>
