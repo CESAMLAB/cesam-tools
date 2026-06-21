@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Vérification rapide sans dépendances système (binaire headless : TCP seul).
+  lint-test-headless:
+    name: Lint & test (headless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Clippy (headless)
+        run: cargo clippy --workspace --no-default-features --all-targets -- -D warnings
+      - name: Tests (headless)
+        run: cargo test --workspace --no-default-features
+
+  # Build complet avec IHM + RTU (nécessite les en-têtes système d'egui/eframe).
+  build-full:
+    name: Clippy, test & build (gui + rtu)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Dépendances système (eframe/egui)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libxkbcommon-dev libwayland-dev libgl1-mesa-dev \
+            libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+      - name: Clippy (toutes features)
+        run: cargo clippy --workspace --all-features --all-targets -- -D warnings
+      - name: Tests (toutes features)
+        run: cargo test --workspace --all-features
+      - name: Build release
+        run: cargo build --release --workspace
+
+  # Audit des vulnérabilités de dépendances (RUSTSEC).
+  audit:
+    name: Audit des dépendances
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Installer cargo-audit
+        run: cargo install cargo-audit --locked
+      - name: cargo audit
+        run: cargo audit

@@ -6,6 +6,7 @@ use std::net::SocketAddr;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll};
+use std::time::Instant;
 
 use ractor::ActorRef;
 use tokio::io::{AsyncRead, AsyncWrite, ReadBuf};
@@ -15,7 +16,7 @@ use tokio_modbus::prelude::{ExceptionCode, Request, Response};
 use tokio_modbus::server::tcp::Server;
 use tokio_modbus::server::Service;
 
-use crate::actors::{SharedAllowlist, SharedMap, SharedSnapshot, SimulationMsg};
+use crate::actors::{SharedAllowlist, SharedMap, SharedSnapshot, SharedStatus, SimulationMsg};
 use crate::map::{coil_to_command, holdings_to_commands};
 use crate::regulator::Command;
 
@@ -28,15 +29,22 @@ pub struct RegulatorService {
     actor: ActorRef<SimulationMsg>,
     map: SharedMap,
     snapshot: SharedSnapshot,
+    status: SharedStatus,
 }
 
 impl RegulatorService {
     #[must_use]
-    pub fn new(actor: ActorRef<SimulationMsg>, map: SharedMap, snapshot: SharedSnapshot) -> Self {
+    pub fn new(
+        actor: ActorRef<SimulationMsg>,
+        map: SharedMap,
+        snapshot: SharedSnapshot,
+        status: SharedStatus,
+    ) -> Self {
         Self {
             actor,
             map,
             snapshot,
+            status,
         }
     }
 
@@ -45,7 +53,17 @@ impl RegulatorService {
         let _ = self.actor.cast(SimulationMsg::Command(cmd));
     }
 
+    /// Horodate la dernière requête reçue (témoin d'activité du lien pour l'IHM).
+    /// Mise à jour partielle : ne touche ni au statut d'écoute ni au maître connecté.
+    fn mark_activity(&self) {
+        if let Ok(mut s) = self.status.lock() {
+            s.last_request = Some(Instant::now());
+        }
+    }
+
     fn handle(&self, req: Request<'static>) -> Result<Response, ExceptionCode> {
+        // Toute requête (lecture comprise) atteste que le maître interroge l'appareil.
+        self.mark_activity();
         match req {
             Request::ReadCoils(addr, qty) => {
                 let map = self.lock_map()?;
@@ -223,6 +241,7 @@ pub async fn serve(
     listener: TcpListener,
     service: RegulatorService,
     allowlist: SharedAllowlist,
+    status: SharedStatus,
 ) -> std::io::Result<()> {
     let server = Server::new(listener);
     // Émetteur d'éviction de la connexion actuellement servie (politique mono-maître).
@@ -232,6 +251,7 @@ pub async fn serve(
         let service = service.clone();
         let allowlist = allowlist.clone();
         let current = current.clone();
+        let status = status.clone();
         async move {
             let allowed = allowlist
                 .lock()
@@ -251,6 +271,11 @@ pub async fn serve(
                     log::info!("Master connected: {peer}");
                 }
                 *guard = Some(kick_tx);
+            }
+            // Publie le maître courant pour le voyant de connexion de l'IHM
+            // (mise à jour partielle du statut).
+            if let Ok(mut s) = status.lock() {
+                s.peer = Some(peer.to_string());
             }
             Ok(Some((service, CancellableStream::new(stream, kick_rx))))
         }
@@ -288,7 +313,7 @@ mod tests {
 
     use super::*;
     use crate::actors::{SimulationActor, SimulationArgs};
-    use crate::config::IpFilter;
+    use crate::config::{IpFilter, ServerStatus};
     use crate::map::MemoryMap;
     use crate::regulator::{Regulator, RegulatorConfig};
 
@@ -298,6 +323,7 @@ mod tests {
         let snapshot = Arc::new(Mutex::new(Regulator::new(reg_cfg.clone()).snapshot()));
         let map = Arc::new(Mutex::new(MemoryMap::default()));
         let allowlist = Arc::new(Mutex::new(IpFilter::default()));
+        let status = Arc::new(Mutex::new(ServerStatus::default()));
 
         let (sim, _sj) = Actor::spawn(
             None,
@@ -311,10 +337,10 @@ mod tests {
         .await
         .unwrap();
 
-        let service = RegulatorService::new(sim.clone(), map, snapshot);
+        let service = RegulatorService::new(sim.clone(), map, snapshot, status.clone());
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
-        tokio::spawn(serve(listener, service, allowlist));
+        tokio::spawn(serve(listener, service, allowlist, status));
 
         // Premier maître.
         let mut a = TcpStream::connect(addr).await.unwrap();
@@ -328,6 +354,35 @@ mod tests {
         let mut buf = [0u8; 8];
         let n = a.read(&mut buf).await.unwrap();
         assert_eq!(n, 0, "le premier maître doit être déconnecté à l'arrivée du second");
+
+        sim.stop(None);
+    }
+
+    #[tokio::test]
+    async fn read_request_marks_activity() {
+        // Toute requête traitée doit horodater le témoin d'activité du lien.
+        let reg_cfg = RegulatorConfig::default();
+        let snapshot = Arc::new(Mutex::new(Regulator::new(reg_cfg.clone()).snapshot()));
+        let map = Arc::new(Mutex::new(MemoryMap::default()));
+        let status = Arc::new(Mutex::new(ServerStatus::default()));
+
+        let (sim, _sj) = Actor::spawn(
+            None,
+            SimulationActor,
+            SimulationArgs {
+                config: reg_cfg,
+                snapshot: snapshot.clone(),
+                map: map.clone(),
+            },
+        )
+        .await
+        .unwrap();
+
+        let service = RegulatorService::new(sim.clone(), map, snapshot, status.clone());
+        assert!(status.lock().unwrap().last_request.is_none());
+        // Une simple lecture des registres d'entrée suffit à marquer l'activité.
+        let _ = service.handle(Request::ReadInputRegisters(crate::map::IR_PV, 2));
+        assert!(status.lock().unwrap().last_request.is_some());
 
         sim.stop(None);
     }

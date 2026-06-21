@@ -2,7 +2,7 @@
 //!
 //! Seules les chaînes **destinées à l'opérateur** (interface graphique) sont
 //! traduites. Les logs, messages d'erreur internes et commentaires restent en
-//! **français** (cf. `CLAUDE.md`).
+//! **français** (cf. conventions du projet).
 //!
 //! # Principe
 //!
@@ -101,6 +101,13 @@ pub enum Msg {
     DeviceStopped,
     SettingsSaved,
     SaveFailed,
+    // Voyant de connexion (maître Modbus / activité du lien).
+    Master,
+    NoMaster,
+    LinkActive,
+    LinkIdle,
+    /// Avertissement de sécurité : serveur exposé sans filtrage d'IP.
+    SecurityExposed,
     // --- Panneau gauche : commandes ---
     Commands,
     OnOff,
@@ -185,6 +192,8 @@ pub enum Msg {
     RowModeSens2,
     RowHysteresis,
     RowIdent,
+    /// Mot composé en suffixe pour les recopies en lecture seule (« SP auto (recopie) »).
+    Readback,
     // Mots réutilisés pour composer les libellés des gains PID.
     Dir1,
     Dir2,
@@ -205,6 +214,11 @@ impl Msg {
             DeviceStopped      => ["À L'ARRÊT", "STOPPED", "GESTOPPT", "DETENIDO", "FERMO", "PARADO", "GESTOPT", "ZATRZYMANY"],
             SettingsSaved      => ["Réglages sauvegardés", "Settings saved", "Einstellungen gespeichert", "Ajustes guardados", "Impostazioni salvate", "Definições guardadas", "Instellingen opgeslagen", "Ustawienia zapisane"],
             SaveFailed         => ["Échec de sauvegarde", "Save failed", "Speichern fehlgeschlagen", "Error al guardar", "Salvataggio non riuscito", "Falha ao guardar", "Opslaan mislukt", "Zapis nie powiódł się"],
+            Master             => ["Maître", "Master", "Master", "Maestro", "Master", "Mestre", "Master", "Master"],
+            NoMaster           => ["Aucun maître", "No master", "Kein Master", "Sin maestro", "Nessun master", "Sem mestre", "Geen master", "Brak mastera"],
+            LinkActive         => ["Lien actif — trafic Modbus récent", "Link active — recent Modbus traffic", "Verbindung aktiv — kürzlich Modbus-Verkehr", "Enlace activo — tráfico Modbus reciente", "Collegamento attivo — traffico Modbus recente", "Ligação ativa — tráfego Modbus recente", "Verbinding actief — recent Modbus-verkeer", "Łącze aktywne — niedawny ruch Modbus"],
+            LinkIdle           => ["Lien inactif — aucun trafic récent", "Link idle — no recent traffic", "Verbindung inaktiv — kein kürzlicher Verkehr", "Enlace inactivo — sin tráfico reciente", "Collegamento inattivo — nessun traffico recente", "Ligação inativa — sem tráfego recente", "Verbinding inactief — geen recent verkeer", "Łącze nieaktywne — brak ostatniego ruchu"],
+            SecurityExposed    => ["⚠ Serveur Modbus exposé à tout le réseau (aucune liste blanche d'IP)", "⚠ Modbus server exposed to the whole network (no IP allowlist)", "⚠ Modbus-Server für das gesamte Netzwerk offen (keine IP-Whitelist)", "⚠ Servidor Modbus expuesto a toda la red (sin lista blanca de IP)", "⚠ Server Modbus esposto a tutta la rete (nessuna whitelist IP)", "⚠ Servidor Modbus exposto a toda a rede (sem lista branca de IP)", "⚠ Modbus-server blootgesteld aan het hele netwerk (geen IP-witlijst)", "⚠ Serwer Modbus dostępny dla całej sieci (brak białej listy IP)"],
             // --- Panneau gauche : commandes ---
             Commands           => ["Commandes", "Commands", "Befehle", "Comandos", "Comandi", "Comandos", "Bediening", "Sterowanie"],
             OnOff              => ["Marche / Arrêt", "On / Off", "Ein / Aus", "Marcha / Paro", "Marcia / Arresto", "Ligar / Desligar", "Aan / Uit", "Wł. / Wył."],
@@ -286,6 +300,7 @@ impl Msg {
             RowModeSens2       => ["Mode sens 2", "Mode direction 2", "Modus Richtung 2", "Modo sentido 2", "Modalità verso 2", "Modo sentido 2", "Modus richting 2", "Tryb kierunek 2"],
             RowHysteresis      => ["Hystérésis", "Hysteresis", "Hysterese", "Histéresis", "Isteresi", "Histerese", "Hysterese", "Histereza"],
             RowIdent           => ["Identifiant (ASCII)", "Identifier (ASCII)", "Kennung (ASCII)", "Identificador (ASCII)", "Identificatore (ASCII)", "Identificador (ASCII)", "Identificatie (ASCII)", "Identyfikator (ASCII)"],
+            Readback           => ["recopie", "readback", "Rückmeldung", "lectura", "lettura", "leitura", "uitlezing", "odczyt"],
             Dir1               => ["sens 1", "dir. 1", "Richtung 1", "sentido 1", "verso 1", "sentido 1", "richting 1", "kier. 1"],
             Dir2               => ["sens 2", "dir. 2", "Richtung 2", "sentido 2", "verso 2", "sentido 2", "richting 2", "kier. 2"],
         }

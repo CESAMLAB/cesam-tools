@@ -115,6 +115,12 @@ Codice funzione: `0x04`.
 |---------|-------------|------|-------|
 | `0`–`1` | Misura (PV — *process value*) | `f32` | unità di misura |
 | `2`–`3` | Uscita applicata | `f32` | % con segno (+ caldo / − freddo) |
+| `4`–`5` | Rilettura setpoint auto (sola lettura) | `f32` | unità di misura |
+| `6`–`7` | Rilettura setpoint manuale (sola lettura) | `f32` | % di uscita, con segno (−100…+100) |
+
+> **Riletture dei setpoint**: i registri `4`–`7` espongono in **sola lettura** il
+> valore corrente dei setpoint auto/manuale (specchi degli holding `2`–`5`).
+> Comodo per un supervisore che si limita a **monitorare** senza scrivere.
 
 ---
 
@@ -158,8 +164,8 @@ mbpoll -m tcp -p 5502 -a 1 -t 3:float -r 3 127.0.0.1
 Coils (RW)            DiscreteInputs (RO)     Holding (RW)              Input (RO)
 0  On/Off             0  In marcia            0  Modo verso1 (u16)      0-1 PV (f32)
 1  Auto/Manuale       1  Caldo attivo         1  Modo verso2 (u16)      2-3 Uscita (f32)
-                      2  Freddo attivo        2-3  SP auto (f32)
-                                              4-5  SP manuale (f32)
+                      2  Freddo attivo        2-3  SP auto (f32)         4-5 SP auto (rilettura, RO)
+                                              4-5  SP manuale (f32)       6-7 SP manuale (rilettura, RO)
                                               6-7  Kp1  8-9  Ki1  10-11 Kd1
                                               12-13 Kp2 14-15 Ki2 16-17 Kd2
                                               18-19 Isteresi (f32)

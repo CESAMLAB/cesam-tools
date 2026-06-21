@@ -54,7 +54,7 @@ impl SimulationState {
     }
 
     /// (Ré)arme le prochain `Tick` via un timer one-shot dont on conserve le
-    /// handle. On évite ainsi un timer détaché (cf. invariants `CLAUDE.md`) et on
+    /// handle. On évite ainsi un timer détaché (cf. invariants du projet) et on
     /// obtient un cadencement « auto-régulé » (le tick suivant est planifié après
     /// le traitement du précédent).
     fn arm_timer(&mut self, myself: &ActorRef<SimulationMsg>) {

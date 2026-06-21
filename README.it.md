@@ -133,8 +133,6 @@ cargo test --workspace      # test unitari + integrazione
 cargo clippy --workspace    # lint
 ```
 
-Vedi [CLAUDE.md](CLAUDE.md) per le convenzioni e l'architettura dettagliata.
-
 ## Documentazione
 
 Ogni strumento ha la propria documentazione nella sua sottocartella `docs/`,

@@ -134,8 +134,6 @@ cargo test --workspace      # Unit- + Integrationstests
 cargo clippy --workspace    # Lint
 ```
 
-Siehe [CLAUDE.md](CLAUDE.md) für die Konventionen und die detaillierte Architektur.
-
 ## Dokumentation
 
 Jedes Instrument trägt seine eigene Dokumentation in seinem `docs/`-Unterordner,

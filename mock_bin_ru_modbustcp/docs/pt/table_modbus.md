@@ -115,6 +115,12 @@ Código de função: `0x04`.
 |---------|-------------|------|-------|
 | `0`–`1` | Medida (PV — *process value*) | `f32` | unidade de medida |
 | `2`–`3` | Saída aplicada | `f32` | % com sinal (+ aquecimento / − arrefecimento) |
+| `4`–`5` | Releitura consigna auto (leitura apenas) | `f32` | unidade de medida |
+| `6`–`7` | Releitura consigna manual (leitura apenas) | `f32` | % de saída, com sinal (−100…+100) |
+
+> **Releituras das consignas**: os registos `4`–`7` expõem em **leitura apenas** o
+> valor atual das consignas auto/manual (espelhos dos holdings `2`–`5`).
+> Prático para um supervisor que apenas **monitoriza** sem escrever.
 
 ---
 
@@ -158,8 +164,8 @@ mbpoll -m tcp -p 5502 -a 1 -t 3:float -r 3 127.0.0.1
 Coils (RW)            DiscreteInputs (RO)     Holding (RW)              Input (RO)
 0  On/Off             0  Em marcha            0  Modo sent1 (u16)       0-1 PV (f32)
 1  Auto/Manual        1  Aquec. ativo         1  Modo sent2 (u16)       2-3 Saída (f32)
-                      2  Arref. ativo          2-3  SP auto (f32)
-                                              4-5  SP manual (f32)
+                      2  Arref. ativo          2-3  SP auto (f32)         4-5 SP auto (releitura, RO)
+                                              4-5  SP manual (f32)        6-7 SP manual (releitura, RO)
                                               6-7  Kp1  8-9  Ki1  10-11 Kd1
                                               12-13 Kp2 14-15 Ki2 16-17 Kd2
                                               18-19 Histerese (f32)

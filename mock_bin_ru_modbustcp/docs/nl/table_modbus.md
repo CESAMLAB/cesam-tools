@@ -116,6 +116,13 @@ Functiecode: `0x04`.
 |-------|----------|------|---------|
 | `0`–`1` | Meting (PV — *process value*) | `f32` | meeteenheid |
 | `2`–`3` | Toegepaste uitgang | `f32` | % met teken (+ warm / − koud) |
+| `4`–`5` | Teruglezing automatisch setpoint (alleen-lezen) | `f32` | meeteenheid |
+| `6`–`7` | Teruglezing handmatig setpoint (alleen-lezen) | `f32` | % uitgang, met teken (−100…+100) |
+
+> **Teruglezingen van de setpoints**: registers `4`–`7` stellen de huidige waarde
+> van de automatische/handmatige setpoints **alleen-lezen** beschikbaar (spiegels
+> van de holdings `2`–`5`). Handig voor een supervisor die alleen **bewaakt**
+> zonder te schrijven.
 
 ---
 
@@ -159,8 +166,8 @@ mbpoll -m tcp -p 5502 -a 1 -t 3:float -r 3 127.0.0.1
 Coils (RW)            DiscreteInputs (RO)     Holding (RW)              Input (RO)
 0  On/Off             0  In bedrijf           0  Modus richt1 (u16)     0-1 PV (f32)
 1  Auto/Manuel        1  Warm actief          1  Modus richt2 (u16)     2-3 Uitgang (f32)
-                      2  Koud actief          2-3  SP auto (f32)
-                                              4-5  SP handmatig (f32)
+                      2  Koud actief          2-3  SP auto (f32)         4-5 SP auto (teruglezing, RO)
+                                              4-5  SP handmatig (f32)     6-7 SP handmatig (teruglezing, RO)
                                               6-7  Kp1  8-9  Ki1  10-11 Kd1
                                               12-13 Kp2 14-15 Ki2 16-17 Kd2
                                               18-19 Hysterese (f32)

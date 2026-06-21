@@ -40,6 +40,10 @@ use crate::regulator::{AutoManual, Command, RegulatorSnapshot};
 /// Nombre maximal de points conservés pour la courbe de tendance.
 const HISTORY_LEN: usize = 3000;
 
+/// Délai au-delà duquel le lien est considéré inactif (voyant de connexion gris)
+/// faute de requête Modbus reçue. Un maître interroge typiquement bien plus vite.
+const LINK_ACTIVE_TIMEOUT: Duration = Duration::from_secs(3);
+
 // Couleurs (fixes) des courbes — partagées avec leur pastille de légende.
 const COLOR_SP: egui::Color32 = egui::Color32::from_rgb(90, 140, 255); // bleu
 const COLOR_PV: egui::Color32 = egui::Color32::from_rgb(230, 80, 80); // rouge
@@ -154,6 +158,16 @@ impl RegulatorGui {
         let _ = self.net.cast(ModbusServerMsg::Reconfigure(cfg.network.clone()));
         self.save_config();
     }
+}
+
+/// Indique si le serveur Modbus est « exposé » : transport TCP, écoute sur toutes
+/// les interfaces (`0.0.0.0` / `::`) **et** liste blanche d'IP vide (toutes IP
+/// autorisées). Sert à afficher un avertissement de sécurité dans l'IHM.
+fn network_is_exposed(config: &AppConfig) -> bool {
+    let net = &config.network;
+    net.transport == Transport::Tcp
+        && (net.bind_ip.trim() == "0.0.0.0" || net.bind_ip.trim() == "::")
+        && net.allowlist.iter().all(|p| p.trim().is_empty())
 }
 
 fn parity_label(lang: Lang, parity: Parity) -> &'static str {
@@ -304,7 +318,7 @@ impl RegulatorGui {
                     };
                     ui.colored_label(color, txt);
                     ui.separator();
-                    // État serveur Modbus
+                    // État serveur Modbus + voyant de connexion/activité du lien.
                     if let Ok(st) = self.status.lock() {
                         if st.listening {
                             ui.colored_label(
@@ -315,6 +329,35 @@ impl RegulatorGui {
                             ui.colored_label(egui::Color32::from_rgb(200, 60, 60), format!("Modbus ✖ {err}"));
                         } else {
                             ui.colored_label(egui::Color32::GRAY, "Modbus …");
+                        }
+
+                        // Voyant de connexion : vert si une requête a été reçue
+                        // récemment (le maître interroge), gris sinon. En TCP on
+                        // affiche en plus l'IP du maître ; en RTU (bus série sans
+                        // connexion) un simple voyant d'activité suffit.
+                        if st.listening {
+                            ui.separator();
+                            let active = st
+                                .last_request
+                                .is_some_and(|ts| ts.elapsed() < LINK_ACTIVE_TIMEOUT);
+                            let color = if active {
+                                egui::Color32::from_rgb(0, 180, 0)
+                            } else {
+                                egui::Color32::GRAY
+                            };
+                            let hover = if active { t(Msg::LinkActive) } else { t(Msg::LinkIdle) };
+                            match self.config.network.transport {
+                                Transport::Tcp => {
+                                    let txt = match &st.peer {
+                                        Some(ip) => format!("● {} {}", t(Msg::Master), ip),
+                                        None => format!("● {}", t(Msg::NoMaster)),
+                                    };
+                                    ui.colored_label(color, txt).on_hover_text(hover);
+                                }
+                                Transport::Rtu => {
+                                    ui.colored_label(color, "●").on_hover_text(hover);
+                                }
+                            }
                         }
                     }
                 });
@@ -327,6 +370,11 @@ impl RegulatorGui {
                     egui::Color32::from_rgb(200, 60, 60)
                 };
                 ui.colored_label(color, msg);
+            }
+            // Avertissement de sécurité : serveur TCP exposé sur toutes les interfaces
+            // sans liste blanche d'IP (Modbus n'a ni authentification ni chiffrement).
+            if network_is_exposed(&self.config) {
+                ui.colored_label(egui::Color32::from_rgb(200, 140, 0), t(Msg::SecurityExposed));
             }
             ui.add_space(2.0);
         });
@@ -808,5 +856,7 @@ fn modbus_rows(s: &RegulatorSnapshot, lang: Lang) -> Vec<ModbusRow> {
         ModbusRow { name: t(Msg::RowIdent).to_string(), table: "HR", addr: format!("{}–{}", map::HR_LABEL, label_end), value: format!("\"{}\"", map::LABEL_TEXT), access: "R" },
         ModbusRow { name: t(Msg::Measure).to_string(), table: "IR", addr: f32_addr(map::IR_PV), value: format!("{:.2}", s.pv), access: "R" },
         ModbusRow { name: t(Msg::OutputPct).to_string(), table: "IR", addr: f32_addr(map::IR_OUTPUT), value: format!("{:+.2}", s.output), access: "R" },
+        ModbusRow { name: format!("{} ({})", t(Msg::SpAuto), t(Msg::Readback)), table: "IR", addr: f32_addr(map::IR_SP_AUTO), value: format!("{:.2}", s.sp_auto), access: "R" },
+        ModbusRow { name: format!("{} ({})", t(Msg::SpManual), t(Msg::Readback)), table: "IR", addr: f32_addr(map::IR_SP_MANUAL), value: format!("{:.2}", s.sp_manual), access: "R" },
     ]
 }

@@ -133,8 +133,6 @@ cargo test --workspace      # testy jednostkowe + integracyjne
 cargo clippy --workspace    # lint
 ```
 
-Zobacz [CLAUDE.md](CLAUDE.md) dla konwencji i szczegółowej architektury.
-
 ## Dokumentacja
 
 Każdy przyrząd ma własną dokumentację w swoim podkatalogu `docs/`,

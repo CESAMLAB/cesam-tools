@@ -132,8 +132,6 @@ cargo test --workspace      # unit- + integratietests
 cargo clippy --workspace    # lint
 ```
 
-Zie [CLAUDE.md](CLAUDE.md) voor de conventies en de gedetailleerde architectuur.
-
 ## Documentatie
 
 Elk instrument draagt zijn eigen documentatie in zijn submap `docs/`, beschikbaar in

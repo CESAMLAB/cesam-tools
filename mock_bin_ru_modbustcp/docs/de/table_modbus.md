@@ -115,6 +115,12 @@ Funktionscode: `0x04`.
 |---------|-------------|-----|---------|
 | `0`–`1` | Messwert (PV — *process value*) | `f32` | Messeinheit |
 | `2`–`3` | Angewandter Ausgang | `f32` | % vorzeichenbehaftet (+ heiß / − kalt) |
+| `4`–`5` | Rücklesung Auto-Sollwert (nur Lesen) | `f32` | Messeinheit |
+| `6`–`7` | Rücklesung Manueller Sollwert (nur Lesen) | `f32` | % Ausgang, vorzeichenbehaftet (−100…+100) |
+
+> **Sollwert-Rücklesungen**: Die Register `4`–`7` stellen den aktuellen Wert der
+> Auto-/Manuell-Sollwerte **nur lesend** bereit (Spiegel der Halteregister `2`–`5`).
+> Praktisch für ein Leitsystem, das nur **überwacht**, ohne zu schreiben.
 
 ---
 
@@ -158,8 +164,8 @@ mbpoll -m tcp -p 5502 -a 1 -t 3:float -r 3 127.0.0.1
 Coils (RW)            DiscreteInputs (RO)     Holding (RW)              Input (RO)
 0  On/Off             0  In Betrieb           0  Modus Richt.1 (u16)    0-1 PV (f32)
 1  Auto/Manuell       1  Heiß aktiv           1  Modus Richt.2 (u16)    2-3 Ausgang (f32)
-                      2  Kalt aktiv           2-3  SP auto (f32)
-                                              4-5  SP manuell (f32)
+                      2  Kalt aktiv           2-3  SP auto (f32)         4-5 SP auto (Rücklesung, RO)
+                                              4-5  SP manuell (f32)       6-7 SP manuell (Rücklesung, RO)
                                               6-7  Kp1  8-9  Ki1  10-11 Kd1
                                               12-13 Kp2 14-15 Ki2 16-17 Kd2
                                               18-19 Hysterese (f32)

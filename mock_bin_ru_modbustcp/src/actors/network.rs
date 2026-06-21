@@ -56,11 +56,13 @@ impl ModbusServerState {
     }
 
     /// Publie un statut « à l'écoute » sur l'adresse `addr` (succès de démarrage).
+    /// Remet à zéro le maître connecté et l'activité (nouveau cycle d'écoute).
     fn set_listening(&self, addr: String) {
         self.set_status(ServerStatus {
             listening: true,
             addr,
             error: None,
+            ..ServerStatus::default()
         });
     }
 
@@ -71,12 +73,18 @@ impl ModbusServerState {
             listening: false,
             addr,
             error: Some(error),
+            ..ServerStatus::default()
         });
     }
 
     /// Construit le service Modbus partagé (lectures sur la map, écritures vers l'acteur).
     fn make_service(&self) -> RegulatorService {
-        RegulatorService::new(self.sim.clone(), self.map.clone(), self.snapshot.clone())
+        RegulatorService::new(
+            self.sim.clone(),
+            self.map.clone(),
+            self.snapshot.clone(),
+            self.status.clone(),
+        )
     }
 
     /// (Re)démarre le serveur Modbus selon le transport configuré.
@@ -106,7 +114,9 @@ impl ModbusServerState {
             Ok(listener) => {
                 let service = self.make_service();
                 let allowlist = self.allowlist.clone();
-                let handle = tokio::spawn(async move { serve(listener, service, allowlist).await });
+                let status = self.status.clone();
+                let handle =
+                    tokio::spawn(async move { serve(listener, service, allowlist, status).await });
                 self.handle = Some(handle);
                 log::info!("Modbus TCP server listening on {addr}");
                 self.set_listening(addr.to_string());
@@ -266,6 +276,113 @@ mod tests {
         tokio::time::sleep(Duration::from_millis(100)).await;
         let st = status.lock().unwrap().clone();
         assert!(st.listening, "le serveur doit écouter (erreur: {:?})", st.error);
+
+        net.stop(None);
+        sim.stop(None);
+    }
+
+    /// Démarre une paire simulation + serveur réseau sur `network` et renvoie les
+    /// poignées utiles aux tests de reconfiguration.
+    async fn spawn_pair(
+        network: NetworkConfig,
+    ) -> (
+        ActorRef<SimulationMsg>,
+        ActorRef<ModbusServerMsg>,
+        SharedStatus,
+        SharedAllowlist,
+    ) {
+        let reg_cfg = RegulatorConfig::default();
+        let snapshot = Arc::new(Mutex::new(Regulator::new(reg_cfg.clone()).snapshot()));
+        let map = Arc::new(Mutex::new(MemoryMap::default()));
+        let allowlist = Arc::new(Mutex::new(IpFilter::default()));
+        let status = Arc::new(Mutex::new(ServerStatus::default()));
+
+        let (sim, _sj) = Actor::spawn(None, crate::actors::SimulationActor, crate::actors::SimulationArgs {
+            config: reg_cfg,
+            snapshot: snapshot.clone(),
+            map: map.clone(),
+        })
+        .await
+        .unwrap();
+
+        let (net, _nj) = Actor::spawn(None, ModbusServerActor, ModbusServerArgs {
+            network,
+            sim: sim.clone(),
+            map,
+            snapshot,
+            allowlist: allowlist.clone(),
+            status: status.clone(),
+        })
+        .await
+        .unwrap();
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        (sim, net, status, allowlist)
+    }
+
+    #[tokio::test]
+    async fn reconfigure_allowlist_only_keeps_socket_and_applies_filter() {
+        let network = NetworkConfig {
+            bind_ip: "127.0.0.1".to_string(),
+            port: 0,
+            ..NetworkConfig::default()
+        };
+        let (sim, net, status, allowlist) = spawn_pair(network.clone()).await;
+
+        let addr_before = status.lock().unwrap().addr.clone();
+        assert!(allowlist.lock().unwrap().allows("8.8.8.8".parse().unwrap()));
+
+        // Même transport/IP/port (0), seule la liste blanche change : aucun rebind.
+        let cfg = NetworkConfig {
+            allowlist: vec!["10.0.0.1".to_string()],
+            ..network
+        };
+        net.cast(ModbusServerMsg::Reconfigure(cfg)).unwrap();
+        tokio::time::sleep(Duration::from_millis(100)).await;
+
+        let st = status.lock().unwrap().clone();
+        assert!(st.listening);
+        assert_eq!(st.addr, addr_before, "pas de réouverture du socket attendue");
+        // Le filtre est appliqué à chaud, sans redémarrage.
+        let f = allowlist.lock().unwrap();
+        assert!(f.allows("10.0.0.1".parse().unwrap()));
+        assert!(!f.allows("8.8.8.8".parse().unwrap()));
+
+        net.stop(None);
+        sim.stop(None);
+    }
+
+    #[tokio::test]
+    async fn reconfigure_rebinds_on_port_change() {
+        // Découvre un port libre, puis demande une reconfiguration vers ce port.
+        let tmp = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let free_port = tmp.local_addr().unwrap().port();
+        drop(tmp);
+
+        let network = NetworkConfig {
+            bind_ip: "127.0.0.1".to_string(),
+            port: 0,
+            ..NetworkConfig::default()
+        };
+        let (sim, net, status, _allow) = spawn_pair(network).await;
+        let addr_before = status.lock().unwrap().addr.clone();
+
+        let cfg = NetworkConfig {
+            bind_ip: "127.0.0.1".to_string(),
+            port: free_port,
+            ..NetworkConfig::default()
+        };
+        net.cast(ModbusServerMsg::Reconfigure(cfg)).unwrap();
+        tokio::time::sleep(Duration::from_millis(150)).await;
+
+        let st = status.lock().unwrap().clone();
+        assert!(st.listening, "le serveur doit réécouter (erreur: {:?})", st.error);
+        assert_ne!(st.addr, addr_before, "le socket doit avoir été rouvert");
+        assert!(
+            st.addr.ends_with(&format!(":{free_port}")),
+            "doit écouter sur le nouveau port {free_port} (addr={})",
+            st.addr
+        );
 
         net.stop(None);
         sim.stop(None);

@@ -26,7 +26,8 @@ Thumbs.db
 # Notes de revue interne (analyses critiques, non destinées au dépôt public)
 /analyse/
 
-# Claude Code (réglages locaux non partagés)
+# Instructions & réglages d'assistant de dev — locaux, non partagés
+/CLAUDE.md
 .claude/settings.local.json
 
 # Binaires de distribution générés par scripts/build-release.sh

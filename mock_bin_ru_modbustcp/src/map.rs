@@ -41,10 +41,12 @@
 //!
 //! ## Registres d'entrée — *input registers* (lecture seule, FC 4)
 //!
-//! | Adresse | Symbole        | Type | Description                          |
-//! |---------|----------------|------|--------------------------------------|
-//! | `0-1`   | `IR_PV`        | f32  | Mesure / *process value*             |
-//! | `2-3`   | `IR_OUTPUT`    | f32  | Sortie appliquée (% signé)           |
+//! | Adresse | Symbole         | Type | Description                                  |
+//! |---------|-----------------|------|----------------------------------------------|
+//! | `0-1`   | `IR_PV`         | f32  | Mesure / *process value*                     |
+//! | `2-3`   | `IR_OUTPUT`     | f32  | Sortie appliquée (% signé)                   |
+//! | `4-5`   | `IR_SP_AUTO`    | f32  | Recopie (lecture seule) de la consigne auto  |
+//! | `6-7`   | `IR_SP_MANUAL`  | f32  | Recopie (lecture seule) de la consigne manuelle |
 
 use mock_lib_control::{ControllerKind, PidConfig};
 
@@ -88,7 +90,11 @@ pub const HOLDING_COUNT: usize = 47;
 // --- Registres d'entrée ---
 pub const IR_PV: u16 = 0;
 pub const IR_OUTPUT: u16 = 2;
-pub const INPUT_COUNT: usize = 4;
+/// Recopie en lecture seule de la consigne automatique (miroir de [`HR_SP_AUTO`]).
+pub const IR_SP_AUTO: u16 = 4;
+/// Recopie en lecture seule de la consigne manuelle (miroir de [`HR_SP_MANUAL`]).
+pub const IR_SP_MANUAL: u16 = 6;
+pub const INPUT_COUNT: usize = 8;
 
 /// Découpe un `f32` en 2 registres Modbus (mot de poids fort en premier).
 #[must_use]
@@ -195,6 +201,10 @@ impl MemoryMap {
         // Registres d'entrée (mesures)
         self.set_input_f32(IR_PV, s.pv);
         self.set_input_f32(IR_OUTPUT, s.output);
+        // Recopie en lecture seule des consignes (miroir des HR correspondants),
+        // pratique pour un maître/superviseur qui ne fait que surveiller.
+        self.set_input_f32(IR_SP_AUTO, s.sp_auto);
+        self.set_input_f32(IR_SP_MANUAL, s.sp_manual);
     }
 }
 
@@ -354,6 +364,26 @@ mod tests {
         );
         assert!((tor - 7.0).abs() < 1e-3);
         assert!((pwm - 15.0).abs() < 1e-3);
+    }
+
+    #[test]
+    fn input_registers_mirror_setpoints() {
+        // Les consignes auto/manuelle sont recopiées en lecture seule dans les IR.
+        let mut snap = sample_snapshot();
+        snap.sp_auto = 75.0;
+        snap.sp_manual = -30.0;
+        let mut map = MemoryMap::default();
+        map.refresh_from(&snap);
+        let auto = regs_to_f32(
+            map.inputs[IR_SP_AUTO as usize],
+            map.inputs[IR_SP_AUTO as usize + 1],
+        );
+        let manual = regs_to_f32(
+            map.inputs[IR_SP_MANUAL as usize],
+            map.inputs[IR_SP_MANUAL as usize + 1],
+        );
+        assert!((auto - 75.0).abs() < 1e-3);
+        assert!((manual + 30.0).abs() < 1e-3);
     }
 
     #[test]

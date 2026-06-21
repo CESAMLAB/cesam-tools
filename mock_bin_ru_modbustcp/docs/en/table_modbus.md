@@ -115,6 +115,12 @@ Function code: `0x04`.
 |---------|-------------|------|-------|
 | `0`–`1` | Measurement (PV — *process value*) | `f32` | measurement unit |
 | `2`–`3` | Applied output | `f32` | signed % (+ heating / − cooling) |
+| `4`–`5` | Auto setpoint readback (read-only) | `f32` | measurement unit |
+| `6`–`7` | Manual setpoint readback (read-only) | `f32` | output %, signed (−100…+100) |
+
+> **Setpoint readbacks**: registers `4`–`7` expose **read-only** the current value
+> of the auto/manual setpoints (mirrors of holdings `2`–`5`). Handy for a supervisor
+> that only **monitors** without writing.
 
 ---
 
@@ -158,8 +164,8 @@ mbpoll -m tcp -p 5502 -a 1 -t 3:float -r 3 127.0.0.1
 Coils (RW)            DiscreteInputs (RO)     Holding (RW)              Input (RO)
 0  On/Off             0  Running              0  Mode dir1 (u16)        0-1 PV (f32)
 1  Auto/Manual        1  Heating active       1  Mode dir2 (u16)        2-3 Output (f32)
-                      2  Cooling active       2-3  SP auto (f32)
-                                              4-5  SP manual (f32)
+                      2  Cooling active       2-3  SP auto (f32)         4-5 SP auto (readback, RO)
+                                              4-5  SP manual (f32)        6-7 SP manual (readback, RO)
                                               6-7  Kp1  8-9  Ki1  10-11 Kd1
                                               12-13 Kp2 14-15 Ki2 16-17 Kd2
                                               18-19 Hysteresis (f32)

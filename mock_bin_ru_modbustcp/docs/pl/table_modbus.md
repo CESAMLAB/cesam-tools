@@ -115,6 +115,12 @@ Kod funkcji: `0x04`.
 |---------|-------------|------|-------|
 | `0`–`1` | Pomiar (PV — *process value*) | `f32` | jednostka pomiaru |
 | `2`–`3` | Zastosowane wyjście | `f32` | % ze znakiem (+ grzanie / − chłodzenie) |
+| `4`–`5` | Odczyt zwrotny nastawy auto (tylko odczyt) | `f32` | jednostka pomiaru |
+| `6`–`7` | Odczyt zwrotny nastawy ręcznej (tylko odczyt) | `f32` | % wyjścia, ze znakiem (−100…+100) |
+
+> **Odczyty zwrotne nastaw**: rejestry `4`–`7` udostępniają w trybie **tylko
+> odczyt** bieżącą wartość nastaw auto/ręcznej (odbicia rejestrów holding `2`–`5`).
+> Wygodne dla nadrzędnego systemu, który tylko **monitoruje** bez zapisu.
 
 ---
 
@@ -158,8 +164,8 @@ mbpoll -m tcp -p 5502 -a 1 -t 3:float -r 3 127.0.0.1
 Coils (RW)            DiscreteInputs (RO)     Holding (RW)              Input (RO)
 0  On/Off             0  W ruchu              0  Tryb kier.1 (u16)      0-1 PV (f32)
 1  Auto/Ręczny        1  Grzanie aktywne      1  Tryb kier.2 (u16)      2-3 Wyjście (f32)
-                      2  Chłodzenie aktywne   2-3  SP auto (f32)
-                                              4-5  SP ręczna (f32)
+                      2  Chłodzenie aktywne   2-3  SP auto (f32)         4-5 SP auto (odczyt zwr., RO)
+                                              4-5  SP ręczna (f32)        6-7 SP ręczna (odczyt zwr., RO)
                                               6-7  Kp1  8-9  Ki1  10-11 Kd1
                                               12-13 Kp2 14-15 Ki2 16-17 Kd2
                                               18-19 Histereza (f32)

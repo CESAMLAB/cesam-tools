@@ -115,6 +115,12 @@ Code fonction : `0x04`.
 |---------|-------------|------|-------|
 | `0`–`1` | Mesure (PV — *process value*) | `f32` | unité de mesure |
 | `2`–`3` | Sortie appliquée | `f32` | % signé (+ chaud / − froid) |
+| `4`–`5` | Recopie consigne auto (lecture seule) | `f32` | unité de mesure |
+| `6`–`7` | Recopie consigne manuelle (lecture seule) | `f32` | % de sortie, signée (−100…+100) |
+
+> **Recopies des consignes** : les registres `4`–`7` exposent en **lecture seule**
+> la valeur courante des consignes auto/manuelle (miroirs des holdings `2`–`5`).
+> Pratique pour un superviseur qui ne fait que **surveiller** sans écrire.
 
 ---
 
@@ -158,8 +164,8 @@ mbpoll -m tcp -p 5502 -a 1 -t 3:float -r 3 127.0.0.1
 Coils (RW)            DiscreteInputs (RO)     Holding (RW)              Input (RO)
 0  On/Off             0  En marche            0  Mode sens1 (u16)       0-1 PV (f32)
 1  Auto/Manuel        1  Chaud actif          1  Mode sens2 (u16)       2-3 Sortie (f32)
-                      2  Froid actif          2-3  SP auto (f32)
-                                              4-5  SP manuel (f32)
+                      2  Froid actif          2-3  SP auto (f32)         4-5 SP auto (recopie, RO)
+                                              4-5  SP manuel (f32)        6-7 SP manuel (recopie, RO)
                                               6-7  Kp1  8-9  Ki1  10-11 Kd1
                                               12-13 Kp2 14-15 Ki2 16-17 Kd2
                                               18-19 Hystérésis (f32)
