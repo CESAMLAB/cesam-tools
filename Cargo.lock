@@ -2075,7 +2075,7 @@ dependencies = [
 
 [[package]]
 name = "mock_bin_ru_modbustcp"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "eframe",
@@ -2095,7 +2095,7 @@ dependencies = [
 
 [[package]]
 name = "mock_bin_su_namur"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "eframe",
@@ -2114,14 +2114,14 @@ dependencies = [
 
 [[package]]
 name = "mock_lib_control"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mock_lib_update"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "serde",
  "thiserror 2.0.18",
