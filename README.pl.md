@@ -75,6 +75,10 @@ Kompletny wirtualny regulator przemysłowy:
 
 ## OSNE — symulowane mieszadło laboratoryjne
 
+<p align="center">
+  <img src="pic/osne-logo.svg" alt="OSNE — Open Stirrer NAMUR Emulator" height="120">
+</p>
+
 > **OSNE** — *Open Stirrer NAMUR Emulator*.
 > Laboratoryjne mieszadło nadstawne (w stylu IKA), które istnieje tylko na Twoim
 > łączu NAMUR.

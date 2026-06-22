@@ -73,6 +73,10 @@ A complete virtual industrial controller:
 
 ## OSNE — the simulated lab stirrer
 
+<p align="center">
+  <img src="pic/osne-logo.svg" alt="OSNE — Open Stirrer NAMUR Emulator" height="120">
+</p>
+
 > **OSNE** — *Open Stirrer NAMUR Emulator*.
 > A laboratory overhead stirrer (IKA-style) that exists only on your NAMUR link.
 

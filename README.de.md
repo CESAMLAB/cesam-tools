@@ -75,6 +75,10 @@ Ein vollständiger virtueller Industrieregler:
 
 ## OSNE — der simulierte Laborrührer
 
+<p align="center">
+  <img src="pic/osne-logo.svg" alt="OSNE — Open Stirrer NAMUR Emulator" height="120">
+</p>
+
 > **OSNE** — *Open Stirrer NAMUR Emulator*.
 > Ein Labor-Überkopfrührer (im Stil von IKA), der nur auf Ihrer NAMUR-Verbindung existiert.
 

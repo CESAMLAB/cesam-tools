@@ -74,6 +74,10 @@ Een volledige virtuele industriële regelaar:
 
 ## OSNE — de gesimuleerde laboratoriumroerder
 
+<p align="center">
+  <img src="pic/osne-logo.svg" alt="OSNE — Open Stirrer NAMUR Emulator" height="120">
+</p>
+
 > **OSNE** — *Open Stirrer NAMUR Emulator*.
 > Een bovenroerder voor het laboratorium (IKA-stijl) die alleen bestaat op uw
 > NAMUR-verbinding.

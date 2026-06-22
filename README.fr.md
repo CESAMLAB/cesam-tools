@@ -75,6 +75,10 @@ Un régulateur industriel virtuel complet :
 
 ## OSNE — l'agitateur de laboratoire simulé
 
+<p align="center">
+  <img src="pic/osne-logo.svg" alt="OSNE — Open Stirrer NAMUR Emulator" height="120">
+</p>
+
 > **OSNE** — *Open Stirrer NAMUR Emulator*.
 > Un agitateur de laboratoire à hélice (style IKA) qui n'existe que sur votre
 > liaison NAMUR.
