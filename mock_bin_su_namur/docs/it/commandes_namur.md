@@ -38,7 +38,7 @@ l'intestazione di [`src/namur.rs`](../../src/namur.rs).
 |----------|------|-------|---------|
 | `IN_NAME` | lettura | Nome dell'apparecchio | `CESAM-STIRRER` |
 | `IN_TYPE` | lettura | Tipo di apparecchio | `OSNE` |
-| `IN_SW_VERSION` | lettura | Versione del firmware simulato | es. `0.1.0` |
+| `IN_SW_VERSION` | lettura | Versione del firmware simulato (alias: `IN_VERSION`) | es. `0.2.0` |
 | `IN_PV_4` | lettura | Velocità **misurata** | `<v> 4` |
 | `IN_PV_5` | lettura | Coppia **misurata** | `<c> 5` |
 | `IN_SP_4` | lettura | Riferimento di velocità | `<v> 4` |
@@ -56,8 +56,10 @@ l'intestazione di [`src/namur.rs`](../../src/namur.rs).
 
 Dopo `OUT_WD1@30`, se **nessuna riga** arriva per 30 s, il motore viene
 **arrestato** (`STOP`) automaticamente — protezione in caso di perdita di
-comunicazione con il supervisore. `OUT_WD1@0` disarma il watchdog. Il contatore è
-**ri-armato a ogni comando ricevuto**.
+comunicazione con il supervisore. `OUT_WD1@0` (o un ritardo negativo) disarma il
+watchdog. Il contatore è **ri-armato a ogni comando ricevuto**. Una volta
+**scattato**, il watchdog si **disarma** (il motore è già fermo): riarmarlo con un
+nuovo `OUT_WD1@<m>` per riprendere la sorveglianza.
 
 ---
 

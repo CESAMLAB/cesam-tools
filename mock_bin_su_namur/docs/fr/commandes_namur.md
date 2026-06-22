@@ -38,7 +38,7 @@ l'en-tête de [`src/namur.rs`](../../src/namur.rs).
 |----------|------|-------|---------|
 | `IN_NAME` | lecture | Nom de l'appareil | `CESAM-STIRRER` |
 | `IN_TYPE` | lecture | Type d'appareil | `OSNE` |
-| `IN_SW_VERSION` | lecture | Version du firmware simulé | ex. `0.1.0` |
+| `IN_SW_VERSION` | lecture | Version du firmware simulé (alias : `IN_VERSION`) | ex. `0.2.0` |
 | `IN_PV_4` | lecture | Vitesse **mesurée** | `<v> 4` |
 | `IN_PV_5` | lecture | Couple **mesuré** | `<c> 5` |
 | `IN_SP_4` | lecture | Consigne de vitesse | `<v> 4` |
@@ -56,8 +56,10 @@ l'en-tête de [`src/namur.rs`](../../src/namur.rs).
 
 Après `OUT_WD1@30`, si **aucune ligne** n'arrive pendant 30 s, le moteur est
 **arrêté** (`STOP`) automatiquement — protection en cas de perte de communication
-avec le superviseur. `OUT_WD1@0` désarme le chien de garde. Le compteur est
-**réarmé à chaque commande reçue**.
+avec le superviseur. `OUT_WD1@0` (ou un délai négatif) désarme le chien de garde.
+Le compteur est **réarmé à chaque commande reçue**. Une fois **déclenché**, le
+chien de garde se **désarme** (le moteur est déjà à l'arrêt) : le réarmer par un
+nouveau `OUT_WD1@<m>` pour reprendre la surveillance.
 
 ---
 

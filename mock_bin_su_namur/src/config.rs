@@ -443,6 +443,36 @@ mod tests {
     }
 
     #[test]
+    fn pure_ipv6_matches_exact_pattern_only() {
+        // Une IPv6 non mappée se compare à l'identique (pas de jokers par octet).
+        let f = IpFilter::new(vec!["::1".to_string()]);
+        assert!(f.allows("::1".parse().unwrap()));
+        assert!(!f.allows("::2".parse().unwrap()));
+        // Un motif IPv4 ne matche pas une IPv6 pure (fail-closed).
+        let f4 = IpFilter::new(vec!["10.0.0.*".to_string()]);
+        assert!(!f4.allows("fe80::1".parse().unwrap()));
+    }
+
+    #[test]
+    fn sanitize_pid_orders_bounds_and_drops_non_finite() {
+        let dflt = PidConfig::default();
+        let cfg = sanitize_pid(
+            PidConfig {
+                kp: f32::NAN,
+                ki: -3.0,
+                kd: f32::INFINITY,
+                out_min: 100.0,
+                out_max: 0.0,
+            },
+            dflt,
+        );
+        assert_eq!(cfg.kp, dflt.kp); // NaN -> défaut
+        assert_eq!(cfg.ki, 0.0); // négatif -> 0
+        assert_eq!(cfg.kd, dflt.kd); // Inf -> défaut
+        assert!(cfg.out_min <= cfg.out_max); // bornes réordonnées
+    }
+
+    #[test]
     fn config_round_trips_through_toml() {
         let cfg = AppConfig::default();
         let s = toml::to_string_pretty(&cfg).unwrap();

@@ -208,3 +208,135 @@ impl Actor for NamurServerActor {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::VecDeque;
+    use std::sync::{Arc, Mutex};
+    use std::time::Duration;
+
+    use ractor::Actor;
+
+    use super::*;
+    use crate::config::{IpFilter, NetworkConfig, ServerStatus};
+    use crate::stirrer::{Stirrer, StirrerConfig};
+
+    /// Démarre une paire simulation + serveur NAMUR sur `network` et renvoie les
+    /// poignées utiles aux tests de reconfiguration.
+    async fn spawn_pair(
+        network: NetworkConfig,
+    ) -> (
+        ActorRef<SimulationMsg>,
+        ActorRef<NamurServerMsg>,
+        SharedStatus,
+        SharedAllowlist,
+    ) {
+        let cfg = StirrerConfig::default();
+        let snapshot = Arc::new(Mutex::new(Stirrer::new(cfg.clone()).snapshot()));
+        let allowlist = Arc::new(Mutex::new(IpFilter::default()));
+        let status = Arc::new(Mutex::new(ServerStatus::default()));
+        let trace: SharedTrace = Arc::new(Mutex::new(VecDeque::new()));
+
+        let (sim, _sj) = Actor::spawn(None, crate::actors::SimulationActor, crate::actors::SimulationArgs {
+            config: cfg,
+            snapshot: snapshot.clone(),
+        })
+        .await
+        .unwrap();
+
+        let (net, _nj) = Actor::spawn(None, NamurServerActor, NamurServerArgs {
+            network,
+            sim: sim.clone(),
+            snapshot,
+            allowlist: allowlist.clone(),
+            status: status.clone(),
+            trace,
+        })
+        .await
+        .unwrap();
+
+        tokio::time::sleep(Duration::from_millis(100)).await;
+        (sim, net, status, allowlist)
+    }
+
+    #[tokio::test]
+    async fn namur_actor_binds_and_listens() {
+        let network = NetworkConfig {
+            bind_ip: "127.0.0.1".to_string(),
+            port: 0, // port éphémère attribué par l'OS
+            ..NetworkConfig::default()
+        };
+        let (sim, net, status, _allow) = spawn_pair(network).await;
+        let st = status.lock().unwrap().clone();
+        assert!(st.listening, "le serveur doit écouter (erreur: {:?})", st.error);
+        net.stop(None);
+        sim.stop(None);
+    }
+
+    #[tokio::test]
+    async fn reconfigure_allowlist_only_keeps_socket_and_applies_filter() {
+        let network = NetworkConfig {
+            bind_ip: "127.0.0.1".to_string(),
+            port: 0,
+            ..NetworkConfig::default()
+        };
+        let (sim, net, status, allowlist) = spawn_pair(network.clone()).await;
+
+        let addr_before = status.lock().unwrap().addr.clone();
+        assert!(allowlist.lock().unwrap().allows("8.8.8.8".parse().unwrap()));
+
+        // Même transport/IP/port (0), seule la liste blanche change : aucun rebind.
+        let cfg = NetworkConfig {
+            allowlist: vec!["10.0.0.1".to_string()],
+            ..network
+        };
+        net.cast(NamurServerMsg::Reconfigure(cfg)).unwrap();
+        tokio::time::sleep(Duration::from_millis(100)).await;
+
+        let st = status.lock().unwrap().clone();
+        assert!(st.listening);
+        assert_eq!(st.addr, addr_before, "pas de réouverture du socket attendue");
+        let f = allowlist.lock().unwrap();
+        assert!(f.allows("10.0.0.1".parse().unwrap()));
+        assert!(!f.allows("8.8.8.8".parse().unwrap()));
+
+        net.stop(None);
+        sim.stop(None);
+    }
+
+    #[tokio::test]
+    async fn reconfigure_rebinds_on_port_change() {
+        // Découvre un port libre, puis demande une reconfiguration vers ce port.
+        let tmp = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let free_port = tmp.local_addr().unwrap().port();
+        drop(tmp);
+
+        let network = NetworkConfig {
+            bind_ip: "127.0.0.1".to_string(),
+            port: 0,
+            ..NetworkConfig::default()
+        };
+        let (sim, net, status, _allow) = spawn_pair(network).await;
+        let addr_before = status.lock().unwrap().addr.clone();
+
+        let cfg = NetworkConfig {
+            bind_ip: "127.0.0.1".to_string(),
+            port: free_port,
+            ..NetworkConfig::default()
+        };
+        net.cast(NamurServerMsg::Reconfigure(cfg)).unwrap();
+        tokio::time::sleep(Duration::from_millis(150)).await;
+
+        let st = status.lock().unwrap().clone();
+        assert!(st.listening, "le serveur doit réécouter (erreur: {:?})", st.error);
+        assert_ne!(st.addr, addr_before, "le socket doit avoir été rouvert");
+        assert!(
+            st.addr.ends_with(&format!(":{free_port}")),
+            "doit écouter sur le nouveau port {free_port} (addr={})",
+            st.addr
+        );
+
+        net.stop(None);
+        sim.stop(None);
+    }
+}

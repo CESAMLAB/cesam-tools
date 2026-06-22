@@ -138,7 +138,9 @@ impl Stirrer {
     #[must_use]
     pub fn new(cfg: StirrerConfig) -> Self {
         let motor = Motor::new(cfg.inertia, cfg.load_coeff, cfg.friction);
-        let speed_sp = cfg.speed_min.clamp(cfg.speed_min, cfg.speed_max);
+        // Consigne initiale = borne basse (le moteur démarre à l'arrêt). `min` reste
+        // dans `[speed_min, speed_max]` sans le no-op trompeur d'un `clamp` sur soi-même.
+        let speed_sp = cfg.speed_min.min(cfg.speed_max);
         let viscosity = cfg.viscosity.clamp(cfg.viscosity_min, cfg.viscosity_max);
         Self {
             pid: Pid::new(cfg.pid),

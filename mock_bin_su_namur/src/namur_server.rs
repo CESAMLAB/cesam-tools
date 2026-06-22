@@ -206,4 +206,39 @@ mod tests {
         drop(t);
         sim.stop(None);
     }
+
+    #[tokio::test]
+    async fn watchdog_timeout_stops_motor() {
+        let cfg = StirrerConfig::default();
+        let snapshot = Arc::new(Mutex::new(Stirrer::new(cfg.clone()).snapshot()));
+        let allowlist = Arc::new(Mutex::new(IpFilter::default()));
+        let status = Arc::new(Mutex::new(ServerStatus::default()));
+        let trace: SharedTrace = Arc::new(Mutex::new(std::collections::VecDeque::new()));
+
+        let (sim, _sj) = Actor::spawn(None, SimulationActor, SimulationArgs {
+            config: cfg,
+            snapshot: snapshot.clone(),
+        })
+        .await
+        .unwrap();
+
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        tokio::spawn(serve_tcp(listener, sim.clone(), snapshot.clone(), status, allowlist, trace));
+
+        let stream = TcpStream::connect(addr).await.unwrap();
+        let (_rd, mut wr) = stream.into_split();
+
+        // Démarre le moteur puis arme un chien de garde court (100 ms).
+        wr.write_all(b"START_4\r\n").await.unwrap();
+        wr.write_all(b"OUT_WD1@0.1\r\n").await.unwrap();
+        tokio::time::sleep(Duration::from_millis(60)).await;
+        assert!(snapshot.lock().unwrap().on, "le moteur doit tourner avant l'échéance");
+
+        // Silence prolongé : le chien de garde doit forcer l'arrêt (état sûr).
+        tokio::time::sleep(Duration::from_millis(250)).await;
+        assert!(!snapshot.lock().unwrap().on, "le chien de garde doit avoir arrêté le moteur");
+
+        sim.stop(None);
+    }
 }

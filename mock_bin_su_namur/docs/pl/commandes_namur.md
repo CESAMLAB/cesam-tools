@@ -38,7 +38,7 @@ Referencja funkcjonalna protokołu. **Techniczne źródło prawdy** to nagłówe
 |----------|------|-------|---------|
 | `IN_NAME` | odczyt | Nazwa urządzenia | `CESAM-STIRRER` |
 | `IN_TYPE` | odczyt | Typ urządzenia | `OSNE` |
-| `IN_SW_VERSION` | odczyt | Wersja symulowanego firmware'u | np. `0.1.0` |
+| `IN_SW_VERSION` | odczyt | Wersja symulowanego firmware'u (alias: `IN_VERSION`) | np. `0.2.0` |
 | `IN_PV_4` | odczyt | Prędkość **zmierzona** | `<v> 4` |
 | `IN_PV_5` | odczyt | Moment **zmierzony** | `<c> 5` |
 | `IN_SP_4` | odczyt | Wartość zadana prędkości | `<v> 4` |
@@ -56,8 +56,10 @@ Referencja funkcjonalna protokołu. **Techniczne źródło prawdy** to nagłówe
 
 Po `OUT_WD1@30`, jeśli **żadna linia** nie nadejdzie przez 30 s, silnik zostaje
 automatycznie **zatrzymany** (`STOP`) — zabezpieczenie na wypadek utraty
-komunikacji z systemem nadzoru. `OUT_WD1@0` rozbraja watchdog. Licznik jest
-**zerowany przy każdej odebranej komendzie**.
+komunikacji z systemem nadzoru. `OUT_WD1@0` (lub ujemne opóźnienie) rozbraja
+watchdog. Licznik jest **zerowany przy każdej odebranej komendzie**. Po
+**wyzwoleniu** watchdog **rozbraja się** (silnik jest już zatrzymany): należy go
+ponownie uzbroić nową komendą `OUT_WD1@<m>`, aby wznowić nadzór.
 
 ---
 

@@ -165,4 +165,34 @@ mod tests {
         assert_eq!(handle_line("FOO_BAR", &s), NamurResponse::Unknown);
         assert_eq!(handle_line("   ", &s), NamurResponse::Ignore);
     }
+
+    #[test]
+    fn watchdog_zero_disarms_and_negative_is_clamped() {
+        let s = sample();
+        // `@0` = désarmement explicite (délai nul transmis tel quel au serveur).
+        assert_eq!(handle_line("OUT_WD1@0", &s), NamurResponse::SetWatchdog(0.0));
+        // Un délai négatif est ramené à 0 (désarmement), jamais une durée négative.
+        assert_eq!(handle_line("OUT_WD1@-5", &s), NamurResponse::SetWatchdog(0.0));
+        // Argument non numérique ou non fini : commande rejetée.
+        assert_eq!(handle_line("OUT_WD1@nan", &s), NamurResponse::Unknown);
+        assert_eq!(handle_line("OUT_WD2@inf", &s), NamurResponse::Unknown);
+    }
+
+    #[test]
+    fn version_alias_and_malformed_args() {
+        let s = sample();
+        let v = env!("CARGO_PKG_VERSION");
+        // Les deux libellés de version renvoient la même valeur.
+        assert_eq!(handle_line("IN_SW_VERSION", &s), NamurResponse::Reply(v.into()));
+        assert_eq!(handle_line("IN_VERSION", &s), NamurResponse::Reply(v.into()));
+        // Consigne sans argument, ou non finie : rejetée (pas de panic, pas d'effet).
+        assert_eq!(handle_line("OUT_SP_4", &s), NamurResponse::Unknown);
+        assert_eq!(handle_line("OUT_SP_4 nan", &s), NamurResponse::Unknown);
+        assert_eq!(handle_line("OUT_SP_4 inf", &s), NamurResponse::Unknown);
+        // Argument surnuméraire ignoré (seul le premier compte).
+        assert_eq!(
+            handle_line("OUT_SP_4 750 extra", &s),
+            NamurResponse::Apply(Command::SetSpeed(750.0))
+        );
+    }
 }

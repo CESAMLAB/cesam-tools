@@ -38,7 +38,7 @@ der Kopf von [`src/namur.rs`](../../src/namur.rs).
 |--------|-----|---------|---------|
 | `IN_NAME` | Lesung | Gerätename | `CESAM-STIRRER` |
 | `IN_TYPE` | Lesung | Gerätetyp | `OSNE` |
-| `IN_SW_VERSION` | Lesung | Version der simulierten Firmware | z. B. `0.1.0` |
+| `IN_SW_VERSION` | Lesung | Version der simulierten Firmware (Alias: `IN_VERSION`) | z. B. `0.2.0` |
 | `IN_PV_4` | Lesung | **gemessene** Drehzahl | `<v> 4` |
 | `IN_PV_5` | Lesung | **gemessenes** Drehmoment | `<c> 5` |
 | `IN_SP_4` | Lesung | Drehzahl-Sollwert | `<v> 4` |
@@ -56,8 +56,10 @@ der Kopf von [`src/namur.rs`](../../src/namur.rs).
 
 Trifft nach `OUT_WD1@30` 30 s lang **keine Zeile** ein, wird der Motor automatisch
 **gestoppt** (`STOP`) — Schutz bei Verlust der Kommunikation mit dem Leitsystem.
-`OUT_WD1@0` deaktiviert den Watchdog. Der Zähler wird **bei jedem empfangenen
-Befehl neu armiert**.
+`OUT_WD1@0` (oder eine negative Verzögerung) deaktiviert den Watchdog. Der Zähler
+wird **bei jedem empfangenen Befehl neu armiert**. Nach dem **Auslösen**
+**deaktiviert** sich der Watchdog (der Motor steht bereits still): mit einem neuen
+`OUT_WD1@<m>` erneut armieren, um die Überwachung fortzusetzen.
 
 ---
 

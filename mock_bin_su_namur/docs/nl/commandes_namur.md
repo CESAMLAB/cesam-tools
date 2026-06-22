@@ -38,7 +38,7 @@ de header van [`src/namur.rs`](../../src/namur.rs).
 |----------|------|--------|----------|
 | `IN_NAME` | lezen | Naam van het apparaat | `CESAM-STIRRER` |
 | `IN_TYPE` | lezen | Type apparaat | `OSNE` |
-| `IN_SW_VERSION` | lezen | Versie van de gesimuleerde firmware | bv. `0.1.0` |
+| `IN_SW_VERSION` | lezen | Versie van de gesimuleerde firmware (alias: `IN_VERSION`) | bv. `0.2.0` |
 | `IN_PV_4` | lezen | **Gemeten** snelheid | `<v> 4` |
 | `IN_PV_5` | lezen | **Gemeten** koppel | `<c> 5` |
 | `IN_SP_4` | lezen | Snelheidssetpoint | `<v> 4` |
@@ -56,8 +56,10 @@ de header van [`src/namur.rs`](../../src/namur.rs).
 
 Na `OUT_WD1@30`, als er gedurende 30 s **geen enkele regel** binnenkomt, wordt de
 motor automatisch **gestopt** (`STOP`) — bescherming bij verlies van communicatie
-met de supervisor. `OUT_WD1@0` schakelt de waakhond uit. De teller wordt **bij elk
-ontvangen commando opnieuw ingesteld**.
+met de supervisor. `OUT_WD1@0` (of een negatieve vertraging) schakelt de waakhond
+uit. De teller wordt **bij elk ontvangen commando opnieuw ingesteld**. Eenmaal
+**geactiveerd** schakelt de waakhond zichzelf **uit** (de motor staat al stil):
+herstel hem met een nieuwe `OUT_WD1@<m>` om de bewaking te hervatten.
 
 ---
 

@@ -38,7 +38,7 @@ header of [`src/namur.rs`](../../src/namur.rs).
 |---------|------|--------|-------|
 | `IN_NAME` | read | Device name | `CESAM-STIRRER` |
 | `IN_TYPE` | read | Device type | `OSNE` |
-| `IN_SW_VERSION` | read | Simulated firmware version | e.g. `0.1.0` |
+| `IN_SW_VERSION` | read | Simulated firmware version (alias: `IN_VERSION`) | e.g. `0.2.0` |
 | `IN_PV_4` | read | **Measured** speed | `<v> 4` |
 | `IN_PV_5` | read | **Measured** torque | `<c> 5` |
 | `IN_SP_4` | read | Speed setpoint | `<v> 4` |
@@ -56,8 +56,10 @@ header of [`src/namur.rs`](../../src/namur.rs).
 
 After `OUT_WD1@30`, if **no line** arrives for 30 s, the motor is automatically
 **stopped** (`STOP`) — protection against loss of communication with the
-supervisor. `OUT_WD1@0` disarms the watchdog. The counter is **rearmed on every
-command received**.
+supervisor. `OUT_WD1@0` (or a negative delay) disarms the watchdog. The counter is
+**rearmed on every command received**. Once **triggered**, the watchdog
+**disarms** (the motor is already stopped): rearm it with a new `OUT_WD1@<m>` to
+resume monitoring.
 
 ---
 
