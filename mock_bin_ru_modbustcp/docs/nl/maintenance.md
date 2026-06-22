@@ -229,7 +229,7 @@ De GUI zit achter de Cargo-feature **`gui`**, standaard geactiveerd:
 
 ```bash
 cargo build --release                       # met GUI (werkstation)
-cargo build --release --no-default-features  # « headless »: Modbus + simulatie, zonder GUI
+cargo build --release --no-default-features  # «headless»: Modbus + simulatie, zonder GUI
 ```
 
 De **headless**-modus is bedoeld voor implementaties zonder scherm (Raspberry Pi in
@@ -276,24 +276,31 @@ en vernieuwt vervolgens de caches (`gtk-update-icon-cache`,
 ### Eenduidige procedure
 
 Alles wordt **vanaf Linux** geproduceerd door
-[`scripts/build-prod.sh`](../../../scripts/build-prod.sh):
+[`scripts/build-prod.sh`](../../../scripts/build-prod.sh), dat **alle instrumenten
+van het workspace** (ORME *en* OSNE) in één passe bouwt. Voor elk instrument
+(`<bin>` = `orme`, `osne`):
 
 | Uitvoer | Doel | GUI | Methode |
 |---------|------|-----|---------|
-| `dist/…-linux-x86_64` | `x86_64-unknown-linux-gnu` | ✅ | `cross` |
-| `dist/…-windows-x86_64.exe` | `x86_64-pc-windows-gnu` | ✅ | `cross` (mingw) |
-| `dist/…-rpi-arm64` | `aarch64-unknown-linux-gnu` (Pi 3/4/5, Pi OS 64b) | ✅ | `cross` |
-| Headless Docker-image | multi-arch `linux/amd64` + `linux/arm64` | ❌ | `docker buildx` |
+| `dist/<bin>-linux-x86_64` | `x86_64-unknown-linux-gnu` | ✅ | `cross` |
+| `dist/<bin>-windows-x86_64.exe` | `x86_64-pc-windows-gnu` | ✅ | `cross` (mingw) |
+| `dist/<bin>-rpi-arm64` | `aarch64-unknown-linux-gnu` (Pi 3/4/5, Pi OS 64b) | ✅ | `cross` |
+| Headless Docker-image `<bin>:headless` | multi-arch `linux/amd64` + `linux/arm64` | ❌ | `docker buildx` |
+| `dist/<bin>_<ver>_amd64.deb` / `_arm64.deb` | Debian/Ubuntu-pakket | ✅ | `dpkg-deb` |
+| `dist/<bin>-setup-x86_64.exe` | Windows-installer | ✅ | NSIS (`makensis`) |
 
 ```bash
 # Vereisten (eenmalig) — Docker moet draaien:
 cargo install cross
 
-# Alles produceren (exes in dist/ + lokale Docker-image amd64 geladen):
+# Alles produceren (exes ORME + OSNE in dist/ + lokale Docker-images amd64 geladen):
 scripts/build-prod.sh
 
-# Variant: MULTI-ARCH Docker-image gepusht naar een register:
-IMAGE=ghcr.io/<account>/orme:latest scripts/build-prod.sh
+# Variant: MULTI-ARCH Docker-images gepusht naar een register (<prefix>/<bin>:latest):
+IMAGE_PREFIX=ghcr.io/<account> scripts/build-prod.sh
+
+# Slechts één instrument bouwen:
+ONLY=orme scripts/build-prod.sh
 ```
 
 ### Waarom `cross` voor ALLE builds (ook Linux x86_64)
@@ -332,6 +339,33 @@ volume op `/data` om `mock_ru_modbustcp.toml` te leveren/behouden.
 # Zonder register: lokale image amd64 geladen, onmiddellijk testbaar
 docker run --rm -p 5502:5502 -v "$PWD/conf:/data" orme:headless
 ```
+
+### Installers (`.deb` Linux/RPi + setup Windows)
+
+Aan het einde van de build roept `build-prod.sh`
+[`scripts/make-installers.sh <bin>`](../../../scripts/make-installers.sh) aan, dat
+de release-uitvoerbare bestanden uit `dist/` omzet naar **installers**:
+
+| Installer | Bron | Inhoud | Tool |
+|-----------|------|--------|------|
+| `<bin>_<ver>_amd64.deb` | `dist/<bin>-linux-x86_64` | binair → `/usr/bin`, bureaubladvermelding, hicolor-pictogram | `dpkg-deb` |
+| `<bin>_<ver>_arm64.deb` | `dist/<bin>-rpi-arm64` | idem (Raspberry Pi OS 64-bits) | `dpkg-deb` |
+| `<bin>-setup-x86_64.exe` | `dist/<bin>-windows-x86_64.exe` | exe + snelkoppelingen (startmenu/bureaublad) + deïnstallatieprogramma | NSIS (`makensis`) |
+
+- De `.deb`-pakketten plaatsen het pictogram en het `.desktop`-bestand; een
+  `postinst` vernieuwt de pictogramcaches en de `.desktop`-database. Afhankelijkheden:
+  `libc6`; grafische aanbevelingen (`libgl1`, `libxkbcommon0`, `libwayland-client0`).
+- De Windows-installer komt van
+  [`packaging/windows/installer.nsi`](../../../packaging/windows/installer.nsi); zijn
+  snelkoppelingen dragen een `.ico`-pictogram met meerdere resoluties, afgeleid van
+  `pic/<bin>-icon.png` (via Pillow).
+- **Vereisten**: `dpkg-deb` (Debian/Ubuntu) voor de `.deb`-pakketten, **`makensis`**
+  (`sudo apt install nsis`) voor de Windows-setup, `python3`+Pillow voor de `.ico`.
+  Elk doel waarvan de tool of het artefact ontbreekt, wordt **gewaarschuwd en
+  overgeslagen** (de build breekt niet). Uitschakelen via `INSTALLERS=0`, of de
+  installers van één instrument apart (her)genereren: `scripts/make-installers.sh orme`.
+- De **versie** van de pakketten komt van `[workspace.package].version` van de
+  hoofd-`Cargo.toml`.
 
 ### Native Windows-build (MSVC) — optioneel
 

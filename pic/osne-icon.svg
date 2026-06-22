@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>OSNE — Open Stirrer NAMUR Emulator</title>
+  <g>
+    <circle cx="128" cy="128" r="74" fill="#1A171B"/>
+    <path d="M 62.95 193.05 A 92 92 0 1 1 193.05 193.05" fill="none" stroke="#F29400" stroke-width="17" stroke-linecap="round"/>
+    <polygon points="193.05,193.05 222.45,176.12 197.5,163.41" fill="#F29400"/>
+    <polygon points="62.95,62.95 33.55,79.88 58.5,92.59" fill="#F29400"/>
+    <line x1="128" y1="78" x2="128" y2="128" stroke="#F29400" stroke-width="8" stroke-linecap="round"/>
+    <rect x="108" y="62" width="40" height="20" rx="6" fill="#F29400"/>
+    <g transform="translate(144.38,139.47) rotate(35)"><ellipse cx="0" cy="0" rx="20" ry="7.5" fill="#F29400"/></g>
+    <g transform="translate(116.53,144.38) rotate(125)"><ellipse cx="0" cy="0" rx="20" ry="7.5" fill="#F29400"/></g>
+    <g transform="translate(111.62,116.53) rotate(215)"><ellipse cx="0" cy="0" rx="20" ry="7.5" fill="#F29400"/></g>
+    <g transform="translate(139.47,111.62) rotate(305)"><ellipse cx="0" cy="0" rx="20" ry="7.5" fill="#F29400"/></g>
+    <circle cx="128" cy="128" r="13" fill="#F29400"/>
+    <circle cx="128" cy="128" r="5.5" fill="#1A171B"/>
+  </g>
+</svg>

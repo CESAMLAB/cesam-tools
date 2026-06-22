@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "mock_lib_control",
     "mock_bin_ru_modbustcp",
+    "mock_bin_su_namur",
 ]
 
 [workspace.package]
@@ -10,7 +11,7 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 authors = ["tmenard <t.menard@cesam-lab.com>"]
-repository = ""
+repository = "https://github.com/CESAMLAB/cesam-tools"
 rust-version = "1.85"
 
 # Dépendances partagées par les membres du workspace.

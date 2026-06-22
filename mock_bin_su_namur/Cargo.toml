@@ -1,0 +1,39 @@
+[package]
+name = "mock_bin_su_namur"
+description = "Agitateur de laboratoire simulé (façon IKA) : moteur à fonction de transfert, régulation de vitesse rapide, charge visqueuse réglable, protocole série NAMUR et interface graphique."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+# Nom commercial de l'exécutable : OSNE (Open Stirrer NAMUR Emulator).
+# Le nom de paquet reste `mock_bin_su_namur` (sélecteur `cargo -p`).
+[[bin]]
+name = "osne"
+path = "src/main.rs"
+
+[features]
+# Interface graphique embarquée. Activée par défaut (poste de travail).
+# La désactiver (`--no-default-features`) produit un binaire « headless » : le
+# serveur NAMUR et la simulation tournent sans IHM.
+default = ["gui", "serial"]
+gui = ["dep:eframe", "dep:egui_plot", "dep:image"]
+# Transport NAMUR sur liaison série RS-232 (le bus historique des appareils de
+# labo). Tire `tokio-serial`. La désactiver produit un binaire NAMUR/TCP seul.
+serial = ["dep:tokio-serial"]
+
+[dependencies]
+mock_lib_control = { workspace = true, features = ["serde"] }
+anyhow = { workspace = true }
+# `io-util` ajoute BufReader / lignes ASCII / split, nécessaires au serveur NAMUR.
+tokio = { workspace = true, features = ["io-util"] }
+ractor = { workspace = true }
+tokio-serial = { workspace = true, optional = true }
+eframe = { workspace = true, optional = true }
+egui_plot = { workspace = true, optional = true }
+image = { workspace = true, optional = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"

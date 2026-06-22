@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=OSNE
+GenericName=Agitateur de laboratoire simulé (NAMUR)
+Comment=Simulateur d'agitateur de laboratoire — CESAM-Lab
+Exec=osne
+Icon=osne
+Terminal=false
+Categories=Utility;Engineering;Development;
+# Doit correspondre à l'app_id Wayland / WM_CLASS X11 défini dans main.rs.
+StartupWMClass=osne
