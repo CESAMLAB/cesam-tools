@@ -67,17 +67,17 @@ Befehl neu armiert**.
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (stumm)
+START_4                (stumm)
 IN_PV_4
 1200.0 4
 IN_PV_5
 62.0 5
-STOP_4                 (silencieux)
+STOP_4                 (stumm)
 ```
 
 > Das gelesene **Drehmoment** wächst mit der eingestellten **Viskosität** (IHM-
-> seitig) und der Drehzahl: `couple ≈ coeff_charge · viscosité · vitesse +
-> frottement`. Bei hoher Viskosität sättigt das Drehmoment am Motormaximum: Die
+> seitig) und der Drehzahl: `Drehmoment ≈ Lastkoeffizient · Viskosität · Drehzahl +
+> Reibung`. Bei hoher Viskosität sättigt das Drehmoment am Motormaximum: Die
 > Solldrehzahl wird nicht mehr erreicht (**Überlast**), ein Verhalten, das einen
 > realen Rührer nachbildet.

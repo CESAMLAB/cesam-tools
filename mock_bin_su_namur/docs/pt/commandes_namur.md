@@ -67,17 +67,17 @@ comando recebido**.
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (silencioso)
+START_4                (silencioso)
 IN_PV_4
 1200.0 4
 IN_PV_5
 62.0 5
-STOP_4                 (silencieux)
+STOP_4                 (silencioso)
 ```
 
 > O **binário** lido cresce com a **viscosidade** definida (no lado da IHM) e com a
-> velocidade: `couple ≈ coeff_charge · viscosité · vitesse + frottement`. Com
+> velocidade: `binário ≈ coeff_carga · viscosidade · velocidade + atrito`. Com
 > viscosidade elevada, o binário satura no máximo do motor: a velocidade de consigna
 > deixa de ser atingida (**sobrecarga**), comportamento que reproduz um agitador
 > real.

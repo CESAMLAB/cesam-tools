@@ -103,6 +103,9 @@ docs/                    Ontwerp, Modbus-tabel, onderhoud
 Structuur (alle secties zijn optioneel, aangevuld met standaardwaarden):
 
 ```toml
+language = "nl"
+check_updates = true       # bij de start controleren of er een recentere release bestaat (GUI)
+
 [network]
 bind_ip = "0.0.0.0"
 port = 5502
@@ -128,6 +131,23 @@ kp = 4.0 ; ki = 0.25 ; kd = 1.0 ; out_min = 0.0 ; out_max = 100.0
 > in `regulator.rs`. `ProcessConfig`/`RegulationConfig` (config.rs) zijn hiervan
 > afgeleid. Om een standaard te wijzigen, pas alleen `RegulatorConfig::default` aan.
 
+### Controle op updates
+
+Als `check_updates = true` (standaard) **en** het binair gecompileerd is met de
+feature `gui`, raadpleegt de GUI **bij de start** de laatste op GitHub
+(`CESAMLAB/cesam-tools`) gepubliceerde release en vergelijkt het nummer ervan met
+de huidige versie. Een recentere versie toont een klikbare banner « 🔔 Update
+beschikbaar ». De knop *Nu controleren* (modaal *Instellingen*) herhaalt de
+controle.
+
+- Het HTTPS-verzoek wordt uitgevoerd in een **toegewijde thread**, begrensd door
+  een timeout (5 s): offline of een onbereikbare GitHub belemmert nooit de start.
+- De logica leeft in de gedeelde crate **`mock_lib_update`** (`ureq`/`rustls`,
+  ingebedde Mozilla-roots → schone cross-compilatie onder `cross`).
+- **Headless-build** (`--no-default-features`): de controle — en de volledige
+  netwerk-/TLS-afhankelijkheid — is **afwezig**. Beheer op een server de updates
+  via apt/Docker. Door de operator uitschakelbaar (selectievakje in het modaal).
+
 ---
 
 ## 5. Afhankelijkheden en versievalkuilen
@@ -141,6 +161,7 @@ kp = 4.0 ; ki = 0.25 ; kd = 1.0 ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | GUI | onderling verbonden versies |
 | `egui_plot` | grafiek | ⚠️ **één minor-versie vooruit ten opzichte van `egui`**: voor `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | persistentie | `mock_lib_control` biedt een feature `serde` die door het binair wordt geactiveerd |
+| `mock_lib_update` (`ureq`/`rustls`) | updatecontrole | **alleen feature `gui`**; rustls 0.23 (webpki up-to-date); afwezig in headless |
 
 De gedeelde versies zijn gecentraliseerd in `[workspace.dependencies]` van de
 root-`Cargo.toml`. Om `egui`/`eframe` op te waarderen, **verifieer de

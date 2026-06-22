@@ -60,16 +60,16 @@ defeito). O cabeçalho indica o estado:
 ## 3. A interface num relance
 
 ```
-┌──────────────── En-tête : titre OSNE, ⚙ Paramètres, 💾 Sauvegarder, états & voyants ────────────────┐
+┌──────────────── Cabeçalho : título OSNE, ⚙ Definições, 💾 Guardar, estados & indicadores ───────────┐
 ├──────────────────┬──────────────────────────────────────────────────────────────────────────────────┤
-│  COMMANDES        │   SUPERVISION                                                                      │
-│  (gauche)         │   - cartes de valeurs (Vitesse / Couple / Viscosité / Surcharge)                  │
-│  Marche/Arrêt     │   - COURBE de tendance temps réel (Consigne / Vitesse / Couple)                   │
-│  Consigne vitesse │                                                                                   │
-│  Viscosité        │                                                                                   │
-│  Réglages PID     │                                                                                   │
+│  COMANDOS         │   SUPERVISÃO                                                                       │
+│  (esquerda)       │   - cartas de valores (Velocidade / Binário / Viscosidade / Sobrecarga)           │
+│  Arranque/Paragem │   - CURVA de tendência em tempo real (Consigna / Velocidade / Binário)            │
+│  Consigna veloc.  │                                                                                   │
+│  Viscosidade      │                                                                                   │
+│  Ajustes PID      │                                                                                   │
 ├──────────────────┴──────────────────────────────────────────────────────────────────────────────────┤
-│  ⇄ TRAMES NAMUR : mini-terminal (RX/TX) + ligne de commande + référence du protocole (à droite)       │
+│  ⇄ TRAMAS NAMUR : mini-terminal (RX/TX) + linha de comando + referência do protocolo (à direita)      │
 └───────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -181,7 +181,7 @@ Escolha da ligação — **uma única ativa de cada vez**:
 > ponto-a-ponto** (o servidor responde qualquer que seja o endereço pedido).
 
 ### Parâmetros do motor
-Comportamento físico simulado `J·dω/dt = T − k·η·ω − frottement`:
+Comportamento físico simulado `J·dω/dt = T − k·η·ω − atrito`:
 - **Inércia** (`J`): reatividade do motor (pequeno ⇒ rápido);
 - **Coeficiente de carga** (`k`): peso da viscosidade no binário;
 - **Atrito** (`N·cm`): atrito seco residual;
@@ -228,11 +228,11 @@ Exemplo com `nc` (netcat):
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (silencioso)
+START_4                (silencioso)
 IN_PV_4
 1200.0 4
-STOP_4                 (silencieux)
+STOP_4                 (silencioso)
 ```
 
 > O **cão de guarda** `OUT_WD1@30` para automaticamente o motor se **nenhuma linha**
@@ -252,7 +252,7 @@ uma versão **sem interface**: faz correr a simulação e o servidor NAMUR,
 comandáveis **apenas por NAMUR**.
 
 ```bash
-# Image Docker (déployable n'importe où) :
+# Imagem Docker (implementável em qualquer lugar) :
 docker run --rm -p 4001:4001 -v "$PWD/conf:/data" osne:headless
 ```
 

@@ -67,26 +67,26 @@ cargo build -p mock_bin_su_namur --no-default-features --features gui    # GUI, 
 ## 3. Organisatie van de code
 
 ```
-mock_lib_control/        Bibliothèque de régulation (pure, sans IO, testable)
-  src/pid.rs             PID anti-emballement (réutilisé pour l'asservissement de vitesse)
-  src/lib.rs             ré-exports (feature `serde` optionnelle)
+mock_lib_control/        Regelbibliotheek (puur, zonder IO, testbaar)
+  src/pid.rs             Anti-windup-PID (hergebruikt voor de snelheidsregeling)
+  src/lib.rs             re-exports (optionele feature `serde`)
 
-mock_bin_su_namur/       Binaire agitateur (exécutable `osne`)
-  src/main.rs            Démarrage : config, runtime Tokio, acteurs, IHM
-  src/motor.rs           Modèle physique du moteur (dynamique rotationnelle, Euler)
-  src/stirrer.rs         Modèle métier synchrone (état, Command, step) — possède le PID
+mock_bin_su_namur/       Roerder-binair (uitvoerbaar bestand `osne`)
+  src/main.rs            Opstart: config, Tokio-runtime, acteurs, GUI
+  src/motor.rs           Fysisch motormodel (rotatiedynamiek, Euler)
+  src/stirrer.rs         Synchrone bedrijfslogica (state, Command, step) — bezit de PID
   src/config.rs          AppConfig (TOML), Transport/SerialConfig, IpFilter, ServerStatus
-  src/namur.rs           Protocole NAMUR : handle_line (SOURCE DE VÉRITÉ du jeu de commandes)
-  src/namur_server.rs    Service NAMUR (lignes ASCII) + mono-maître TCP + serve série + chien de garde
-  src/trace.rs           Journal circulaire des trames (mini-terminal IHM)
-  src/gui.rs             IHM egui (page unique + mini-terminal + modal Paramètres)
-  src/branding.rs        Logos embarqués (feature `gui`)
-  src/i18n.rs            Catalogue i18n typé (8 langues), sans dépendance
+  src/namur.rs           NAMUR-protocol: handle_line (BRON VAN WAARHEID van de commandoset)
+  src/namur_server.rs    NAMUR-service (ASCII-regels) + mono-master TCP + seriële poort + waakhond
+  src/trace.rs           Circulair frame-journaal (miniterminal GUI)
+  src/gui.rs             egui-GUI (enkele pagina + miniterminal + modaal Instellingen)
+  src/branding.rs        Ingebedde logo's (feature `gui`)
+  src/i18n.rs            Getypeerde i18n-catalogus (8 talen), zonder afhankelijkheid
   src/actors/
-    simulation.rs        Boucle de simulation (tick 20 ms)
-    network.rs           Serveur NAMUR TCP/série (re)configurable à chaud
+    simulation.rs        Simulatielus (tick 20 ms)
+    network.rs           NAMUR-server TCP/serieel (warm) herconfigureerbaar
 
-docs/                    Conception, commandes NAMUR, manuel, maintenance (multilingue)
+docs/                    Conceptie, NAMUR-commando's, handleiding, onderhoud (meertalig)
 ```
 
 **Gulden regel**: de bedrijfslogica (`mock_lib_control`, `motor.rs`, `stirrer.rs`)
@@ -111,22 +111,23 @@ invarianten.
 Structuur (alle secties zijn optioneel, aangevuld met standaardwaarden):
 
 ```toml
-language = "fr"
+language = "nl"
+check_updates = true       # bij de start controleren of er een recentere release bestaat (GUI)
 
 [network]
-transport = "tcp"          # "tcp" ou "serial"
+transport = "tcp"          # "tcp" of "serial"
 bind_ip = "0.0.0.0"
 port = 4001
-allowlist = ["192.168.1.*", "127.0.0.1"]   # vide = toutes IP autorisées
+allowlist = ["192.168.1.*", "127.0.0.1"]   # leeg = alle IP's toegestaan
 [network.serial]
 port = "/dev/ttyUSB0"
 baud = 9600 ; parity = "even" ; data_bits = 7 ; stop_bits = 1   # NAMUR 7E1
 
-[motor]   # J·dω/dt = T − k·η·ω − frottement
-inertia = 0.02      # J (réactivité)
-load_coeff = 0.05   # k (poids de la viscosité)
+[motor]   # J·dω/dt = T − k·η·ω − wrijving
+inertia = 0.02      # J (reactiviteit)
+load_coeff = 0.05   # k (gewicht van de viscositeit)
 friction = 2.0      # N·cm
-torque_max = 100.0  # N·cm (plafond de la sortie PID)
+torque_max = 100.0  # N·cm (plafond van de PID-uitgang)
 
 [regulation]
 speed_min = 0.0 ; speed_max = 2000.0
@@ -141,6 +142,23 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 > naar `[0, couple_max]` op het moment dat de roerder wordt opgebouwd
 > (`to_stirrer_config`).
 
+### Controle op updates
+
+Als `check_updates = true` (standaard) **en** het binair gecompileerd is met de
+feature `gui`, raadpleegt de GUI **bij de start** de laatste op GitHub
+(`CESAMLAB/cesam-tools`) gepubliceerde release en vergelijkt het nummer ervan met
+de huidige versie. Een recentere versie toont een klikbare banner « 🔔 Update
+beschikbaar ». De knop *Nu controleren* (modaal *Instellingen*) herhaalt de
+controle.
+
+- Het HTTPS-verzoek wordt uitgevoerd in een **toegewijde thread**, begrensd door
+  een timeout (5 s): offline of een onbereikbare GitHub belemmert nooit de start.
+- De logica leeft in de gedeelde crate **`mock_lib_update`** (`ureq`/`rustls`,
+  ingebedde Mozilla-roots → schone cross-compilatie onder `cross`).
+- **Headless-build** (`--no-default-features`): de controle — en de volledige
+  netwerk-/TLS-afhankelijkheid — is **afwezig**. Beheer op een server de updates
+  via apt/Docker. Door de operator uitschakelbaar (selectievakje in het modaal).
+
 ---
 
 ## 5. Afhankelijkheden en versievalkuilen
@@ -153,6 +171,7 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | GUI | onderling gekoppelde versies |
 | `egui_plot` | grafiek | ⚠️ **één minor versie vooruit op `egui`**: voor `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | persistentie | `mock_lib_control` biedt een feature `serde` geactiveerd door het binair |
+| `mock_lib_update` (`ureq`/`rustls`) | updatecontrole | **alleen feature `gui`**; rustls 0.23 (webpki up-to-date); afwezig in headless |
 
 De gedeelde versies zijn gecentraliseerd in `[workspace.dependencies]` van de
 root-`Cargo.toml`. Om `egui`/`eframe` op te waarderen, **controleer de
@@ -252,7 +271,7 @@ Het `release`-profiel activeert `lto = "thin"` en `opt-level = 3` (zie root-
 ### Feature `gui` (build met / zonder interface)
 
 ```bash
-cargo build --release -p mock_bin_su_namur                       # avec IHM (poste de travail)
+cargo build --release -p mock_bin_su_namur                       # met GUI (werkstation)
 cargo build --release -p mock_bin_su_namur --no-default-features  # «headless»: NAMUR + simulatie, zonder GUI
 ```
 

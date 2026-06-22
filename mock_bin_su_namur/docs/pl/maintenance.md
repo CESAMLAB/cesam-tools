@@ -111,7 +111,8 @@ same niezmienniki.
 Struktura (wszystkie sekcje są opcjonalne, uzupełniane domyślnie):
 
 ```toml
-language = "fr"
+language = "pl"
+check_updates = true       # sprawdza przy starcie, czy istnieje nowsze wydanie (GUI)
 
 [network]
 transport = "tcp"          # "tcp" lub "serial"
@@ -140,6 +141,22 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 > Granice wyjścia PID (`out_min`/`out_max`) są **wymuszane** na `[0, couple_max]`
 > w momencie budowania mieszadła (`to_stirrer_config`).
 
+### Sprawdzanie aktualizacji
+
+Jeśli `check_updates = true` (domyślnie) **oraz** binarka jest skompilowana z
+feature `gui`, GUI odpytuje **przy starcie** o ostatnie wydanie opublikowane na
+GitHubie (`CESAMLAB/cesam-tools`) i porównuje jego numer z bieżącą wersją.
+Nowsza wersja wyświetla klikalny baner „🔔 Dostępna aktualizacja”. Przycisk
+*Sprawdź teraz* (modal *Ustawienia*) ponawia sprawdzanie.
+
+- Żądanie HTTPS wykonuje się w **dedykowanym wątku**, ograniczone limitem czasu
+  (5 s): brak połączenia lub niedostępny GitHub nigdy nie blokuje startu.
+- Logika żyje we współdzielonym crate **`mock_lib_update`** (`ureq`/`rustls`,
+  wbudowane korzenie Mozilla → czysta kompilacja skrośna pod `cross`).
+- **Build headless** (`--no-default-features`): sprawdzanie — i cała zależność
+  sieciowa/TLS — jest **nieobecne**. Na serwerze aktualizacjami zarządzaj przez
+  apt/Docker. Operator może je wyłączyć (pole wyboru w modalu).
+
 ---
 
 ## 5. Zależności i pułapki wersji
@@ -152,6 +169,7 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | GUI | wersje powiązane ze sobą |
 | `egui_plot` | wykres | ⚠️ **wersjonowany o jedną mniejszą przed `egui`**: dla `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | trwałość | `mock_lib_control` udostępnia feature `serde` aktywowaną przez binarkę |
+| `mock_lib_update` (`ureq`/`rustls`) | sprawdzanie aktualizacji | **tylko feature `gui`**; rustls 0.23 (webpki aktualne); nieobecny w headless |
 
 Współdzielone wersje są scentralizowane w `[workspace.dependencies]` głównego
 `Cargo.toml`. Aby podnieść `egui`/`eframe`, **sprawdź odpowiadającą wersję

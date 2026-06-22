@@ -110,22 +110,23 @@ gleiche Invarianten.
 Struktur (alle Abschnitte sind optional, mit Standardwerten ergänzt):
 
 ```toml
-language = "fr"
+language = "de"
+check_updates = true       # beim Start prüfen, ob eine neuere Release existiert (IHM)
 
 [network]
-transport = "tcp"          # "tcp" ou "serial"
+transport = "tcp"          # "tcp" oder "serial"
 bind_ip = "0.0.0.0"
 port = 4001
-allowlist = ["192.168.1.*", "127.0.0.1"]   # vide = toutes IP autorisées
+allowlist = ["192.168.1.*", "127.0.0.1"]   # leer = alle IP erlaubt
 [network.serial]
 port = "/dev/ttyUSB0"
 baud = 9600 ; parity = "even" ; data_bits = 7 ; stop_bits = 1   # NAMUR 7E1
 
-[motor]   # J·dω/dt = T − k·η·ω − frottement
-inertia = 0.02      # J (réactivité)
-load_coeff = 0.05   # k (poids de la viscosité)
+[motor]   # J·dω/dt = T − k·η·ω − Reibung
+inertia = 0.02      # J (Reaktivität)
+load_coeff = 0.05   # k (Gewicht der Viskosität)
 friction = 2.0      # N·cm
-torque_max = 100.0  # N·cm (plafond de la sortie PID)
+torque_max = 100.0  # N·cm (Obergrenze der PID-Ausgabe)
 
 [regulation]
 speed_min = 0.0 ; speed_max = 2000.0
@@ -139,6 +140,25 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 > Die Ausgangsgrenzen des PID (`out_min`/`out_max`) werden beim Aufbau des Rührers
 > auf `[0, couple_max]` **erzwungen** (`to_stirrer_config`).
 
+### Aktualisierungsprüfung
+
+Wenn `check_updates = true` (Standard) **und** das Binary mit der Feature `gui`
+kompiliert ist, fragt die IHM **beim Start** die letzte auf GitHub
+veröffentlichte Release (`CESAMLAB/cesam-tools`) ab und vergleicht deren Nummer
+mit der aktuellen Version. Eine neuere Version zeigt ein klickbares Banner
+„🔔 Update verfügbar" an. Die Schaltfläche *Jetzt prüfen* (Modal
+*Einstellungen*) startet die Prüfung erneut.
+
+- Die HTTPS-Anfrage läuft in einem **dedizierten Thread**, begrenzt durch einen
+  Timeout (5 s): offline oder nicht erreichbares GitHub behindert niemals den
+  Start.
+- Die Logik liegt in der gemeinsamen Crate **`mock_lib_update`** (`ureq`/`rustls`,
+  eingebettete Mozilla-Wurzeln → saubere Cross-Kompilierung unter `cross`).
+- **Headless-Build** (`--no-default-features`): die Prüfung — und die gesamte
+  Netzwerk-/TLS-Abhängigkeit — ist **nicht vorhanden**. Auf dem Server
+  Aktualisierungen über apt/Docker verwalten. Vom Bediener deaktivierbar
+  (Kontrollkästchen im Modal).
+
 ---
 
 ## 5. Abhängigkeiten und Versionsfallen
@@ -151,6 +171,7 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | IHM | untereinander verknüpfte Versionen |
 | `egui_plot` | Kurve | ⚠️ **um eine Minor-Version vor `egui` versioniert**: für `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | Persistenz | `mock_lib_control` stellt eine vom Binary aktivierte Feature `serde` bereit |
+| `mock_lib_update` (`ureq`/`rustls`) | Aktualisierungsprüfung | **nur Feature `gui`**; rustls 0.23 (webpki aktuell); fehlt im Headless-Build |
 
 Die gemeinsam genutzten Versionen sind in `[workspace.dependencies]` der Wurzel-
 `Cargo.toml` zentralisiert. Um `egui`/`eframe` anzuheben, **die entsprechende

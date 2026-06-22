@@ -102,6 +102,9 @@ docs/                    Diseño, tabla Modbus, mantenimiento
 Estructura (todas las secciones son opcionales, completadas por defecto):
 
 ```toml
+language = "es"
+check_updates = true       # comprobar al arranque si existe una release más reciente (IHM)
+
 [network]
 bind_ip = "0.0.0.0"
 port = 5502
@@ -127,6 +130,23 @@ kp = 4.0 ; ki = 0.25 ; kd = 1.0 ; out_min = 0.0 ; out_max = 100.0
 > en `regulator.rs`. `ProcessConfig`/`RegulationConfig` (config.rs) derivan de ella.
 > Para cambiar un valor por defecto, modificar únicamente `RegulatorConfig::default`.
 
+### Comprobación de actualización
+
+Si `check_updates = true` (por defecto) **y** el binario está compilado con la
+feature `gui`, la IHM consulta **al arranque** la última release publicada en
+GitHub (`CESAMLAB/cesam-tools`) y compara su número con la versión actual. Una
+versión más reciente muestra un banner clicable «🔔 Actualización disponible».
+El botón *Comprobar ahora* (modal *Ajustes*) relanza la comprobación.
+
+- La petición HTTPS se ejecuta en un **hilo dedicado**, acotada por un timeout
+  (5 s): sin conexión o GitHub inaccesible nunca obstaculiza el arranque.
+- La lógica vive en la crate compartida **`mock_lib_update`** (`ureq`/`rustls`,
+  raíces Mozilla embebidas → compilación cruzada limpia con `cross`).
+- **Build headless** (`--no-default-features`): la comprobación —y toda la
+  dependencia de red/TLS— está **ausente**. En servidor, gestionar las
+  actualizaciones mediante apt/Docker. Desactivable por el operador (casilla del
+  modal).
+
 ---
 
 ## 5. Dependencias y trampas de versión
@@ -140,6 +160,7 @@ kp = 4.0 ; ki = 0.25 ; kd = 1.0 ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | IHM | versiones ligadas entre sí |
 | `egui_plot` | curva | ⚠️ **versionado una menor por delante de `egui`**: para `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | persistencia | `mock_lib_control` expone una feature `serde` activada por el binario |
+| `mock_lib_update` (`ureq`/`rustls`) | comprob. de actualización | **solo feature `gui`**; rustls 0.23 (webpki actualizado); ausente en headless |
 
 Las versiones compartidas están centralizadas en `[workspace.dependencies]` del
 `Cargo.toml` raíz. Para subir `egui`/`eframe`, **comprobar la versión

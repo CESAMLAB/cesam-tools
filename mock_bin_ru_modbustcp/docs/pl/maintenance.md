@@ -102,6 +102,9 @@ docs/                    Projekt, tablica Modbus, utrzymanie
 Struktura (wszystkie sekcje są opcjonalne, uzupełniane domyślnymi):
 
 ```toml
+language = "pl"
+check_updates = true       # sprawdza przy starcie, czy istnieje nowsze wydanie (GUI)
+
 [network]
 bind_ip = "0.0.0.0"
 port = 5502
@@ -127,6 +130,22 @@ kp = 4.0 ; ki = 0.25 ; kd = 1.0 ; out_min = 0.0 ; out_max = 100.0
 > w `regulator.rs`. `ProcessConfig`/`RegulationConfig` (config.rs) z niego wywodzą.
 > Aby zmienić domyślną wartość, zmodyfikuj wyłącznie `RegulatorConfig::default`.
 
+### Sprawdzanie aktualizacji
+
+Jeśli `check_updates = true` (domyślnie) **oraz** binarka jest skompilowana z
+feature `gui`, GUI odpytuje **przy starcie** o ostatnie wydanie opublikowane na
+GitHubie (`CESAMLAB/cesam-tools`) i porównuje jego numer z bieżącą wersją.
+Nowsza wersja wyświetla klikalny baner „🔔 Dostępna aktualizacja”. Przycisk
+*Sprawdź teraz* (modal *Ustawienia*) ponawia sprawdzanie.
+
+- Żądanie HTTPS wykonuje się w **dedykowanym wątku**, ograniczone limitem czasu
+  (5 s): brak połączenia lub niedostępny GitHub nigdy nie blokuje startu.
+- Logika żyje we współdzielonym crate **`mock_lib_update`** (`ureq`/`rustls`,
+  wbudowane korzenie Mozilla → czysta kompilacja skrośna pod `cross`).
+- **Build headless** (`--no-default-features`): sprawdzanie — i cała zależność
+  sieciowa/TLS — jest **nieobecne**. Na serwerze aktualizacjami zarządzaj przez
+  apt/Docker. Operator może je wyłączyć (pole wyboru w modalu).
+
 ---
 
 ## 5. Zależności i pułapki wersji
@@ -140,6 +159,7 @@ kp = 4.0 ; ki = 0.25 ; kd = 1.0 ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | GUI | wersje powiązane ze sobą |
 | `egui_plot` | wykres | ⚠️ **wersjonowany o jedną minor wyżej niż `egui`**: dla `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | trwałość | `mock_lib_control` udostępnia feature `serde` włączaną przez plik binarny |
+| `mock_lib_update` (`ureq`/`rustls`) | sprawdzanie aktualizacji | **tylko feature `gui`**; rustls 0.23 (webpki aktualne); nieobecny w headless |
 
 Współdzielone wersje są scentralizowane w `[workspace.dependencies]` w głównym
 `Cargo.toml`. Aby podnieść `egui`/`eframe`, **sprawdź odpowiednią wersję

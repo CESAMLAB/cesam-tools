@@ -232,11 +232,11 @@ Beispiel mit `nc` (netcat):
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (stumm)
+START_4                (stumm)
 IN_PV_4
 1200.0 4
-STOP_4                 (silencieux)
+STOP_4                 (stumm)
 ```
 
 > Der **Watchdog** `OUT_WD1@30` stoppt den Motor automatisch, wenn 30 s lang

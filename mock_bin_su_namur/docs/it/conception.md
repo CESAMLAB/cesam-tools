@@ -54,7 +54,7 @@ quello di ORME perché la dinamica di un motore è rapida.
 
 ```
 IHM (egui) ──Command(cast)──►  SimulationActor ──refresh──► SharedSnapshot ──► IHM
-Serveur NAMUR ──Command(cast)─►   (Stirrer)     ──refresh──► SharedSnapshot ──► lectures NAMUR
+Server NAMUR ──Command(cast)─►   (Stirrer)     ──refresh──► SharedSnapshot ──► letture NAMUR
 ```
 
 - **`SimulationActor`** ([`actors/simulation.rs`](../../src/actors/simulation.rs)):
