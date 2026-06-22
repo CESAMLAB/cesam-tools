@@ -13,6 +13,13 @@
 // qu'à l'interface graphique : on tolère le code et les imports inutilisés pour
 // cette configuration uniquement (le build par défaut reste strict).
 #![cfg_attr(not(feature = "gui"), allow(unused))]
+// Sous Windows, le binaire IHM (release) utilise le sous-système « windows » : pas
+// de console superflue à côté de la fenêtre. En **headless** (serveur, sans IHM)
+// ou en build **debug**, on conserve la console pour afficher les logs.
+#![cfg_attr(
+    all(target_os = "windows", feature = "gui", not(debug_assertions)),
+    windows_subsystem = "windows"
+)]
 
 mod actors;
 #[cfg(feature = "gui")]

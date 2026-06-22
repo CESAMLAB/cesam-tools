@@ -1,27 +1,32 @@
-# Image d'exécution headless multi-arch d'ORME (régulateur simulé).
+# Image d'exécution headless multi-arch des instruments `cesam-tools`.
 #
-# Les binaires sont compilés EN AMONT (sans IHM, via `cross`) puis simplement
-# copiés ici selon l'architecture cible — aucune compilation dans l'image, donc
-# pas besoin de QEMU pour assembler le multi-arch.
+# Générique : le binaire (ORME, OSNE…) et son port d'écoute sont passés par
+# `--build-arg`. Les binaires sont compilés EN AMONT (sans IHM, via `cross`) puis
+# simplement copiés ici selon l'architecture cible — aucune compilation dans
+# l'image, donc pas besoin de QEMU pour assembler le multi-arch.
 #
 # Construite par `scripts/build-prod.sh` avec `docker buildx`.
 FROM debian:bookworm-slim
 
+# Nom de l'exécutable (ex. "orme", "osne") et port d'écoute par défaut.
+ARG BIN=orme
+ARG PORT=5502
 # Renseigné automatiquement par buildx : "amd64" ou "arm64".
 ARG TARGETARCH
 
-LABEL org.opencontainers.image.title="orme" \
-      org.opencontainers.image.description="ORME — Open Regulator Modbus Emulator : régulateur industriel simulé, serveur Modbus TCP/RTU (headless)" \
+LABEL org.opencontainers.image.title="${BIN}" \
+      org.opencontainers.image.description="Instrument simulé CESAM-Lab (headless) — voir https://github.com/CESAMLAB/cesam-tools" \
       org.opencontainers.image.licenses="MIT"
 
-# Binaire headless correspondant à l'architecture (préparé dans dist/_docker/<arch>/).
-COPY dist/_docker/${TARGETARCH}/orme /usr/local/bin/orme
+# Binaire headless correspondant à l'architecture, préparé dans
+# dist/_docker/<bin>/<arch>/ par build-prod.sh.
+COPY dist/_docker/${BIN}/${TARGETARCH}/${BIN} /usr/local/bin/instrument
 
-# Port Modbus TCP par défaut.
-EXPOSE 5502
+# Port du protocole de terrain par défaut (Modbus 5502 pour ORME, NAMUR 4001 pour OSNE).
+EXPOSE ${PORT}
 
-# Répertoire de travail : y monter un volume pour fournir/persister
-# `mock_ru_modbustcp.toml` (sinon valeurs par défaut). Cf. variable MOCK_CONFIG.
+# Répertoire de travail : y monter un volume pour fournir/persister le fichier de
+# configuration TOML de l'instrument (sinon valeurs par défaut). Cf. MOCK_CONFIG.
 WORKDIR /data
 
-ENTRYPOINT ["/usr/local/bin/orme"]
+ENTRYPOINT ["/usr/local/bin/instrument"]

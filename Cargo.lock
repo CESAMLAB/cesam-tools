@@ -2070,6 +2070,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "mock_bin_su_namur"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "eframe",
+ "egui_plot",
+ "env_logger",
+ "image",
+ "log",
+ "mock_lib_control",
+ "ractor",
+ "serde",
+ "tokio",
+ "tokio-serial",
+ "toml",
+]
+
+[[package]]
 name = "mock_lib_control"
 version = "0.1.0"
 dependencies = [

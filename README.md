@@ -23,6 +23,7 @@ demonstrating supervisors, PLCs or gateways **without real hardware**.
 | Crate | Product | Description | Protocol | GUI |
 |-------|---------|-------------|-----------|-----|
 | [`mock_bin_ru_modbustcp`](mock_bin_ru_modbustcp) | **ORME** | Controller (PID / TOR / PWM) over a transfer function | Modbus TCP & RTU (slave) | egui |
+| [`mock_bin_su_namur`](mock_bin_su_namur) | **OSNE** | Overhead lab stirrer: motor transfer function, fast speed control, adjustable viscous load | NAMUR over TCP & serial RS-232 (slave) | egui |
 
 Shared library:
 
@@ -70,9 +71,38 @@ A complete virtual industrial controller:
 - **`tokio-modbus`**: Modbus TCP and serial RTU server (`Service` trait).
 - **`eframe`/`egui`**: graphical interface on the main thread.
 
+## OSNE — the simulated lab stirrer
+
+> **OSNE** — *Open Stirrer NAMUR Emulator*.
+> A laboratory overhead stirrer (IKA-style) that exists only on your NAMUR link.
+
+A complete virtual lab stirrer:
+
+- **Motor** modelled by a rotational transfer function `J·dω/dt = T − k·η·ω −
+  friction` (explicit Euler), with a **fast PID** driving torque to track the
+  speed setpoint.
+- **Adjustable viscosity** `η`: raises the load torque; at high viscosity the
+  motor saturates and the setpoint becomes unreachable (**overload**) — like a
+  real stirrer.
+- **NAMUR server** (ASCII command protocol) over **TCP** (test without hardware)
+  or **serial RS-232** (`serial` feature), with a per-session **watchdog**
+  (`OUT_WD1@<m>`), **single-master** policy and an **IP allowlist** (TCP).
+- **Single-page graphical interface**: speed setpoint, viscosity, live
+  speed/torque **trend curve**, an embedded **NAMUR mini-terminal** (send/inspect
+  frames with command history), and a **Settings modal** (TCP/serial transport,
+  motor parameters, bounds, 8-language i18n).
+- **Configuration persisted** in TOML format (`mock_su_namur.toml`), reloaded at
+  startup, with a reset-to-defaults button.
+
+It shares ORME's architecture (synchronous business model, `ractor` actors, `egui`
+GUI). Run it with `cargo run -p mock_bin_su_namur`; the NAMUR server listens on
+`0.0.0.0:4001` by default.
+
 ## Download
 
-Prebuilt binaries are available on the [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) page — **no Rust toolchain required**.
+Prebuilt binaries are available on the [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) page — **no Rust toolchain required**. Each instrument ships its own executable (`orme`, `osne`).
+
+**ORME** (Modbus controller):
 
 | Platform | GUI | Headless (TCP only, no GUI) |
 |----------|-----|-----------------------------|
@@ -80,8 +110,16 @@ Prebuilt binaries are available on the [**Releases**](https://github.com/CESAMLA
 | Windows x86_64 | [`orme-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-windows-x86_64.exe) | — |
 | Raspberry Pi arm64 (Pi OS 64-bit) | [`orme-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64) | [`orme-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64-headless) |
 
+**OSNE** (NAMUR lab stirrer):
+
+| Platform | GUI | Headless (TCP only, no GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`osne-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-linux-x86_64) | [`osne-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-linux-x86_64-headless) |
+| Windows x86_64 | [`osne-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`osne-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-rpi-arm64) | [`osne-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-rpi-arm64-headless) |
+
 ```bash
-chmod +x orme-linux-x86_64        # Linux / Raspberry Pi
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi (same for osne-*)
 ./orme-linux-x86_64
 ```
 
@@ -134,12 +172,21 @@ cargo clippy --workspace    # lint
 ## Documentation
 
 Each instrument carries its own documentation in its `docs/` subfolder, available
-in eight languages (`docs/<language>/`). For the controller (English version):
+in eight languages (`docs/<language>/`). English versions:
+
+**ORME** (Modbus controller):
 
 - [**User manual**](mock_bin_ru_modbustcp/docs/en/manuel_utilisateur.md) — getting started, GUI, settings, FAQ.
 - [Design document](mock_bin_ru_modbustcp/docs/en/conception.md) — architecture and technical choices.
 - [Modbus address table](mock_bin_ru_modbustcp/docs/en/table_modbus.md) — complete addressing plan.
 - [Software maintenance](mock_bin_ru_modbustcp/docs/en/maintenance.md) — build, configuration, extension, troubleshooting.
+
+**OSNE** (NAMUR lab stirrer):
+
+- [**User manual**](mock_bin_su_namur/docs/en/manuel_utilisateur.md) — getting started, GUI, NAMUR mini-terminal, settings, FAQ.
+- [Design document](mock_bin_su_namur/docs/en/conception.md) — motor model, control loop, architecture.
+- [NAMUR command set](mock_bin_su_namur/docs/en/commandes_namur.md) — protocol reference (channels, commands, examples).
+- [Software maintenance](mock_bin_su_namur/docs/en/maintenance.md) — build, configuration, extension, troubleshooting.
 
 ## Brand & logos
 
@@ -148,11 +195,18 @@ The logos are in [`pic/`](pic/):
 - [`orme-icon.svg`](pic/orme-icon.svg) / `orme-icon.png` — ORME icon (dial), also
   embedded as the application's window icon.
 - [`orme-logo.svg`](pic/orme-logo.svg) — full ORME logo (icon + text).
+- [`osne-icon.svg`](pic/osne-icon.svg) / `osne-icon.png` — OSNE icon (stirrer
+  impeller), also embedded as the OSNE window icon.
+- [`osne-logo.svg`](pic/osne-logo.svg) — full OSNE logo (icon + text).
 - [`Logo-CESAM-Couleur-vect.png`](pic/Logo-CESAM-Couleur-vect.png) — CESAM-Lab logo.
 
-The ORME icon is **generated** from [`pic/orme-logo.gen.py`](pic/orme-logo.gen.py)
-(`python3 pic/orme-logo.gen.py` produces the `.svg` files, to be rasterized
-afterwards).
+Each icon is **generated** from its `*-logo.gen.py` script
+([`pic/orme-logo.gen.py`](pic/orme-logo.gen.py),
+[`pic/osne-logo.gen.py`](pic/osne-logo.gen.py)). The OSNE script also rasterizes
+`osne-icon.png` directly (via Pillow); the ORME `.svg` is rasterized afterwards.
+
+On **Wayland**, install an instrument's taskbar icon with
+`scripts/install-desktop.sh [orme|osne]`.
 
 ## License
 

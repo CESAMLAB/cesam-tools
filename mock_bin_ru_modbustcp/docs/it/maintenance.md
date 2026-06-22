@@ -29,9 +29,9 @@ cargo test  --workspace          # Test unitari + integrazione
 cargo clippy --workspace --all-targets   # Lint (deve restare SENZA avviso)
 cargo run -p mock_bin_ru_modbustcp       # Lancia il regolatore
 
-# File di configurazione alternativo :
+# File di configurazione alternativo:
 MOCK_CONFIG=./ma_config.toml cargo run -p mock_bin_ru_modbustcp
-# Registrazione dettagliata :
+# Registrazione dettagliata:
 RUST_LOG=debug cargo run -p mock_bin_ru_modbustcp
 ```
 
@@ -212,7 +212,7 @@ Aumentare la verbosità: `RUST_LOG=debug` (o `trace`).
 
 ```bash
 cargo build --release
-# Binario autonomo :
+# Binario autonomo:
 target/release/orme
 ```
 
@@ -273,24 +273,31 @@ sessione Wayland).
 ### Procedura unica
 
 Tutto è prodotto **da Linux** tramite
-[`scripts/build-prod.sh`](../../../scripts/build-prod.sh):
+[`scripts/build-prod.sh`](../../../scripts/build-prod.sh), che costruisce **tutti gli
+strumenti del workspace** (ORME *e* OSNE) in una sola passata. Per ogni strumento
+(`<bin>` = `orme`, `osne`):
 
 | Output | Target | IHM | Metodo |
 |--------|-------|-----|---------|
-| `dist/…-linux-x86_64` | `x86_64-unknown-linux-gnu` | ✅ | `cross` |
-| `dist/…-windows-x86_64.exe` | `x86_64-pc-windows-gnu` | ✅ | `cross` (mingw) |
-| `dist/…-rpi-arm64` | `aarch64-unknown-linux-gnu` (Pi 3/4/5, Pi OS 64b) | ✅ | `cross` |
-| Immagine Docker headless | multi-arch `linux/amd64` + `linux/arm64` | ❌ | `docker buildx` |
+| `dist/<bin>-linux-x86_64` | `x86_64-unknown-linux-gnu` | ✅ | `cross` |
+| `dist/<bin>-windows-x86_64.exe` | `x86_64-pc-windows-gnu` | ✅ | `cross` (mingw) |
+| `dist/<bin>-rpi-arm64` | `aarch64-unknown-linux-gnu` (Pi 3/4/5, Pi OS 64b) | ✅ | `cross` |
+| Immagine Docker headless `<bin>:headless` | multi-arch `linux/amd64` + `linux/arm64` | ❌ | `docker buildx` |
+| `dist/<bin>_<ver>_amd64.deb` / `_arm64.deb` | pacchetto Debian/Ubuntu | ✅ | `dpkg-deb` |
+| `dist/<bin>-setup-x86_64.exe` | installer Windows | ✅ | NSIS (`makensis`) |
 
 ```bash
-# Prerequisiti (una volta) — Docker deve essere in esecuzione :
+# Prerequisiti (una volta) — Docker deve essere in esecuzione:
 cargo install cross
 
-# Produrre tutto (exe in dist/ + immagine Docker locale amd64 caricata) :
+# Produrre tutto (exe ORME + OSNE in dist/ + immagini Docker locali amd64 caricate):
 scripts/build-prod.sh
 
-# Variante : immagine Docker MULTI-ARCH inviata a un registro :
-IMAGE=ghcr.io/<account>/orme:latest scripts/build-prod.sh
+# Variante: immagini Docker MULTI-ARCH inviate a un registro (<prefisso>/<bin>:latest):
+IMAGE_PREFIX=ghcr.io/<account> scripts/build-prod.sh
+
+# Costruire un solo strumento:
+ONLY=orme scripts/build-prod.sh
 ```
 
 ### Perché `cross` per TUTTE le build (compreso Linux x86_64)
@@ -325,9 +332,35 @@ multi-arch `amd64`+`arm64`. Il server ascolta su `5502`. Montare un volume su
 `/data` per fornire/persistere `mock_ru_modbustcp.toml`.
 
 ```bash
-# Senza registro : immagine locale amd64 caricata, testabile immediatamente
+# Senza registro: immagine locale amd64 caricata, testabile immediatamente
 docker run --rm -p 5502:5502 -v "$PWD/conf:/data" orme:headless
 ```
+
+### Installer (`.deb` Linux/RPi + setup Windows)
+
+A fine build, `build-prod.sh` chiama
+[`scripts/make-installers.sh <bin>`](../../../scripts/make-installers.sh), che
+trasforma gli eseguibili release di `dist/` in **installer**:
+
+| Installer | Sorgente | Contenuto | Strumento |
+|------------|--------|---------|-------|
+| `<bin>_<ver>_amd64.deb` | `dist/<bin>-linux-x86_64` | binario → `/usr/bin`, voce di desktop, icona hicolor | `dpkg-deb` |
+| `<bin>_<ver>_arm64.deb` | `dist/<bin>-rpi-arm64` | idem (Raspberry Pi OS 64 bit) | `dpkg-deb` |
+| `<bin>-setup-x86_64.exe` | `dist/<bin>-windows-x86_64.exe` | exe + collegamenti (menu Start/desktop) + disinstaller | NSIS (`makensis`) |
+
+- I `.deb` installano l'icona e il `.desktop`; un `postinst` aggiorna le cache
+  delle icone e il database `.desktop`. Dipendenze: `libc6`; raccomandazioni
+  grafiche (`libgl1`, `libxkbcommon0`, `libwayland-client0`).
+- L'installer Windows proviene da
+  [`packaging/windows/installer.nsi`](../../../packaging/windows/installer.nsi);
+  i suoi collegamenti portano un'icona `.ico` multi-risoluzione derivata da
+  `pic/<bin>-icon.png` (tramite Pillow).
+- **Prerequisiti**: `dpkg-deb` (Debian/Ubuntu) per i `.deb`, **`makensis`**
+  (`sudo apt install nsis`) per il setup Windows, `python3`+Pillow per il `.ico`.
+  Ogni target il cui strumento/artefatto manca è **avvisato e saltato** (la build
+  non si rompe). Disattivare tramite `INSTALLERS=0`, oppure (ri)generare solo gli
+  installer di uno strumento: `scripts/make-installers.sh orme`. La **versione**
+  dei pacchetti proviene da `[workspace.package].version`.
 
 ### Build nativa Windows (MSVC) — opzionale
 

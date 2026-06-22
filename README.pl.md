@@ -24,6 +24,7 @@ tworzenia, testowania i demonstrowania systemów nadzoru, sterowników lub brame
 | Crate | Produkt | Opis | Protokół | GUI |
 |-------|---------|-------------|-----------|-----|
 | [`mock_bin_ru_modbustcp`](mock_bin_ru_modbustcp) | **ORME** | Regulator (PID / TOR / PWM) na funkcji przejścia | Modbus TCP & RTU (slave) | egui |
+| [`mock_bin_su_namur`](mock_bin_su_namur) | **OSNE** | Mieszadło laboratoryjne nadstawne: funkcja przejścia silnika, szybka regulacja prędkości, regulowane obciążenie lepkościowe | NAMUR po TCP i szeregowo RS-232 (slave) | egui |
 
 Biblioteka współdzielona:
 
@@ -72,9 +73,39 @@ Kompletny wirtualny regulator przemysłowy:
 - **`tokio-modbus`**: serwer Modbus TCP i RTU szeregowy (trait `Service`).
 - **`eframe`/`egui`**: interfejs graficzny na wątku głównym.
 
+## OSNE — symulowane mieszadło laboratoryjne
+
+> **OSNE** — *Open Stirrer NAMUR Emulator*.
+> Laboratoryjne mieszadło nadstawne (w stylu IKA), które istnieje tylko na Twoim
+> łączu NAMUR.
+
+Kompletne wirtualne mieszadło laboratoryjne:
+
+- **Silnik** modelowany obrotową funkcją przejścia `J·dω/dt = T − k·η·ω −
+  tarcie` (jawny Euler), z **szybkim PID** sterującym momentem, aby śledzić
+  nastawę prędkości.
+- **Regulowana lepkość** `η`: zwiększa moment obciążenia; przy wysokiej lepkości
+  silnik się nasyca, a nastawa staje się nieosiągalna (**przeciążenie**) — jak
+  w prawdziwym mieszadle.
+- **Serwer NAMUR** (protokół poleceń ASCII) po **TCP** (test bez sprzętu) lub
+  **szeregowo RS-232** (feature `serial`), z **watchdogiem** na sesję
+  (`OUT_WD1@<m>`), **polityką jednego mastera** oraz **białą listą IP** (TCP).
+- **Interfejs graficzny** na jednej stronie: nastawa prędkości, lepkość,
+  **wykres trendu** prędkości/momentu na żywo, wbudowany **mini-terminal NAMUR**
+  (wysyłanie/inspekcja ramek z historią poleceń) oraz **modal Parametry**
+  (transport TCP/szeregowy, parametry silnika, granice, i18n w 8 językach).
+- **Konfiguracja utrwalana** w formacie TOML (`mock_su_namur.toml`),
+  przeładowywana przy starcie, z przyciskiem przywracania wartości domyślnych.
+
+Współdzieli architekturę ORME (synchroniczny model biznesowy, aktory `ractor`,
+GUI `egui`). Uruchom go poleceniem `cargo run -p mock_bin_su_namur`; serwer NAMUR
+domyślnie nasłuchuje na `0.0.0.0:4001`.
+
 ## Pobieranie
 
-Gotowe pliki binarne są dostępne na stronie [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) — **bez potrzeby instalowania narzędzi Rust**.
+Gotowe pliki binarne są dostępne na stronie [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) — **bez potrzeby instalowania narzędzi Rust**. Każdy przyrząd dostarcza własny plik wykonywalny (`orme`, `osne`).
+
+**ORME** (regulator Modbus):
 
 | Platforma | GUI | Headless (tylko TCP, bez GUI) |
 |----------|-----|-----------------------------|
@@ -82,8 +113,16 @@ Gotowe pliki binarne są dostępne na stronie [**Releases**](https://github.com/
 | Windows x86_64 | [`orme-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-windows-x86_64.exe) | — |
 | Raspberry Pi arm64 (Pi OS 64-bit) | [`orme-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64) | [`orme-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/orme-rpi-arm64-headless) |
 
+**OSNE** (mieszadło laboratoryjne NAMUR):
+
+| Platforma | GUI | Headless (tylko TCP, bez GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`osne-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-linux-x86_64) | [`osne-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-linux-x86_64-headless) |
+| Windows x86_64 | [`osne-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`osne-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-rpi-arm64) | [`osne-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-rpi-arm64-headless) |
+
 ```bash
-chmod +x orme-linux-x86_64        # Linux / Raspberry Pi
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi (to samo dla osne-*)
 ./orme-linux-x86_64
 ```
 
@@ -136,13 +175,21 @@ cargo clippy --workspace    # lint
 ## Dokumentacja
 
 Każdy przyrząd ma własną dokumentację w swoim podkatalogu `docs/`,
-dostępną w ośmiu językach (`docs/<język>/`). Dla regulatora (wersja
-polska):
+dostępną w ośmiu językach (`docs/<język>/`). Wersje polskie:
+
+**ORME** (regulator Modbus):
 
 - [**Podręcznik użytkownika**](mock_bin_ru_modbustcp/docs/pl/manuel_utilisateur.md) — wprowadzenie, GUI, parametry, FAQ.
 - [Dokument projektowy](mock_bin_ru_modbustcp/docs/pl/conception.md) — architektura i decyzje techniczne.
 - [Tablica adresów Modbus](mock_bin_ru_modbustcp/docs/pl/table_modbus.md) — pełny plan adresowania.
 - [Utrzymanie oprogramowania](mock_bin_ru_modbustcp/docs/pl/maintenance.md) — build, konfiguracja, rozszerzanie, rozwiązywanie problemów.
+
+**OSNE** (mieszadło laboratoryjne NAMUR):
+
+- [**Podręcznik użytkownika**](mock_bin_su_namur/docs/pl/manuel_utilisateur.md) — wprowadzenie, GUI, mini-terminal NAMUR, parametry, FAQ.
+- [Dokument projektowy](mock_bin_su_namur/docs/pl/conception.md) — model silnika, pętla regulacji, architektura.
+- [Zestaw poleceń NAMUR](mock_bin_su_namur/docs/pl/commandes_namur.md) — opis protokołu (kanały, polecenia, przykłady).
+- [Utrzymanie oprogramowania](mock_bin_su_namur/docs/pl/maintenance.md) — build, konfiguracja, rozszerzanie, rozwiązywanie problemów.
 
 ## Marka i logo
 
@@ -151,10 +198,19 @@ Logo znajdują się w [`pic/`](pic/):
 - [`orme-icon.svg`](pic/orme-icon.svg) / `orme-icon.png` — ikona ORME (tarcza),
   również osadzona jako ikona okna aplikacji.
 - [`orme-logo.svg`](pic/orme-logo.svg) — pełne logo ORME (ikona + tekst).
+- [`osne-icon.svg`](pic/osne-icon.svg) / `osne-icon.png` — ikona OSNE (wirnik
+  mieszadła), również osadzona jako ikona okna OSNE.
+- [`osne-logo.svg`](pic/osne-logo.svg) — pełne logo OSNE (ikona + tekst).
 - [`Logo-CESAM-Couleur-vect.png`](pic/Logo-CESAM-Couleur-vect.png) — logo CESAM-Lab.
 
-Ikona ORME jest **generowana** z [`pic/orme-logo.gen.py`](pic/orme-logo.gen.py)
-(`python3 pic/orme-logo.gen.py` produkuje pliki `.svg`, które należy następnie zrasteryzować).
+Każda ikona jest **generowana** ze swojego skryptu `*-logo.gen.py`
+([`pic/orme-logo.gen.py`](pic/orme-logo.gen.py),
+[`pic/osne-logo.gen.py`](pic/osne-logo.gen.py)). Skrypt OSNE rasteryzuje też
+`osne-icon.png` bezpośrednio (przez Pillow); plik `.svg` ORME jest rasteryzowany
+później.
+
+W systemie **Wayland** zainstaluj ikonę na pasku zadań danego przyrządu
+poleceniem `scripts/install-desktop.sh [orme|osne]`.
 
 ## Licencja
 

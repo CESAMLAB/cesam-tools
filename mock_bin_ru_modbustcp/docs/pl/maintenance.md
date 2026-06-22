@@ -272,24 +272,31 @@ następnie odświeża pamięci podręczne (`gtk-update-icon-cache`,
 ### Jedna procedura
 
 Wszystko wytwarzane jest **z Linuksa** przez
-[`scripts/build-prod.sh`](../../../scripts/build-prod.sh):
+[`scripts/build-prod.sh`](../../../scripts/build-prod.sh), który buduje **wszystkie
+przyrządy workspace** (ORME *oraz* OSNE) w jednym przebiegu. Dla każdego przyrządu
+(`<bin>` = `orme`, `osne`):
 
 | Wynik | Cel | GUI | Metoda |
 |--------|-------|-----|---------|
-| `dist/…-linux-x86_64` | `x86_64-unknown-linux-gnu` | ✅ | `cross` |
-| `dist/…-windows-x86_64.exe` | `x86_64-pc-windows-gnu` | ✅ | `cross` (mingw) |
-| `dist/…-rpi-arm64` | `aarch64-unknown-linux-gnu` (Pi 3/4/5, Pi OS 64b) | ✅ | `cross` |
-| Obraz Docker headless | wieloarchitekturowy `linux/amd64` + `linux/arm64` | ❌ | `docker buildx` |
+| `dist/<bin>-linux-x86_64` | `x86_64-unknown-linux-gnu` | ✅ | `cross` |
+| `dist/<bin>-windows-x86_64.exe` | `x86_64-pc-windows-gnu` | ✅ | `cross` (mingw) |
+| `dist/<bin>-rpi-arm64` | `aarch64-unknown-linux-gnu` (Pi 3/4/5, Pi OS 64b) | ✅ | `cross` |
+| Obraz Docker headless `<bin>:headless` | wieloarchitekturowy `linux/amd64` + `linux/arm64` | ❌ | `docker buildx` |
+| `dist/<bin>_<ver>_amd64.deb` / `_arm64.deb` | pakiet Debian/Ubuntu | ✅ | `dpkg-deb` |
+| `dist/<bin>-setup-x86_64.exe` | instalator Windows | ✅ | NSIS (`makensis`) |
 
 ```bash
 # Wymagania (jednorazowo) — Docker musi działać:
 cargo install cross
 
-# Wytworzyć wszystko (pliki w dist/ + lokalny obraz Docker amd64 załadowany):
+# Wytworzyć wszystko (pliki ORME + OSNE w dist/ + lokalne obrazy Docker amd64 załadowane):
 scripts/build-prod.sh
 
-# Wariant: obraz Docker WIELOARCHITEKTUROWY wypchnięty do rejestru:
-IMAGE=ghcr.io/<konto>/orme:latest scripts/build-prod.sh
+# Wariant: obrazy Docker WIELOARCHITEKTUROWE wypchnięte do rejestru (<prefix>/<bin>:latest):
+IMAGE_PREFIX=ghcr.io/<konto> scripts/build-prod.sh
+
+# Zbudować tylko jeden przyrząd:
+ONLY=orme scripts/build-prod.sh
 ```
 
 ### Dlaczego `cross` dla WSZYSTKICH buildów (włącznie z Linux x86_64)
@@ -327,6 +334,31 @@ Obraz ([`docker/Dockerfile.headless`](../../../docker/Dockerfile.headless)) wych
 # Bez rejestru: lokalny obraz amd64 załadowany, gotowy do testów od razu
 docker run --rm -p 5502:5502 -v "$PWD/conf:/data" orme:headless
 ```
+
+### Instalatory (`.deb` Linux/RPi + setup Windows)
+
+Na końcu buildu `build-prod.sh` wywołuje
+[`scripts/make-installers.sh <bin>`](../../../scripts/make-installers.sh), który
+przekształca pliki wykonywalne release z `dist/` w **instalatory**:
+
+| Instalator | Źródło | Zawartość | Narzędzie |
+|------------|--------|-----------|-----------|
+| `<bin>_<ver>_amd64.deb` | `dist/<bin>-linux-x86_64` | binarka → `/usr/bin`, wpis pulpitu, ikona hicolor | `dpkg-deb` |
+| `<bin>_<ver>_arm64.deb` | `dist/<bin>-rpi-arm64` | to samo (Raspberry Pi OS 64-bitowy) | `dpkg-deb` |
+| `<bin>-setup-x86_64.exe` | `dist/<bin>-windows-x86_64.exe` | exe + skróty (menu Start/pulpit) + deinstalator | NSIS (`makensis`) |
+
+- Pliki `.deb` instalują ikonę i `.desktop`; `postinst` odświeża pamięci podręczne
+  ikon i bazę `.desktop`. Zależności: `libc6`; zalecenia graficzne (`libgl1`,
+  `libxkbcommon0`, `libwayland-client0`).
+- Instalator Windows pochodzi z
+  [`packaging/windows/installer.nsi`](../../../packaging/windows/installer.nsi);
+  jego skróty mają ikonę `.ico` o wielu rozdzielczościach wyprowadzoną z
+  `pic/<bin>-icon.png` (przez Pillow).
+- **Wymagania**: `dpkg-deb` (Debian/Ubuntu) dla `.deb`, **`makensis`**
+  (`sudo apt install nsis`) dla setupu Windows, `python3`+Pillow dla `.ico`. Każdy
+  cel, którego narzędzie/artefakt brakuje, jest **ostrzegany i pomijany** (build się
+  nie psuje). Wyłączyć przez `INSTALLERS=0` lub (ponownie) wygenerować same
+  instalatory jednego przyrządu: `scripts/make-installers.sh orme`.
 
 ### Natywny build Windows (MSVC) — opcjonalny
 

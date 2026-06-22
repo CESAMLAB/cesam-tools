@@ -274,24 +274,31 @@ relogin de la session Wayland).
 ### Procédure unique
 
 Tout est produit **depuis Linux** par
-[`scripts/build-prod.sh`](../../../scripts/build-prod.sh) :
+[`scripts/build-prod.sh`](../../../scripts/build-prod.sh), qui construit **tous les
+instruments du workspace** (ORME *et* OSNE) en une passe. Pour chaque instrument
+(`<bin>` = `orme`, `osne`) :
 
 | Sortie | Cible | IHM | Méthode |
 |--------|-------|-----|---------|
-| `dist/…-linux-x86_64` | `x86_64-unknown-linux-gnu` | ✅ | `cross` |
-| `dist/…-windows-x86_64.exe` | `x86_64-pc-windows-gnu` | ✅ | `cross` (mingw) |
-| `dist/…-rpi-arm64` | `aarch64-unknown-linux-gnu` (Pi 3/4/5, Pi OS 64b) | ✅ | `cross` |
-| Image Docker headless | multi-arch `linux/amd64` + `linux/arm64` | ❌ | `docker buildx` |
+| `dist/<bin>-linux-x86_64` | `x86_64-unknown-linux-gnu` | ✅ | `cross` |
+| `dist/<bin>-windows-x86_64.exe` | `x86_64-pc-windows-gnu` | ✅ | `cross` (mingw) |
+| `dist/<bin>-rpi-arm64` | `aarch64-unknown-linux-gnu` (Pi 3/4/5, Pi OS 64b) | ✅ | `cross` |
+| Image Docker headless `<bin>:headless` | multi-arch `linux/amd64` + `linux/arm64` | ❌ | `docker buildx` |
+| `dist/<bin>_<ver>_amd64.deb` / `_arm64.deb` | paquet Debian/Ubuntu | ✅ | `dpkg-deb` |
+| `dist/<bin>-setup-x86_64.exe` | installeur Windows | ✅ | NSIS (`makensis`) |
 
 ```bash
 # Prérequis (une fois) — Docker doit tourner :
 cargo install cross
 
-# Tout produire (exes dans dist/ + image Docker locale amd64 chargée) :
+# Tout produire (exes ORME + OSNE dans dist/ + images Docker locales amd64 chargées) :
 scripts/build-prod.sh
 
-# Variante : image Docker MULTI-ARCH poussée vers un registre :
-IMAGE=ghcr.io/<compte>/orme:latest scripts/build-prod.sh
+# Variante : images Docker MULTI-ARCH poussées vers un registre (<prefix>/<bin>:latest) :
+IMAGE_PREFIX=ghcr.io/<compte> scripts/build-prod.sh
+
+# Ne construire qu'un seul instrument :
+ONLY=orme scripts/build-prod.sh
 ```
 
 ### Pourquoi `cross` pour TOUS les builds (y compris Linux x86_64)
@@ -329,6 +336,31 @@ multi-arch `amd64`+`arm64`. Le serveur écoute sur `5502`. Monter un volume sur
 # Sans registre : image locale amd64 chargée, testable immédiatement
 docker run --rm -p 5502:5502 -v "$PWD/conf:/data" orme:headless
 ```
+
+### Installeurs (`.deb` Linux/RPi + setup Windows)
+
+En fin de build, `build-prod.sh` appelle
+[`scripts/make-installers.sh <bin>`](../../../scripts/make-installers.sh), qui
+transforme les exécutables release de `dist/` en **installeurs** :
+
+| Installeur | Source | Contenu | Outil |
+|------------|--------|---------|-------|
+| `<bin>_<ver>_amd64.deb` | `dist/<bin>-linux-x86_64` | binaire → `/usr/bin`, entrée de bureau, icône hicolor | `dpkg-deb` |
+| `<bin>_<ver>_arm64.deb` | `dist/<bin>-rpi-arm64` | idem (Raspberry Pi OS 64 bits) | `dpkg-deb` |
+| `<bin>-setup-x86_64.exe` | `dist/<bin>-windows-x86_64.exe` | exe + raccourcis (menu Démarrer/bureau) + désinstalleur | NSIS (`makensis`) |
+
+- Les `.deb` posent l'icône et le `.desktop` ; un `postinst` rafraîchit les caches
+  d'icônes et la base `.desktop`. Dépendances : `libc6` ; recommandations
+  graphiques (`libgl1`, `libxkbcommon0`, `libwayland-client0`).
+- L'installeur Windows vient de
+  [`packaging/windows/installer.nsi`](../../../packaging/windows/installer.nsi) ;
+  ses raccourcis portent une icône `.ico` multi-résolution dérivée de
+  `pic/<bin>-icon.png` (via Pillow).
+- **Prérequis** : `dpkg-deb` (Debian/Ubuntu) pour les `.deb`, **`makensis`**
+  (`sudo apt install nsis`) pour le setup Windows, `python3`+Pillow pour le `.ico`.
+  Toute cible dont l'outil/artefact manque est **avertie et sautée** (le build ne
+  casse pas). Désactiver via `INSTALLERS=0`, ou (re)générer seuls les installeurs
+  d'un instrument : `scripts/make-installers.sh orme`.
 
 ### Build natif Windows (MSVC) — optionnel
 
