@@ -5,6 +5,7 @@ members = [
     "mock_lib_update",
     "mock_bin_ru_modbustcp",
     "mock_bin_su_namur",
+    "mock_bin_ru_opcua",
 ]
 
 [workspace.package]
@@ -21,6 +22,10 @@ rust-version = "1.85"
 # --- Async / acteurs ---
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "time", "sync"] }
 ractor = { version = "0.15" }
+
+# --- OPC UA (serveur) — pile 100 % Rust (RustCrypto), sans OpenSSL ---
+# Prototype mock_bin_ru_opcua. La feature `server` tire le serveur tokio-natif.
+async-opcua = { version = "0.18", default-features = false, features = ["server"] }
 
 # --- Modbus TCP (serveur/esclave) ---
 tokio-modbus = { version = "0.17", default-features = false, features = ["tcp-server"] }

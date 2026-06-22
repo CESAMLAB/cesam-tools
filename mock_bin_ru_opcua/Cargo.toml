@@ -1,0 +1,22 @@
+[package]
+name = "mock_bin_ru_opcua"
+description = "Prototype (Phase 1) : régulateur de procédé simulé exposé en OPC UA (serveur async-opcua, sécurité None). Réutilise mock_lib_control."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+# Nom de l'exécutable provisoire (Phase 1, headless). Nom commercial à fixer.
+[[bin]]
+name = "ru_opcua"
+path = "src/main.rs"
+
+[dependencies]
+mock_lib_control = { workspace = true }
+async-opcua = { workspace = true }
+# `signal` pour l'arrêt propre du serveur (Ctrl-C → fermeture informée des clients).
+tokio = { workspace = true, features = ["signal"] }
+anyhow = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
