@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=RU OPC UA
+GenericName=Régulateur simulé (OPC UA)
+Comment=Simulateur d'unité de régulation industrielle sur OPC UA — CESAM-Lab
+Exec=ru_opcua
+Icon=ru_opcua
+Terminal=false
+Categories=Utility;Engineering;Development;
+# Doit correspondre à l'app_id Wayland / WM_CLASS X11 défini dans main.rs.
+StartupWMClass=ru_opcua

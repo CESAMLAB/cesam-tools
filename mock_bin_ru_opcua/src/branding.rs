@@ -7,9 +7,9 @@ use eframe::egui;
 pub const CESAM_LOGO_PNG: &[u8] =
     include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../pic/Logo-CESAM-Couleur-vect.png"));
 
-/// Icône (famille régulateur, réutilise l'icône ORME) — icône de fenêtre.
+/// Icône de l'instrument (famille régulateur) — icône de fenêtre / barre des tâches.
 pub const ICON_PNG: &[u8] =
-    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../pic/orme-icon.png"));
+    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../pic/ru_opcua-icon.png"));
 
 /// Décode un PNG embarqué en texture egui. `None` en cas d'échec (l'IHM se rabat
 /// alors sur le texte seul).

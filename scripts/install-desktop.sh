@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# Installe l'entrée de bureau d'un instrument (ORME ou OSNE) pour l'utilisateur
-# courant (Linux/Wayland & X11).
+# Installe l'entrée de bureau d'un instrument (ORME, OSNE ou RU/OPC UA) pour
+# l'utilisateur courant (Linux/Wayland & X11).
 #
 # Pourquoi : sous Wayland, l'icône de la barre des tâches n'est PAS prise depuis
 # le binaire (`with_icon` est ignoré). Le compositeur associe la fenêtre à son
@@ -15,13 +15,13 @@
 # L'exécutable doit être dans le PATH (ou ajustez `Exec=` du .desktop).
 #
 # Usage :
-#   scripts/install-desktop.sh [orme|osne]      # défaut : orme
+#   scripts/install-desktop.sh [orme|osne|ru_opcua]   # défaut : orme
 set -euo pipefail
 
 BIN="${1:-orme}"
 case "$BIN" in
-  orme|osne) ;;
-  *) echo "✗ Instrument inconnu : $BIN (attendu : orme | osne)"; exit 1 ;;
+  orme|osne|ru_opcua) ;;
+  *) echo "✗ Instrument inconnu : $BIN (attendu : orme | osne | ru_opcua)"; exit 1 ;;
 esac
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

@@ -1,0 +1,9 @@
+# Configuration `cross` (cross-compilation via conteneurs).
+#
+# La cible Windows GNU utilise une image **à jour** : la bibliothèque d'import
+# mingw-w64 de l'image par défaut `:0.2.5` est trop ancienne pour fournir
+# `GetHostNameW` (symbole référencé par `std`/`gethostname`, tiré par la pile OPC UA
+# de `mock_bin_ru_opcua`). L'image `:main` embarque un mingw récent qui le fournit.
+# Les autres instruments (ORME/OSNE) compilent aussi avec cette image (sur-ensemble).
+[target.x86_64-pc-windows-gnu]
+image = "ghcr.io/cross-rs/x86_64-pc-windows-gnu:main"

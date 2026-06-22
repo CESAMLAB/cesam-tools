@@ -30,6 +30,7 @@ set -euo pipefail
 INSTRUMENTS=(
   "mock_bin_ru_modbustcp:orme:5502"
   "mock_bin_su_namur:osne:4001"
+  "mock_bin_ru_opcua:ru_opcua:4840"
 )
 
 IMAGE_PREFIX="${IMAGE_PREFIX:-}"
