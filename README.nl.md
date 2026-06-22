@@ -218,3 +218,5 @@ Op **Wayland** installeer je het taakbalkpictogram van een instrument met
 ## Licentie
 
 [MIT](LICENSE) © 2026 CESAM-Lab
+
+Componenten van derden die in sommige instrumenten zijn gebundeld, worden onder hun eigen licenties gedistribueerd (met name de OPC UA-stack onder MPL-2.0 die door `mock_bin_ru_opcua` wordt gebruikt); zie [NOTICE](NOTICE). Ze wijzigen de MIT-licentie van de cesam-tools-code niet.

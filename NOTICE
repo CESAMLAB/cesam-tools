@@ -1,0 +1,39 @@
+NOTICE — cesam-tools
+====================
+
+cesam-tools is distributed under the MIT License (see the LICENSE file).
+The MIT license applies to all source code in this repository authored by
+CESAM-Lab.
+
+This product also includes third-party components distributed under terms
+other than MIT. Those licenses apply to the corresponding components only and
+do NOT change the MIT license of the cesam-tools source code.
+
+
+Mozilla Public License 2.0 (MPL-2.0)
+------------------------------------
+
+The OPC UA instrument `mock_bin_ru_opcua` links the async-opcua family of
+crates, licensed under the Mozilla Public License, version 2.0:
+
+    async-opcua            async-opcua-server     async-opcua-types
+    async-opcua-core       async-opcua-crypto     async-opcua-nodes
+    async-opcua-macros     async-opcua-core-namespace
+
+    Upstream / source : https://github.com/freeopcua/async-opcua
+    License text      : https://www.mozilla.org/MPL/2.0/
+
+MPL-2.0 is a file-level ("weak") copyleft license. These components are used
+**unmodified** and their complete source is publicly available at the URL
+above; therefore no part of the cesam-tools source code is relicensed by this
+dependency. Should any MPL-2.0 file ever be modified within this project, that
+modified file must remain under MPL-2.0 and its source be made available.
+
+
+Other dependencies
+------------------
+
+The remaining transitive dependencies are distributed under permissive
+licenses (MIT, Apache-2.0, BSD-2/3-Clause, Zlib, Unicode-3.0, BSL-1.0). The
+authoritative, complete list for any build is given by the resolved
+`Cargo.lock` (e.g. via `cargo tree` or `cargo license`).

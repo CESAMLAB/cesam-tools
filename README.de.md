@@ -218,3 +218,5 @@ Installieren Sie unter **Wayland** das Taskleistensymbol eines Instruments mit
 ## Lizenz
 
 [MIT](LICENSE) © 2026 CESAM-Lab
+
+Drittanbieter-Komponenten, die in einigen Instrumenten gebündelt sind, werden unter ihren eigenen Lizenzen verteilt (insbesondere der OPC-UA-Stack unter MPL-2.0, der von `mock_bin_ru_opcua` verwendet wird); siehe [NOTICE](NOTICE). Sie ändern nichts an der MIT-Lizenz des cesam-tools-Codes.

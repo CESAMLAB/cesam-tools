@@ -218,3 +218,5 @@ No **Wayland**, instale o ícone da barra de tarefas de um instrumento com
 ## Licença
 
 [MIT](LICENSE) © 2026 CESAM-Lab
+
+Os componentes de terceiros integrados em alguns instrumentos são distribuídos sob as suas próprias licenças (nomeadamente a pilha OPC UA sob MPL-2.0 utilizada por `mock_bin_ru_opcua`); consulte [NOTICE](NOTICE). Não alteram a licença MIT do código do cesam-tools.

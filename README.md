@@ -215,3 +215,7 @@ On **Wayland**, install an instrument's taskbar icon with
 ## License
 
 [MIT](LICENSE) © 2026 CESAM-Lab
+
+Third-party components bundled in some instruments are distributed under their
+own licenses (notably the MPL-2.0 OPC UA stack used by `mock_bin_ru_opcua`); see
+[NOTICE](NOTICE). They do not change the MIT license of the cesam-tools code.

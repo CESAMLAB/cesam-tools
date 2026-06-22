@@ -5,7 +5,10 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
-rust-version.workspace = true
+# MSRV propre à ce crate : `async-opcua` ne déclare aucun `rust-version`, et la
+# pile tire des dépendances récentes. Plancher **vérifié** : 1.91 (le workspace
+# reste à 1.85 pour les autres crates, qui le respectent réellement).
+rust-version = "1.91"
 
 # Nom de l'exécutable provisoire (Phase 1, headless). Nom commercial à fixer.
 [[bin]]

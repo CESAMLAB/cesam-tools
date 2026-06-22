@@ -219,3 +219,5 @@ Sous **Wayland**, installer l'icône de barre des tâches d'un instrument avec
 ## Licence
 
 [MIT](LICENSE) © 2026 CESAM-Lab
+
+Les composants tiers intégrés dans certains instruments sont distribués sous leurs propres licences (notamment la pile OPC UA sous MPL-2.0 utilisée par `mock_bin_ru_opcua`) ; voir [NOTICE](NOTICE). Ils ne modifient pas la licence MIT du code de cesam-tools.

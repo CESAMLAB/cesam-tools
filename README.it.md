@@ -219,3 +219,5 @@ strumento con `scripts/install-desktop.sh [orme|osne]`.
 ## Licenza
 
 [MIT](LICENSE) © 2026 CESAM-Lab
+
+I componenti di terze parti integrati in alcuni strumenti sono distribuiti sotto le proprie licenze (in particolare lo stack OPC UA con licenza MPL-2.0 utilizzato da `mock_bin_ru_opcua`); vedere [NOTICE](NOTICE). Non modificano la licenza MIT del codice di cesam-tools.
