@@ -67,16 +67,16 @@ ontvangen commando opnieuw ingesteld**.
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (stil)
+START_4                (stil)
 IN_PV_4
 1200.0 4
 IN_PV_5
 62.0 5
-STOP_4                 (silencieux)
+STOP_4                 (stil)
 ```
 
 > Het afgelezen **koppel** stijgt met de ingestelde **viscositeit** (GUI-zijde) en
-> de snelheid: `couple ≈ coeff_charge · viscosité · vitesse + frottement`. Bij hoge
+> de snelheid: `koppel ≈ belastingscoeff · viscositeit · snelheid + wrijving`. Bij hoge
 > viscositeit verzadigt het koppel bij het motormaximum: het snelheidssetpoint wordt
 > niet meer bereikt (**overbelasting**), een gedrag dat een echte roerder reproduceert.

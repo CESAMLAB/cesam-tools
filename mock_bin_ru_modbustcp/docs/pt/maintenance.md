@@ -102,6 +102,9 @@ docs/                    Conceção, tabela Modbus, manutenção
 Estrutura (todas as secções são opcionais, completadas por omissão):
 
 ```toml
+language = "pt"
+check_updates = true       # verificar no arranque se existe uma release mais recente (IHM)
+
 [network]
 bind_ip = "0.0.0.0"
 port = 5502
@@ -127,6 +130,22 @@ kp = 4.0 ; ki = 0.25 ; kd = 1.0 ; out_min = 0.0 ; out_max = 100.0
 > em `regulator.rs`. `ProcessConfig`/`RegulationConfig` (config.rs) derivam dela.
 > Para alterar um valor predefinido, modificar apenas `RegulatorConfig::default`.
 
+### Verificação de atualização
+
+Se `check_updates = true` (predefinição) **e** o binário for compilado com a
+feature `gui`, a IHM consulta **no arranque** a última release publicada no
+GitHub (`CESAMLAB/cesam-tools`) e compara o seu número com a versão atual. Uma
+versão mais recente mostra um banner clicável «🔔 Atualização disponível». O
+botão *Verificar agora* (modal *Definições*) reinicia a verificação.
+
+- O pedido HTTPS executa-se numa **thread dedicada**, limitada por um timeout
+  (5 s): offline ou GitHub inacessível nunca impede o arranque.
+- A lógica reside na crate partilhada **`mock_lib_update`** (`ureq`/`rustls`,
+  raízes Mozilla embutidas → cross-compilação limpa sob `cross`).
+- **Build headless** (`--no-default-features`): a verificação — e toda a
+  dependência rede/TLS — está **ausente**. No servidor, gerir as atualizações
+  via apt/Docker. Desativável pelo operador (caixa de seleção do modal).
+
 ---
 
 ## 5. Dependências e armadilhas de versão
@@ -140,6 +159,7 @@ kp = 4.0 ; ki = 0.25 ; kd = 1.0 ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | IHM | versões ligadas entre si |
 | `egui_plot` | curva | ⚠️ **versionado uma minor à frente de `egui`**: para `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | persistência | `mock_lib_control` expõe uma feature `serde` ativada pelo binário |
+| `mock_lib_update` (`ureq`/`rustls`) | verif. de atualização | **feature `gui` apenas**; rustls 0.23 (webpki atualizado); ausente em headless |
 
 As versões partilhadas estão centralizadas em `[workspace.dependencies]` do
 `Cargo.toml` raiz. Para subir `egui`/`eframe`, **verificar a versão

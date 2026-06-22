@@ -67,17 +67,17 @@ comunicazione con il supervisore. `OUT_WD1@0` disarma il watchdog. Il contatore 
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (silenzioso)
+START_4                (silenzioso)
 IN_PV_4
 1200.0 4
 IN_PV_5
 62.0 5
-STOP_4                 (silencieux)
+STOP_4                 (silenzioso)
 ```
 
 > La **coppia** letta cresce con la **viscosità** impostata (lato IHM) e la
-> velocità: `couple ≈ coeff_charge · viscosité · vitesse + frottement`. Ad alta
+> velocità: `coppia ≈ coeff_carico · viscosità · velocità + attrito`. Ad alta
 > viscosità, la coppia satura al massimo del motore: la velocità di riferimento non
 > viene più raggiunta (**sovraccarico**), comportamento che riproduce un agitatore
 > reale.

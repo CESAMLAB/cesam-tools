@@ -67,13 +67,13 @@ se **rearma con cada comando recibido**.
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (silencioso)
+START_4                (silencioso)
 IN_PV_4
 1200.0 4
 IN_PV_5
 62.0 5
-STOP_4                 (silencieux)
+STOP_4                 (silencioso)
 ```
 
 > El **par** leído crece con la **viscosidad** ajustada (lado IHM) y la velocidad:

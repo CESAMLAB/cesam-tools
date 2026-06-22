@@ -66,26 +66,26 @@ cargo build -p mock_bin_su_namur --no-default-features --features gui    # IHM, 
 ## 3. Organizzazione del codice
 
 ```
-mock_lib_control/        Bibliothèque de régulation (pure, sans IO, testable)
-  src/pid.rs             PID anti-emballement (réutilisé pour l'asservissement de vitesse)
-  src/lib.rs             ré-exports (feature `serde` optionnelle)
+mock_lib_control/        Libreria di regolazione (pura, senza IO, testabile)
+  src/pid.rs             PID anti-deriva (riutilizzato per l'asservimento di velocità)
+  src/lib.rs             ri-export (feature `serde` opzionale)
 
-mock_bin_su_namur/       Binaire agitateur (exécutable `osne`)
-  src/main.rs            Démarrage : config, runtime Tokio, acteurs, IHM
-  src/motor.rs           Modèle physique du moteur (dynamique rotationnelle, Euler)
-  src/stirrer.rs         Modèle métier synchrone (état, Command, step) — possède le PID
+mock_bin_su_namur/       Binario agitatore (eseguibile `osne`)
+  src/main.rs            Avvio: config, runtime Tokio, attori, IHM
+  src/motor.rs           Modello fisico del motore (dinamica rotazionale, Euler)
+  src/stirrer.rs         Modello di dominio sincrono (stato, Command, step) — possiede il PID
   src/config.rs          AppConfig (TOML), Transport/SerialConfig, IpFilter, ServerStatus
-  src/namur.rs           Protocole NAMUR : handle_line (SOURCE DE VÉRITÉ du jeu de commandes)
-  src/namur_server.rs    Service NAMUR (lignes ASCII) + mono-maître TCP + serve série + chien de garde
-  src/trace.rs           Journal circulaire des trames (mini-terminal IHM)
-  src/gui.rs             IHM egui (page unique + mini-terminal + modal Paramètres)
-  src/branding.rs        Logos embarqués (feature `gui`)
-  src/i18n.rs            Catalogue i18n typé (8 langues), sans dépendance
+  src/namur.rs           Protocollo NAMUR: handle_line (FONTE DI VERITÀ del set di comandi)
+  src/namur_server.rs    Servizio NAMUR (righe ASCII) + mono-master TCP + serve seriale + watchdog
+  src/trace.rs           Giornale circolare delle trame (mini-terminale IHM)
+  src/gui.rs             IHM egui (pagina unica + mini-terminale + modale Impostazioni)
+  src/branding.rs        Logo incorporati (feature `gui`)
+  src/i18n.rs            Catalogo i18n tipizzato (8 lingue), senza dipendenza
   src/actors/
-    simulation.rs        Boucle de simulation (tick 20 ms)
-    network.rs           Serveur NAMUR TCP/série (re)configurable à chaud
+    simulation.rs        Ciclo di simulazione (tick 20 ms)
+    network.rs           Servizio NAMUR TCP/seriale (ri)configurabile a caldo
 
-docs/                    Conception, commandes NAMUR, manuel, maintenance (multilingue)
+docs/                    Concezione, comandi NAMUR, manuale, manutenzione (multilingua)
 ```
 
 **Regola d'oro**: la logica di dominio (`mock_lib_control`, `motor.rs`,
@@ -110,22 +110,23 @@ invarianti.
 Struttura (tutte le sezioni sono opzionali, completate per default):
 
 ```toml
-language = "fr"
+language = "it"
+check_updates = true       # verifica all'avvio se esiste una release più recente (IHM)
 
 [network]
-transport = "tcp"          # "tcp" ou "serial"
+transport = "tcp"          # "tcp" o "serial"
 bind_ip = "0.0.0.0"
 port = 4001
-allowlist = ["192.168.1.*", "127.0.0.1"]   # vide = toutes IP autorisées
+allowlist = ["192.168.1.*", "127.0.0.1"]   # vuoto = tutti gli IP autorizzati
 [network.serial]
 port = "/dev/ttyUSB0"
 baud = 9600 ; parity = "even" ; data_bits = 7 ; stop_bits = 1   # NAMUR 7E1
 
-[motor]   # J·dω/dt = T − k·η·ω − frottement
-inertia = 0.02      # J (réactivité)
-load_coeff = 0.05   # k (poids de la viscosité)
+[motor]   # J·dω/dt = T − k·η·ω − attrito
+inertia = 0.02      # J (reattività)
+load_coeff = 0.05   # k (peso della viscosità)
 friction = 2.0      # N·cm
-torque_max = 100.0  # N·cm (plafond de la sortie PID)
+torque_max = 100.0  # N·cm (limite massimo dell'uscita PID)
 
 [regulation]
 speed_min = 0.0 ; speed_max = 2000.0
@@ -139,6 +140,23 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 > di uscita del PID (`out_min`/`out_max`) sono **forzati** a `[0, couple_max]` al
 > momento di costruire l'agitatore (`to_stirrer_config`).
 
+### Verifica degli aggiornamenti
+
+Se `check_updates = true` (predefinito) **e** il binario è compilato con la
+feature `gui`, l'IHM interroga **all'avvio** l'ultima release pubblicata su
+GitHub (`CESAMLAB/cesam-tools`) e ne confronta il numero con la versione
+corrente. Una versione più recente mostra un banner cliccabile «🔔 Aggiornamento
+disponibile». Il pulsante *Controlla ora* (modale *Impostazioni*) riavvia la
+verifica.
+
+- La richiesta HTTPS viene eseguita in un **thread dedicato**, limitata da un
+  timeout (5 s): offline o GitHub irraggiungibile non ostacola mai l'avvio.
+- La logica risiede nella crate condivisa **`mock_lib_update`** (`ureq`/`rustls`,
+  radici Mozilla incorporate → cross-compilazione pulita con `cross`).
+- **Build headless** (`--no-default-features`): la verifica — e tutta la
+  dipendenza rete/TLS — è **assente**. Su server, gestire gli aggiornamenti via
+  apt/Docker. Disattivabile dall'operatore (casella di spunta della modale).
+
 ---
 
 ## 5. Dipendenze e trappole di versione
@@ -151,6 +169,7 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | IHM | versioni collegate tra loro |
 | `egui_plot` | curva | ⚠️ **versionato una minore in anticipo su `egui`**: per `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | persistenza | `mock_lib_control` espone una feature `serde` attivata dal binario |
+| `mock_lib_update` (`ureq`/`rustls`) | verifica aggiornamenti | **solo feature `gui`**; rustls 0.23 (webpki aggiornato); assente in headless |
 
 Le versioni condivise sono centralizzate in `[workspace.dependencies]` del
 `Cargo.toml` radice. Per aggiornare `egui`/`eframe`, **verificare la versione
@@ -249,7 +268,7 @@ Licenza **MIT** (file `LICENSE`).
 ### Feature `gui` (build con / senza interfaccia)
 
 ```bash
-cargo build --release -p mock_bin_su_namur                       # avec IHM (poste de travail)
+cargo build --release -p mock_bin_su_namur                       # con IHM (postazione di lavoro)
 cargo build --release -p mock_bin_su_namur --no-default-features  # «headless»: NAMUR + simulazione, senza IHM
 ```
 

@@ -61,16 +61,16 @@ por defecto). El encabezado indica el estado:
 ## 3. La interfaz de un vistazo
 
 ```
-┌──────────────── En-tête : titre OSNE, ⚙ Paramètres, 💾 Sauvegarder, états & voyants ────────────────┐
+┌──────────────── Encabezado: título OSNE, ⚙ Ajustes, 💾 Guardar, estados y pilotos ─────────────────┐
 ├──────────────────┬──────────────────────────────────────────────────────────────────────────────────┤
-│  COMMANDES        │   SUPERVISION                                                                      │
-│  (gauche)         │   - cartes de valeurs (Vitesse / Couple / Viscosité / Surcharge)                  │
-│  Marche/Arrêt     │   - COURBE de tendance temps réel (Consigne / Vitesse / Couple)                   │
-│  Consigne vitesse │                                                                                   │
-│  Viscosité        │                                                                                   │
-│  Réglages PID     │                                                                                   │
+│  COMANDOS         │   SUPERVISIÓN                                                                     │
+│  (izquierda)      │   - tarjetas de valores (Velocidad / Par / Viscosidad / Sobrecarga)               │
+│  Marcha/Parada    │   - CURVA de tendencia en tiempo real (Consigna / Velocidad / Par)                │
+│  Consigna veloc.  │                                                                                   │
+│  Viscosidad       │                                                                                   │
+│  Ajustes PID      │                                                                                   │
 ├──────────────────┴──────────────────────────────────────────────────────────────────────────────────┤
-│  ⇄ TRAMES NAMUR : mini-terminal (RX/TX) + ligne de commande + référence du protocole (à droite)       │
+│  ⇄ TRAMAS NAMUR: mini-terminal (RX/TX) + línea de comando + referencia del protocolo (a la derecha)   │
 └───────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -229,11 +229,11 @@ Ejemplo con `nc` (netcat):
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (silencioso)
+START_4                (silencioso)
 IN_PV_4
 1200.0 4
-STOP_4                 (silencieux)
+STOP_4                 (silencioso)
 ```
 
 > El **perro guardián** `OUT_WD1@30` detiene automáticamente el motor si **no llega
@@ -253,7 +253,7 @@ una versión **sin interfaz**: ejecuta la simulación y el servidor NAMUR,
 controlables **únicamente por NAMUR**.
 
 ```bash
-# Image Docker (déployable n'importe où) :
+# Imagen Docker (desplegable en cualquier sitio):
 docker run --rm -p 4001:4001 -v "$PWD/conf:/data" osne:headless
 ```
 

@@ -61,16 +61,16 @@ standaard). De koptekst geeft de toestand aan:
 ## 3. De interface in één oogopslag
 
 ```
-┌──────────────── En-tête : titre OSNE, ⚙ Paramètres, 💾 Sauvegarder, états & voyants ────────────────┐
+┌──────────────── Koptekst: titel OSNE, ⚙ Instellingen, 💾 Opslaan, statussen & lampjes ───────────────┐
 ├──────────────────┬──────────────────────────────────────────────────────────────────────────────────┤
-│  COMMANDES        │   SUPERVISION                                                                      │
-│  (gauche)         │   - cartes de valeurs (Vitesse / Couple / Viscosité / Surcharge)                  │
-│  Marche/Arrêt     │   - COURBE de tendance temps réel (Consigne / Vitesse / Couple)                   │
-│  Consigne vitesse │                                                                                   │
-│  Viscosité        │                                                                                   │
-│  Réglages PID     │                                                                                   │
+│  COMMANDO'S       │   SUPERVISIE                                                                       │
+│  (links)          │   - waardekaarten (Snelheid / Koppel / Viscositeit / Overbelasting)               │
+│  Start/Stop       │   - real-time trendCURVE (Setpoint / Snelheid / Koppel)                           │
+│  Setpoint snelheid│                                                                                   │
+│  Viscositeit      │                                                                                   │
+│  PID-instellingen │                                                                                   │
 ├──────────────────┴──────────────────────────────────────────────────────────────────────────────────┤
-│  ⇄ TRAMES NAMUR : mini-terminal (RX/TX) + ligne de commande + référence du protocole (à droite)       │
+│  ⇄ NAMUR-FRAMES: miniterminal (RX/TX) + commandoregel + protocolreferentie (rechts)                   │
 └───────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -182,7 +182,7 @@ Keuze van de verbinding — **slechts één actief tegelijk**:
 > **punt-tot-punt-verbinding** (de server antwoordt ongeacht het gevraagde adres).
 
 ### Motorparameters
-Gesimuleerd fysiek gedrag `J·dω/dt = T − k·η·ω − frottement`:
+Gesimuleerd fysiek gedrag `J·dω/dt = T − k·η·ω − wrijving`:
 - **Inertie** (`J`): reactiviteit van de motor (klein ⇒ snel);
 - **Belastingscoëfficiënt** (`k`): gewicht van de viscositeit op het koppel;
 - **Wrijving** (`N·cm`): resterende droge wrijving;
@@ -231,11 +231,11 @@ Voorbeeld met `nc` (netcat):
 $ nc 127.0.0.1 4001
 IN_NAME
 CESAM-STIRRER
-OUT_SP_4 1200          (silencieux)
-START_4                (silencieux)
+OUT_SP_4 1200          (stil)
+START_4                (stil)
 IN_PV_4
 1200.0 4
-STOP_4                 (silencieux)
+STOP_4                 (stil)
 ```
 
 > De **waakhond** `OUT_WD1@30` stopt automatisch de motor als er gedurende 30 s
@@ -256,7 +256,7 @@ bestaat er een versie **zonder interface**: deze laat de simulatie en de
 NAMUR-server draaien, **enkel bestuurbaar via NAMUR**.
 
 ```bash
-# Image Docker (déployable n'importe où) :
+# Docker-image (overal inzetbaar):
 docker run --rm -p 4001:4001 -v "$PWD/conf:/data" osne:headless
 ```
 

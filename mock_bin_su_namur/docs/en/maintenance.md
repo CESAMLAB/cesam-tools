@@ -109,7 +109,8 @@ copy of the **ORME** controller (`mock_bin_ru_modbustcp`) — same invariants.
 Structure (all sections are optional, filled in with defaults):
 
 ```toml
-language = "fr"
+language = "en"
+check_updates = true       # check at startup whether a newer release exists (GUI)
 
 [network]
 transport = "tcp"          # "tcp" or "serial"
@@ -138,6 +139,22 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 > PID output bounds (`out_min`/`out_max`) are **forced** to `[0, torque_max]` when
 > building the stirrer (`to_stirrer_config`).
 
+### Update check
+
+If `check_updates = true` (default) **and** the binary is compiled with the `gui`
+feature, the GUI queries **at startup** the latest release published on GitHub
+(`CESAMLAB/cesam-tools`) and compares its number with the current version. A newer
+version displays a clickable "🔔 Update available" banner. The *Check now* button
+(*Settings* modal) re-runs the check.
+
+- The HTTPS request runs in a **dedicated thread**, bounded by a timeout (5 s):
+  being offline or having GitHub unreachable never hinders startup.
+- The logic lives in the shared crate **`mock_lib_update`** (`ureq`/`rustls`,
+  embedded Mozilla roots → clean cross-compilation under `cross`).
+- **Headless build** (`--no-default-features`): the check — and the whole
+  network/TLS dependency — is **absent**. On a server, manage updates via
+  apt/Docker. Disableable by the operator (modal checkbox).
+
 ---
 
 ## 5. Dependencies and version pitfalls
@@ -150,6 +167,7 @@ kp = ... ; ki = ... ; kd = ... ; out_min = 0.0 ; out_max = 100.0
 | `eframe`/`egui` | GUI | versions tied together |
 | `egui_plot` | chart | ⚠️ **versioned one minor ahead of `egui`**: for `egui` 0.33 → `egui_plot` **0.34** |
 | `serde`/`toml` | persistence | `mock_lib_control` exposes a `serde` feature enabled by the binary |
+| `mock_lib_update` (`ureq`/`rustls`) | update check | **`gui` feature only**; rustls 0.23 (webpki up to date); absent in headless |
 
 Shared versions are centralized in `[workspace.dependencies]` of the root
 `Cargo.toml`. To bump `egui`/`eframe`, **check the matching `egui_plot` version**

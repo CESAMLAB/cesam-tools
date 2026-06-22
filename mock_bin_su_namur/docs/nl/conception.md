@@ -54,8 +54,8 @@ fijner dan die van ORME omdat de dynamiek van een motor snel is.
 ## 3. Architectuur (acteurs)
 
 ```
-IHM (egui) ──Command(cast)──►  SimulationActor ──refresh──► SharedSnapshot ──► IHM
-Serveur NAMUR ──Command(cast)─►   (Stirrer)     ──refresh──► SharedSnapshot ──► lectures NAMUR
+GUI (egui) ──Command(cast)──►  SimulationActor ──refresh──► SharedSnapshot ──► GUI
+NAMUR-server ──Command(cast)─►   (Stirrer)     ──refresh──► SharedSnapshot ──► NAMUR-uitlezingen
 ```
 
 - **`SimulationActor`** ([`actors/simulation.rs`](../../src/actors/simulation.rs)):
