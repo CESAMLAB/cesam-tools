@@ -1,6 +1,6 @@
 [package]
 name = "mock_bin_ru_opcua"
-description = "Prototype (Phase 1) : régulateur de procédé simulé exposé en OPC UA (serveur async-opcua, sécurité None). Réutilise mock_lib_control."
+description = "Régulateur de procédé simulé exposé en OPC UA (serveur async-opcua, sécurité None), avec IHM egui. Réutilise mock_lib_control."
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -10,16 +10,31 @@ authors.workspace = true
 # reste à 1.85 pour les autres crates, qui le respectent réellement).
 rust-version = "1.91"
 
-# Nom de l'exécutable provisoire (Phase 1, headless). Nom commercial à fixer.
+# Nom de l'exécutable provisoire. Nom commercial à fixer.
 [[bin]]
 name = "ru_opcua"
 path = "src/main.rs"
 
+[features]
+# Interface graphique embarquée. Activée par défaut (poste de travail).
+# `--no-default-features` produit un binaire « headless » : serveur OPC UA +
+# simulation sans IHM.
+default = ["gui"]
+gui = ["dep:eframe", "dep:egui_plot", "dep:image", "dep:mock_lib_update"]
+
 [dependencies]
-mock_lib_control = { workspace = true }
+mock_lib_control = { workspace = true, features = ["serde"] }
 async-opcua = { workspace = true }
-# `signal` pour l'arrêt propre du serveur (Ctrl-C → fermeture informée des clients).
 tokio = { workspace = true, features = ["signal"] }
+ractor = { workspace = true }
 anyhow = { workspace = true }
 log = { workspace = true }
 env_logger = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+# Interface graphique (feature `gui` uniquement).
+eframe = { workspace = true, optional = true }
+egui_plot = { workspace = true, optional = true }
+image = { workspace = true, optional = true }
+# Vérification de mise à jour (feature `gui` : commodité poste de travail).
+mock_lib_update = { workspace = true, optional = true }

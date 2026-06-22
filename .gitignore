@@ -33,3 +33,7 @@ Thumbs.db
 
 # Binaires & installeurs de distribution générés par scripts/build-prod.sh
 /dist
+
+# OPC UA : certificat d'instance auto-généré au premier lancement
+pki/
+mock_ru_opcua.toml

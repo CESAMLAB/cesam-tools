@@ -2535,10 +2535,17 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "async-opcua",
+ "eframe",
+ "egui_plot",
  "env_logger",
+ "image",
  "log",
  "mock_lib_control",
+ "mock_lib_update",
+ "ractor",
+ "serde",
  "tokio",
+ "toml",
 ]
 
 [[package]]
