@@ -1,0 +1,17 @@
+[package]
+name = "mock_lib_update"
+description = "Vérification de mise à jour logicielle : interroge la dernière release GitHub et compare à la version courante. Brique partagée par les simulateurs CESAM-Lab."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+# Client HTTP bloquant + TLS rustls (racines Mozilla embarquées via webpki-roots) :
+# se cross-compile vers Windows/arm64 sous `cross` sans dépendance système TLS.
+# `ureq` 2.x tire rustls 0.23 (webpki corrigé) — contrairement à `minreq` figé sur
+# rustls 0.21, vulnérable (RUSTSEC-2026-0098/0099/0104).
+ureq = { version = "2", default-features = false, features = ["tls", "json"] }
+serde = { version = "1", features = ["derive"] }
+thiserror = { workspace = true }

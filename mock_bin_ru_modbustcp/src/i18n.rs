@@ -197,6 +197,13 @@ pub enum Msg {
     // Mots réutilisés pour composer les libellés des gains PID.
     Dir1,
     Dir2,
+    // Vérification de mise à jour
+    CheckUpdates,
+    CheckNow,
+    UpdateAvailable,
+    UpdateDownload,
+    UpToDate,
+    UpdateCheckFailed,
 }
 
 impl Msg {
@@ -303,6 +310,12 @@ impl Msg {
             Readback           => ["recopie", "readback", "Rückmeldung", "lectura", "lettura", "leitura", "uitlezing", "odczyt"],
             Dir1               => ["sens 1", "dir. 1", "Richtung 1", "sentido 1", "verso 1", "sentido 1", "richting 1", "kier. 1"],
             Dir2               => ["sens 2", "dir. 2", "Richtung 2", "sentido 2", "verso 2", "sentido 2", "richting 2", "kier. 2"],
+            CheckUpdates       => ["Vérifier les mises à jour au démarrage", "Check for updates at startup", "Beim Start nach Updates suchen", "Buscar actualizaciones al iniciar", "Controlla aggiornamenti all'avvio", "Procurar atualizações ao iniciar", "Bij opstarten op updates controleren", "Sprawdzaj aktualizacje przy starcie"],
+            CheckNow           => ["Vérifier maintenant", "Check now", "Jetzt prüfen", "Comprobar ahora", "Controlla ora", "Verificar agora", "Nu controleren", "Sprawdź teraz"],
+            UpdateAvailable    => ["🔔 Mise à jour disponible :", "🔔 Update available:", "🔔 Update verfügbar:", "🔔 Actualización disponible:", "🔔 Aggiornamento disponibile:", "🔔 Atualização disponível:", "🔔 Update beschikbaar:", "🔔 Dostępna aktualizacja:"],
+            UpdateDownload     => ["Télécharger", "Download", "Herunterladen", "Descargar", "Scarica", "Transferir", "Downloaden", "Pobierz"],
+            UpToDate           => ["Logiciel à jour", "Up to date", "Aktuell", "Actualizado", "Aggiornato", "Atualizado", "Up-to-date", "Aktualne"],
+            UpdateCheckFailed  => ["Vérification impossible (hors ligne ?)", "Check failed (offline?)", "Prüfung fehlgeschlagen (offline?)", "Comprobación fallida (¿sin conexión?)", "Controllo non riuscito (offline?)", "Verificação falhou (offline?)", "Controle mislukt (offline?)", "Sprawdzenie nie powiodło się (offline?)"],
         }
     }
 }
