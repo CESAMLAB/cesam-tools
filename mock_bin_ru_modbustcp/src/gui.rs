@@ -23,6 +23,8 @@
 
 use std::collections::VecDeque;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use eframe::egui;
@@ -30,6 +32,7 @@ use egui_plot::{Corner, Legend, Line, Plot, PlotPoints};
 use ractor::ActorRef;
 
 use mock_lib_control::{ControllerKind, PidConfig};
+use mock_lib_update::UpdateStatus;
 
 use crate::actors::{ModbusServerMsg, SharedSnapshot, SharedStatus, SimulationMsg};
 use crate::config::{AppConfig, Parity, Transport};
@@ -43,6 +46,25 @@ const HISTORY_LEN: usize = 3000;
 /// Délai au-delà duquel le lien est considéré inactif (voyant de connexion gris)
 /// faute de requête Modbus reçue. Un maître interroge typiquement bien plus vite.
 const LINK_ACTIVE_TIMEOUT: Duration = Duration::from_secs(3);
+
+/// Dépôt GitHub interrogé pour la dernière release (vérification de mise à jour).
+const UPDATE_REPO: &str = "CESAMLAB/cesam-tools";
+/// Timeout réseau de la vérification de mise à jour (commodité, jamais bloquante).
+const UPDATE_TIMEOUT: Duration = Duration::from_secs(5);
+
+/// État de la vérification de mise à jour, partagé avec le thread de requête.
+#[derive(Default)]
+enum UpdateCheck {
+    /// Jamais lancée (ou désactivée en configuration).
+    #[default]
+    Idle,
+    /// Requête en cours.
+    Checking,
+    /// Terminée : `Ok(statut)` ou `Err(message)` si la requête a échoué.
+    Done(Result<UpdateStatus, String>),
+}
+
+type SharedUpdate = Arc<Mutex<UpdateCheck>>;
 
 // Couleurs (fixes) des courbes — partagées avec leur pastille de légende.
 const COLOR_SP: egui::Color32 = egui::Color32::from_rgb(90, 140, 255); // bleu
@@ -74,6 +96,10 @@ pub struct RegulatorGui {
     // Logos chargés paresseusement à la première frame (cf. `ensure_logos`).
     orme_logo: Option<egui::TextureHandle>,
     cesam_logo: Option<egui::TextureHandle>,
+    /// Résultat de la vérification de mise à jour (rempli par un thread dédié).
+    update: SharedUpdate,
+    /// Handle du thread de vérification (one-shot, requête bornée par un timeout).
+    update_thread: Option<JoinHandle<()>>,
 }
 
 impl RegulatorGui {
@@ -86,7 +112,8 @@ impl RegulatorGui {
         config: AppConfig,
         config_path: PathBuf,
     ) -> Self {
-        Self {
+        let check_at_startup = config.check_updates;
+        let mut gui = Self {
             sim,
             net,
             snapshot,
@@ -101,7 +128,38 @@ impl RegulatorGui {
             feedback: None,
             orme_logo: None,
             cesam_logo: None,
+            update: Arc::new(Mutex::new(UpdateCheck::Idle)),
+            update_thread: None,
+        };
+        if check_at_startup {
+            gui.spawn_update_check();
         }
+        gui
+    }
+
+    /// Lance (si aucune n'est déjà en cours) une vérification de mise à jour dans
+    /// un thread dédié : la requête HTTPS est bornée par [`UPDATE_TIMEOUT`] et son
+    /// résultat est publié dans [`Self::update`].
+    fn spawn_update_check(&mut self) {
+        {
+            let mut g = match self.update.lock() {
+                Ok(g) => g,
+                Err(_) => return,
+            };
+            if matches!(*g, UpdateCheck::Checking) {
+                return; // une requête est déjà en vol
+            }
+            *g = UpdateCheck::Checking;
+        }
+        let shared = self.update.clone();
+        self.update_thread = Some(std::thread::spawn(move || {
+            let res =
+                mock_lib_update::check_blocking(UPDATE_REPO, env!("CARGO_PKG_VERSION"), UPDATE_TIMEOUT)
+                    .map_err(|e| e.to_string());
+            if let Ok(mut g) = shared.lock() {
+                *g = UpdateCheck::Done(res);
+            }
+        }));
     }
 
     /// Charge les textures de logo à la première frame (le contexte egui n'est
@@ -376,6 +434,18 @@ impl RegulatorGui {
             if network_is_exposed(&self.config) {
                 ui.colored_label(egui::Color32::from_rgb(200, 140, 0), t(Msg::SecurityExposed));
             }
+            // Notification de mise à jour disponible (vérification au démarrage).
+            if let Ok(guard) = self.update.lock() {
+                if let UpdateCheck::Done(Ok(UpdateStatus::Available(rel))) = &*guard {
+                    ui.horizontal(|ui| {
+                        ui.colored_label(
+                            egui::Color32::from_rgb(0, 140, 200),
+                            format!("{} v{}", t(Msg::UpdateAvailable), rel.version),
+                        );
+                        ui.hyperlink_to(t(Msg::UpdateDownload), &rel.url);
+                    });
+                }
+            }
             ui.add_space(2.0);
         });
     }
@@ -603,10 +673,30 @@ impl RegulatorGui {
         let mut do_apply = false;
         let mut do_reset = false;
         let mut do_close = false;
+        let mut do_check_now = false;
         // Langue de prévisualisation : celle du brouillon (mise à jour vivante au
         // changement du sélecteur, frame suivante).
         let lang = self.settings_draft.language;
         let t = |k: Msg| i18n::tr(lang, k);
+        // Statut courant de la vérification de mise à jour (libellé + couleur),
+        // calculé avant l'emprunt mutable de `settings_draft` par la fenêtre.
+        let update_label: Option<(String, egui::Color32)> = match self.update.lock() {
+            Ok(g) => match &*g {
+                UpdateCheck::Idle => None,
+                UpdateCheck::Checking => Some(("⏳".to_string(), egui::Color32::GRAY)),
+                UpdateCheck::Done(Ok(UpdateStatus::UpToDate)) => {
+                    Some((t(Msg::UpToDate).to_string(), egui::Color32::from_rgb(0, 150, 0)))
+                }
+                UpdateCheck::Done(Ok(UpdateStatus::Available(rel))) => Some((
+                    format!("{} v{}", t(Msg::UpdateAvailable), rel.version),
+                    egui::Color32::from_rgb(0, 140, 200),
+                )),
+                UpdateCheck::Done(Err(_)) => {
+                    Some((t(Msg::UpdateCheckFailed).to_string(), egui::Color32::from_rgb(200, 140, 0)))
+                }
+            },
+            Err(_) => None,
+        };
         {
             let draft = &mut self.settings_draft;
             let allow_text = &mut self.allowlist_text;
@@ -628,6 +718,20 @@ impl RegulatorGui {
                             });
                     });
                     ui.add_space(4.0);
+
+                    // Vérification de mise à jour.
+                    ui.horizontal(|ui| {
+                        ui.checkbox(&mut draft.check_updates, t(Msg::CheckUpdates));
+                    });
+                    ui.horizontal(|ui| {
+                        if ui.button(t(Msg::CheckNow)).clicked() {
+                            do_check_now = true;
+                        }
+                        if let Some((txt, color)) = &update_label {
+                            ui.colored_label(*color, txt);
+                        }
+                    });
+                    ui.add_space(6.0);
 
                     ui.label(egui::RichText::new(t(Msg::ModbusTransport)).strong());
                     ui.horizontal(|ui| {
@@ -739,6 +843,9 @@ impl RegulatorGui {
                 });
         }
 
+        if do_check_now {
+            self.spawn_update_check();
+        }
         if do_close {
             open = false;
         }

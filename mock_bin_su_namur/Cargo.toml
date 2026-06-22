@@ -18,7 +18,7 @@ path = "src/main.rs"
 # La désactiver (`--no-default-features`) produit un binaire « headless » : le
 # serveur NAMUR et la simulation tournent sans IHM.
 default = ["gui", "serial"]
-gui = ["dep:eframe", "dep:egui_plot", "dep:image"]
+gui = ["dep:eframe", "dep:egui_plot", "dep:image", "dep:mock_lib_update"]
 # Transport NAMUR sur liaison série RS-232 (le bus historique des appareils de
 # labo). Tire `tokio-serial`. La désactiver produit un binaire NAMUR/TCP seul.
 serial = ["dep:tokio-serial"]
@@ -33,6 +33,8 @@ tokio-serial = { workspace = true, optional = true }
 eframe = { workspace = true, optional = true }
 egui_plot = { workspace = true, optional = true }
 image = { workspace = true, optional = true }
+# Vérification de mise à jour (feature `gui` uniquement : commodité poste de travail).
+mock_lib_update = { workspace = true, optional = true }
 log = { workspace = true }
 env_logger = { workspace = true }
 serde = { version = "1", features = ["derive"] }

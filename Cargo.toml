@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "mock_lib_control",
+    "mock_lib_update",
     "mock_bin_ru_modbustcp",
     "mock_bin_su_namur",
 ]
@@ -37,6 +38,7 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 # --- Gestion d'erreurs ---
 # anyhow : frontière process (binaires). thiserror : types d'erreur des libs.
 anyhow = "1"
+thiserror = "2"
 
 # --- Journalisation ---
 log = "0.4"
@@ -44,6 +46,7 @@ env_logger = "0.11"
 
 # --- Membres internes ---
 mock_lib_control = { path = "mock_lib_control" }
+mock_lib_update = { path = "mock_lib_update" }
 
 # Profil release : binaire de simulation léger et rapide.
 [profile.release]

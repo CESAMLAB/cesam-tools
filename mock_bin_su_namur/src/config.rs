@@ -210,13 +210,29 @@ impl Default for RegulationConfig {
 }
 
 /// Configuration complète de l'application.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AppConfig {
     pub language: Lang,
     pub network: NetworkConfig,
     pub motor: MotorConfig,
     pub regulation: RegulationConfig,
+    /// Vérifier au démarrage si une version plus récente est publiée (feature
+    /// `gui`). Activé par défaut ; désactivable depuis le modal *Paramètres*.
+    /// `#[serde(default)]` du conteneur le ramène à `true` pour les anciens TOML.
+    pub check_updates: bool,
+}
+
+impl Default for AppConfig {
+    fn default() -> Self {
+        Self {
+            language: Lang::default(),
+            network: NetworkConfig::default(),
+            motor: MotorConfig::default(),
+            regulation: RegulationConfig::default(),
+            check_updates: true,
+        }
+    }
 }
 
 impl AppConfig {
