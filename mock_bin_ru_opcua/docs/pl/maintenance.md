@@ -120,8 +120,9 @@ certyfikatem oraz tokenami anonimowym i/lub użytkownik/hasło
 (`ServerUserToken::user_pass`). Filtr logów
 `opcua_crypto::certificate_store=off` ([`main.rs`](../../src/main.rs)) dotyczy
 wyłącznie trybu None (brak certyfikatu); w trybie szyfrowanym pozostaje bez
-skutku. Kierunki: polityki `Aes256Sha256RsaPss`, jawna lista zaufania PKI zamiast
-`trust_client_certs`, tokeny X.509.
+skutku. Zaufanie do certyfikatów klientów jest **konfigurowalne**
+(`trust_client_certs`: automatyczne domyślnie lub ścisłe przez `pki/trusted/`).
+Pozostałe kierunki: polityki `Aes256Sha256RsaPss`, tokeny X.509.
 
 ---
 

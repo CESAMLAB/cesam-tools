@@ -72,7 +72,8 @@ segurança **None**, utilizador **Anonymous**. Os nós estão descritos na
 - **Endpoint**: **IP de escuta** e **porta** do servidor OPC UA. Uma alteração
   **reinicia** o servidor a quente (as sessões em curso são fechadas limpamente).
 - **Segurança OPC UA**: **Cifragem** (`Basic256Sha256`), **Permitir o anónimo**,
-  **Utilizador** / **Palavra-passe** (campos ativos quando a cifragem está marcada).
+  **Confiança auto. nos certificados de cliente**, **Utilizador** / **Palavra-passe**
+  (campos ativos quando a cifragem está marcada).
   Ativar a cifragem gera um certificado no primeiro arranque (alguns
   segundos) e reinicia o servidor.
 - **Processo (função de transferência)**: ganho `K`, constante de tempo `τ`, atraso
@@ -93,8 +94,9 @@ A segurança OPC UA é **regulável** em *Parâmetros*:
   nenhuma proteção. **Não expor numa rede aberta.** Um aviso **laranja**
   lembra-o.
 - **Com cifragem**: endpoint **`Basic256Sha256`** (assinado + cifrado). O
-  servidor gera o seu certificado no primeiro arranque e aceita os certificados
-  de cliente. Pode exigir-se um **utilizador / palavra-passe** e/ou permitir
+  servidor gera o seu certificado no primeiro arranque. A **confiança nos
+  certificados de cliente** é regulável (automática por predefinição, ou estrita).
+  Pode exigir-se um **utilizador / palavra-passe** e/ou permitir
   o anónimo. Um aviso **verde 🔒** confirma a cifragem. Para se ligar, o
   cliente deve então utilizar a política `Basic256Sha256` e confiar no
   certificado do servidor (primeira troca).

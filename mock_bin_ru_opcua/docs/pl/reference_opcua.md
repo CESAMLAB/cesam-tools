@@ -22,15 +22,17 @@ transport OPC UA TCP binarny. **Bezpieczeństwo** jest konfigurowalne (sekcja
 - **Nieszyfrowany**: ani uwierzytelniania, ani szyfrowania. Udostępniać wyłącznie
   w **sieci zaufanej**. Natychmiastowy start (brak certyfikatu).
 - **Szyfrowany**: **samopodpisany certyfikat instancji** jest generowany przy
-  pierwszym uruchomieniu (w `pki/`). Serwer ufa certyfikatom klientów
-  (`trust_client_certs`, wygodne dla symulatora). Uwierzytelnianie za pomocą
-  **użytkownika/hasła**, jeśli `username` jest podane; w przeciwnym razie (lub
-  dodatkowo) token **anonimowy**, jeśli `allow_anonymous`. ⚠️ Generowanie RSA może
-  zająć kilka sekund przy pierwszym uruchomieniu (debug).
+  pierwszym uruchomieniu (w `pki/`). Zaufanie do certyfikatów klientów jest
+  **konfigurowalne** (`trust_client_certs`): **automatyczne** (domyślnie, wygodne
+  dla symulatora) lub **ścisłe** — klient musi wtedy być wcześniej zatwierdzony
+  w `pki/trusted/` (w przeciwnym razie trafia do `pki/rejected/` i jest odrzucany).
+  Uwierzytelnianie za pomocą **użytkownika/hasła**, jeśli `username` jest podane;
+  w przeciwnym razie (lub dodatkowo) token **anonimowy**, jeśli `allow_anonymous`.
+  ⚠️ Generowanie RSA może zająć kilka sekund przy pierwszym uruchomieniu (debug).
 
 Ustawienia (`[security]`): `encryption` (bool), `allow_anonymous` (bool),
-`username` (puste = brak uwierzytelniania hasłem), `password` (jawnym tekstem —
-**tylko symulator**).
+`trust_client_certs` (bool, domyślnie `true`), `username` (puste = brak
+uwierzytelniania hasłem), `password` (jawnym tekstem — **tylko symulator**).
 
 ---
 

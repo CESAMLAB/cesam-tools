@@ -71,7 +71,8 @@ Connect an OPC UA client (UaExpert, etc.) to `opc.tcp://127.0.0.1:4840/`, securi
 - **Endpoint**: **listening IP** and **port** of the OPC UA server. A change
   **restarts** the server at runtime (ongoing sessions are closed cleanly).
 - **OPC UA security**: **Encryption** (`Basic256Sha256`), **Allow anonymous**,
-  **Username** / **Password** (fields active when encryption is checked).
+  **Auto-trust client certificates**, **Username** / **Password** (fields active
+  when encryption is checked).
   Enabling encryption generates a certificate on first launch (a few seconds) and
   restarts the server.
 - **Process (transfer function)**: gain `K`, time constant `τ`, pure delay,
@@ -92,8 +93,9 @@ OPC UA security is **configurable** in *Settings*:
   access — no protection. **Do not expose on an open network.** An **orange**
   banner reminds you of this.
 - **With encryption**: a **`Basic256Sha256`** endpoint (signed + encrypted). The
-  server generates its certificate on first launch and accepts client
-  certificates. You can require a **username / password** and/or allow anonymous.
+  server generates its certificate on first launch. **Client certificate trust**
+  is configurable (automatic by default, or strict). You can require a
+  **username / password** and/or allow anonymous.
   A **green 🔒** banner confirms encryption. To connect, the client must then use
   the `Basic256Sha256` policy and trust the server certificate (first exchange).
 

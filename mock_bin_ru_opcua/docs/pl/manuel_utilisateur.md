@@ -71,9 +71,10 @@ bezpieczeństwo **None**, użytkownik **Anonymous**. Węzły są opisane w
 - **Endpoint**: **IP nasłuchiwania** i **port** serwera OPC UA. Zmiana
   **przeładowuje** serwer na gorąco (bieżące sesje są zamykane czysto).
 - **Bezpieczeństwo OPC UA**: **Szyfrowanie** (`Basic256Sha256`), **Zezwalaj na
-  anonimowość**, **Użytkownik** / **Hasło** (pola aktywne, gdy szyfrowanie jest
-  zaznaczone). Włączenie szyfrowania generuje certyfikat przy pierwszym
-  uruchomieniu (kilka sekund) i restartuje serwer.
+  anonimowość**, **Automatyczne zaufanie certyfikatom klientów**, **Użytkownik** /
+  **Hasło** (pola aktywne, gdy szyfrowanie jest zaznaczone). Włączenie szyfrowania
+  generuje certyfikat przy pierwszym uruchomieniu (kilka sekund) i restartuje
+  serwer.
 - **Proces (funkcja przejścia)**: wzmocnienie `K`, stała czasowa `τ`, czyste
   opóźnienie, wartość otoczenia.
 - **Granice wartości zadanej**: min / max (porządkowane automatycznie, jeśli
@@ -93,11 +94,11 @@ Bezpieczeństwo OPC UA jest **konfigurowalne** w *Ustawieniach*:
   **anonimowy** — brak jakiejkolwiek ochrony. **Nie udostępniać w sieci
   otwartej.** Przypomina o tym **pomarańczowy** baner.
 - **Z szyfrowaniem**: endpoint **`Basic256Sha256`** (podpisany + szyfrowany).
-  Serwer generuje swój certyfikat przy pierwszym uruchomieniu i akceptuje
-  certyfikaty klientów. Można wymagać **użytkownika / hasła** i/lub zezwolić na
-  anonimowość. **Zielony baner 🔒** potwierdza szyfrowanie. Aby się połączyć,
-  klient musi wtedy użyć polityki `Basic256Sha256` i zaufać certyfikatowi serwera
-  (pierwsza wymiana).
+  Serwer generuje swój certyfikat przy pierwszym uruchomieniu. **Zaufanie do
+  certyfikatów klientów** jest konfigurowalne (domyślnie automatyczne lub ścisłe).
+  Można wymagać **użytkownika / hasła** i/lub zezwolić na anonimowość. **Zielony
+  baner 🔒** potwierdza szyfrowanie. Aby się połączyć, klient musi wtedy użyć
+  polityki `Basic256Sha256` i zaufać certyfikatowi serwera (pierwsza wymiana).
 
 Hasło jest przechowywane **jawnym tekstem** w pliku TOML: to **symulator**,
 do użycia w sieci zaufanej.

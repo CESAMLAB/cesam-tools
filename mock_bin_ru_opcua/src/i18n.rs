@@ -77,6 +77,7 @@ pub enum Msg {
     Security,
     Encryption,
     AllowAnonymous,
+    TrustClientCerts,
     Username,
     Password,
     // Panneau commandes
@@ -136,6 +137,7 @@ impl Msg {
             Security        => ["Sécurité OPC UA", "OPC UA security", "OPC-UA-Sicherheit", "Seguridad OPC UA", "Sicurezza OPC UA", "Segurança OPC UA", "OPC UA-beveiliging", "Zabezpieczenia OPC UA"],
             Encryption      => ["Chiffrement (Basic256Sha256)", "Encryption (Basic256Sha256)", "Verschlüsselung (Basic256Sha256)", "Cifrado (Basic256Sha256)", "Crittografia (Basic256Sha256)", "Cifragem (Basic256Sha256)", "Versleuteling (Basic256Sha256)", "Szyfrowanie (Basic256Sha256)"],
             AllowAnonymous  => ["Autoriser l'anonyme", "Allow anonymous", "Anonym zulassen", "Permitir anónimo", "Consenti anonimo", "Permitir anónimo", "Anoniem toestaan", "Zezwól na anonimowy"],
+            TrustClientCerts => ["Confiance auto. des certificats clients", "Auto-trust client certificates", "Client-Zertifikaten automatisch vertrauen", "Confiar automáticamente en los certificados de cliente", "Considera automaticamente attendibili i certificati client", "Confiar automaticamente nos certificados de cliente", "Clientcertificaten automatisch vertrouwen", "Automatycznie ufaj certyfikatom klienta"],
             Username        => ["Utilisateur", "Username", "Benutzername", "Usuario", "Nome utente", "Utilizador", "Gebruikersnaam", "Nazwa użytkownika"],
             Password        => ["Mot de passe", "Password", "Passwort", "Contraseña", "Password", "Palavra-passe", "Wachtwoord", "Hasło"],
             Commands        => ["Commandes", "Commands", "Befehle", "Comandos", "Comandi", "Comandos", "Bediening", "Sterowanie"],

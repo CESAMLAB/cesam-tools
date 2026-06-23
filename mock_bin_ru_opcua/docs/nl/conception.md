@@ -101,8 +101,9 @@ beveiliging).
   certificaat. De GUI toont een **oranje waarschuwingsbanner**.
 - **Versleutelde modus (Fase 2)**: endpoint `Basic256Sha256` / `SignAndEncrypt`.
   Een zelfondertekend **instantiecertificaat** wordt bij de eerste start gegenereerd
-  (`pki/`); de server vertrouwt de clientcertificaten. **Authenticatie** met
-  gebruiker/wachtwoord (`ServerUserToken::user_pass`) en/of anoniem. De GUI toont
+  (`pki/`); het vertrouwen van de clientcertificaten is **instelbaar**
+  (`trust_client_certs`: automatisch, of strikt via `pki/trusted/`). **Authenticatie**
+  met gebruiker/wachtwoord (`ServerUserToken::user_pass`) en/of anoniem. De GUI toont
   een **groene banner** 🔒.
 
 De modus wordt ingesteld in het modale venster *Parameters*; een wijziging

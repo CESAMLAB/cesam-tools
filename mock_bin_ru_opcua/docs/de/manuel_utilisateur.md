@@ -74,7 +74,8 @@ Sicherheit **None**, Benutzer **Anonymous**. Die Knoten sind in der
   **startet** den Server im laufenden Betrieb neu (laufende Sitzungen werden sauber
   geschlossen).
 - **OPC-UA-Sicherheit**: **Verschlüsselung** (`Basic256Sha256`), **Anonym erlauben**,
-  **Benutzer** / **Passwort** (Felder aktiv, wenn die Verschlüsselung angehakt ist).
+  **Client-Zertifikaten automatisch vertrauen**, **Benutzer** / **Passwort** (Felder
+  aktiv, wenn die Verschlüsselung angehakt ist).
   Das Aktivieren der Verschlüsselung erzeugt beim ersten Start ein Zertifikat (einige
   Sekunden) und startet den Server neu.
 - **Prozess (Übertragungsfunktion)**: Verstärkung `K`, Zeitkonstante `τ`, reine
@@ -95,11 +96,12 @@ Die OPC-UA-Sicherheit ist unter *Parameter* **einstellbar**:
   Zugriff — kein Schutz. **Nicht in einem offenen Netzwerk bereitstellen.** Ein
   **oranges** Banner erinnert daran.
 - **Mit Verschlüsselung**: Endpoint **`Basic256Sha256`** (signiert + verschlüsselt).
-  Der Server erzeugt sein Zertifikat beim ersten Start und akzeptiert die
-  Client-Zertifikate. Man kann **Benutzer / Passwort** verlangen und/oder den anonymen
-  Zugriff erlauben. Ein **grünes Banner 🔒** bestätigt die Verschlüsselung. Zum
-  Verbinden muss der Client dann die Richtlinie `Basic256Sha256` verwenden und dem
-  Serverzertifikat vertrauen (erster Austausch).
+  Der Server erzeugt sein Zertifikat beim ersten Start. Das **Vertrauen in die
+  Client-Zertifikate** ist einstellbar (standardmäßig automatisch oder streng). Man
+  kann **Benutzer / Passwort** verlangen und/oder den anonymen Zugriff erlauben. Ein
+  **grünes Banner 🔒** bestätigt die Verschlüsselung. Zum Verbinden muss der Client
+  dann die Richtlinie `Basic256Sha256` verwenden und dem Serverzertifikat vertrauen
+  (erster Austausch).
 
 Das Passwort wird **im Klartext** in der TOML-Datei gespeichert: es handelt sich um
 einen **Simulator**, der in einem vertrauenswürdigen Netzwerk zu verwenden ist.

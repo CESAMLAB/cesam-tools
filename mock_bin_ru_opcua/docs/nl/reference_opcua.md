@@ -22,15 +22,17 @@ van de TOML / modaal venster *Parameters*) en bepaalt de blootgestelde endpoint:
 - **Onversleuteld**: noch authenticatie noch versleuteling. Alleen bloot te stellen
   op een **vertrouwd netwerk**. Onmiddellijke start (geen certificaat).
 - **Versleuteld**: een **zelfondertekend instantiecertificaat** wordt bij de eerste
-  start gegenereerd (in `pki/`). De server vertrouwt de clientcertificaten
-  (`trust_client_certs`, handig voor een simulator). Authenticatie met
-  **gebruiker/wachtwoord** als `username` is ingevuld; anders (of daarnaast) een
-  **anoniem** token als `allow_anonymous`. ⚠️ De RSA-generatie kan bij de eerste
-  start enkele seconden duren (debug).
+  start gegenereerd (in `pki/`). Het vertrouwen van de clientcertificaten is
+  **instelbaar** (`trust_client_certs`): **automatisch** (standaard, handig voor een
+  simulator) of **strikt** — de client moet dan vooraf goedgekeurd zijn in
+  `pki/trusted/` (anders wordt hij in `pki/rejected/` geplaatst en geweigerd).
+  Authenticatie met **gebruiker/wachtwoord** als `username` is ingevuld; anders (of
+  daarnaast) een **anoniem** token als `allow_anonymous`. ⚠️ De RSA-generatie kan bij
+  de eerste start enkele seconden duren (debug).
 
 Instellingen (`[security]`): `encryption` (bool), `allow_anonymous` (bool),
-`username` (leeg = geen wachtwoordauthenticatie), `password` (in klare tekst —
-**alleen simulator**).
+`trust_client_certs` (bool, standaard `true`), `username` (leeg = geen
+wachtwoordauthenticatie), `password` (in klare tekst — **alleen simulator**).
 
 ---
 

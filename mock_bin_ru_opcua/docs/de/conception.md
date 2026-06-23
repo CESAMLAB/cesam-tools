@@ -102,7 +102,8 @@ Sicherheit).
   Zertifikat. Die IHM zeigt ein **orangefarbenes Warnbanner**.
 - **Verschlüsselter Modus**: Endpoint `Basic256Sha256` / `SignAndEncrypt`. Ein
   selbstsigniertes **Instanzzertifikat** wird beim ersten Start erzeugt (`pki/`);
-  der Server vertraut den Client-Zertifikaten. **Authentifizierung** per
+  das Vertrauen in die Client-Zertifikate ist **einstellbar** (`trust_client_certs`:
+  automatisch oder streng über `pki/trusted/`). **Authentifizierung** per
   Benutzer/Passwort (`ServerUserToken::user_pass`) und/oder anonym. Die IHM zeigt
   ein **grünes Banner** 🔒.
 

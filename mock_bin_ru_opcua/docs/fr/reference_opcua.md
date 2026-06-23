@@ -22,14 +22,17 @@ OPC UA TCP binaire. La **sécurité** est réglable (section `[security]` du TOM
 - **Non chiffré** : ni authentification ni chiffrement. À n'exposer que sur un
   **réseau de confiance**. Démarrage instantané (aucun certificat).
 - **Chiffré** : un **certificat d'instance auto-signé** est généré au premier
-  lancement (dans `pki/`). Le serveur fait confiance aux certificats clients
-  (`trust_client_certs`, pratique pour un simulateur). Authentification par
+  lancement (dans `pki/`). Confiance des certificats clients **réglable**
+  (`trust_client_certs`) : **automatique** (défaut, pratique pour un simulateur) ou
+  **stricte** — le client doit alors être pré-approuvé dans `pki/trusted/` (sinon il
+  est déposé dans `pki/rejected/` et refusé). Authentification par
   **utilisateur/mot de passe** si `username` est renseigné ; sinon (ou en plus)
   jeton **anonyme** si `allow_anonymous`. ⚠️ La génération RSA peut prendre quelques
   secondes au premier lancement (debug).
 
-Réglages (`[security]`) : `encryption` (bool), `allow_anonymous` (bool), `username`
-(vide = pas d'auth mot de passe), `password` (en clair — **simulateur uniquement**).
+Réglages (`[security]`) : `encryption` (bool), `allow_anonymous` (bool),
+`trust_client_certs` (bool, défaut `true`), `username` (vide = pas d'auth mot de
+passe), `password` (en clair — **simulateur uniquement**).
 
 ---
 

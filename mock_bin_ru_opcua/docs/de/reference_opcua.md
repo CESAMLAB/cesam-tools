@@ -23,15 +23,18 @@ Endpoint:
 - **Unverschlüsselt**: weder Authentifizierung noch Verschlüsselung. Nur in einem
   **vertrauenswürdigen Netzwerk** bereitstellen. Sofortiger Start (kein Zertifikat).
 - **Verschlüsselt**: ein **selbstsigniertes Instanzzertifikat** wird beim ersten
-  Start erzeugt (in `pki/`). Der Server vertraut den Client-Zertifikaten
-  (`trust_client_certs`, praktisch für einen Simulator). Authentifizierung per
-  **Benutzer/Passwort**, falls `username` ausgefüllt ist; andernfalls (oder
-  zusätzlich) **anonymes** Token, falls `allow_anonymous`. ⚠️ Die RSA-Erzeugung kann
-  beim ersten Start einige Sekunden dauern (Debug).
+  Start erzeugt (in `pki/`). Das Vertrauen in die Client-Zertifikate ist
+  **einstellbar** (`trust_client_certs`): **automatisch** (Standard, praktisch für
+  einen Simulator) oder **streng** — der Client muss dann in `pki/trusted/`
+  vorab freigegeben sein (andernfalls wird er in `pki/rejected/` abgelegt und
+  abgelehnt). Authentifizierung per **Benutzer/Passwort**, falls `username`
+  ausgefüllt ist; andernfalls (oder zusätzlich) **anonymes** Token, falls
+  `allow_anonymous`. ⚠️ Die RSA-Erzeugung kann beim ersten Start einige Sekunden
+  dauern (Debug).
 
 Einstellungen (`[security]`): `encryption` (bool), `allow_anonymous` (bool),
-`username` (leer = keine Passwort-Authentifizierung), `password` (im Klartext —
-**nur Simulator**).
+`trust_client_certs` (bool, Standard `true`), `username` (leer = keine
+Passwort-Authentifizierung), `password` (im Klartext — **nur Simulator**).
 
 ---
 

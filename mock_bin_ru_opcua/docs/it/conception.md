@@ -100,7 +100,8 @@ differenziante di OPC UA rispetto ai protocolli di campo (Modbus/NAMUR, senza si
   certificato. L'IHM mostra un **banner arancione** di avviso.
 - **Modalità cifrata (Fase 2)**: endpoint `Basic256Sha256` / `SignAndEncrypt`. Un
   **certificato di istanza** autofirmato viene generato al primo avvio (`pki/`);
-  il server si fida dei certificati client. **Autenticazione** tramite
+  la fiducia nei certificati client è **regolabile** (`trust_client_certs`:
+  auto, o stretta tramite `pki/trusted/`). **Autenticazione** tramite
   utente/password (`ServerUserToken::user_pass`) e/o anonima. L'IHM
   mostra un **banner verde** 🔒.
 

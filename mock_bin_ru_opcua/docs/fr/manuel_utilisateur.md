@@ -72,7 +72,8 @@ sécurité **None**, utilisateur **Anonymous**. Les nœuds sont décrits dans la
 - **Endpoint** : **IP d'écoute** et **port** du serveur OPC UA. Un changement
   **relance** le serveur à chaud (les sessions en cours sont fermées proprement).
 - **Sécurité OPC UA** : **Chiffrement** (`Basic256Sha256`), **Autoriser l'anonyme**,
-  **Utilisateur** / **Mot de passe** (champs actifs quand le chiffrement est coché).
+  **Confiance auto. des certificats clients**, **Utilisateur** / **Mot de passe**
+  (champs actifs quand le chiffrement est coché).
   Activer le chiffrement génère un certificat au premier lancement (quelques
   secondes) et relance le serveur.
 - **Procédé (fonction de transfert)** : gain `K`, constante de temps `τ`, retard
@@ -93,11 +94,12 @@ La sécurité OPC UA est **réglable** dans *Paramètres* :
   aucune protection. **Ne pas exposer sur un réseau ouvert.** Un bandeau **orange**
   le rappelle.
 - **Avec chiffrement** : endpoint **`Basic256Sha256`** (signé + chiffré). Le
-  serveur génère son certificat au premier lancement et accepte les certificats
-  clients. On peut exiger un **utilisateur / mot de passe** et/ou autoriser
-  l'anonyme. Un bandeau **vert 🔒** confirme le chiffrement. Pour se connecter, le
-  client doit alors utiliser la politique `Basic256Sha256` et faire confiance au
-  certificat du serveur (premier échange).
+  serveur génère son certificat au premier lancement. La **confiance des
+  certificats clients** est réglable (auto par défaut, ou stricte). On peut exiger
+  un **utilisateur / mot de passe** et/ou autoriser l'anonyme. Un bandeau **vert 🔒**
+  confirme le chiffrement. Pour se connecter, le client doit alors utiliser la
+  politique `Basic256Sha256` et faire confiance au certificat du serveur (premier
+  échange).
 
 Le mot de passe est stocké **en clair** dans le fichier TOML : c'est un
 **simulateur**, à utiliser sur réseau de confiance.

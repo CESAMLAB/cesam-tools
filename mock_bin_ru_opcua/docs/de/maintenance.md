@@ -116,9 +116,10 @@ Die Sicherheit ist in [`opcua_server.rs`](../../src/opcua_server.rs) implementie
 automatisch erzeugtem Zertifikat sowie anonymen und/oder Benutzer-/Passwort-Token
 (`ServerUserToken::user_pass`) hinzu. Der Log-Filter
 `opcua_crypto::certificate_store=off` ([`main.rs`](../../src/main.rs)) betrifft nur den
-None-Modus (kein Zertifikat); im verschlüsselten Modus ist er wirkungslos. Ansätze:
-Richtlinien `Aes256Sha256RsaPss`, explizite PKI-Vertrauensliste statt
-`trust_client_certs`, X.509-Token.
+None-Modus (kein Zertifikat); im verschlüsselten Modus ist er wirkungslos. Das
+Vertrauen in die Client-Zertifikate ist **einstellbar** (`trust_client_certs`:
+automatisch als Standard oder streng über `pki/trusted/`). Verbleibende Ansätze:
+Richtlinien `Aes256Sha256RsaPss`, X.509-Token.
 
 ---
 

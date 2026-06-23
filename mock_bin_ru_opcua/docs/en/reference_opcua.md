@@ -22,14 +22,17 @@ section of the TOML / *Settings* modal) and determines the exposed endpoint:
 - **Unencrypted**: neither authentication nor encryption. Expose only on a
   **trusted network**. Instant startup (no certificate).
 - **Encrypted**: a **self-signed instance certificate** is generated on first
-  launch (in `pki/`). The server trusts client certificates
-  (`trust_client_certs`, convenient for a simulator). **Username/password**
+  launch (in `pki/`). Client certificate trust is **configurable**
+  (`trust_client_certs`): **automatic** (default, convenient for a simulator) or
+  **strict** — the client must then be pre-approved in `pki/trusted/` (otherwise it
+  is dropped into `pki/rejected/` and refused). **Username/password**
   authentication if `username` is set; otherwise (or in addition) an **anonymous**
   token if `allow_anonymous`. ⚠️ RSA generation can take a few seconds on first
   launch (debug).
 
-Settings (`[security]`): `encryption` (bool), `allow_anonymous` (bool), `username`
-(empty = no password auth), `password` (cleartext — **simulator only**).
+Settings (`[security]`): `encryption` (bool), `allow_anonymous` (bool),
+`trust_client_certs` (bool, default `true`), `username` (empty = no password auth),
+`password` (cleartext — **simulator only**).
 
 ---
 

@@ -72,7 +72,8 @@ sicurezza **None**, utente **Anonymous**. I nodi sono descritti nel
 - **Endpoint**: **IP di ascolto** e **porta** del server OPC UA. Una modifica
   **riavvia** il server a caldo (le sessioni in corso vengono chiuse correttamente).
 - **Sicurezza OPC UA**: **Cifratura** (`Basic256Sha256`), **Consenti anonimo**,
-  **Utente** / **Password** (campi attivi quando la cifratura è selezionata).
+  **Fiducia auto. nei certificati client**, **Utente** / **Password**
+  (campi attivi quando la cifratura è selezionata).
   Attivare la cifratura genera un certificato al primo avvio (alcuni
   secondi) e riavvia il server.
 - **Processo (funzione di trasferimento)**: guadagno `K`, costante di tempo `τ`, ritardo
@@ -93,8 +94,9 @@ La sicurezza OPC UA è **regolabile** in *Parametri*:
   nessuna protezione. **Non esporre su una rete aperta.** Un banner **arancione**
   lo ricorda.
 - **Con cifratura**: endpoint **`Basic256Sha256`** (firmato + cifrato). Il
-  server genera il proprio certificato al primo avvio e accetta i certificati
-  client. Si può richiedere un **utente / password** e/o consentire
+  server genera il proprio certificato al primo avvio. La **fiducia nei
+  certificati client** è regolabile (auto per default, o stretta). Si può
+  richiedere un **utente / password** e/o consentire
   l'anonimo. Un banner **verde 🔒** conferma la cifratura. Per connettersi, il
   client deve allora usare la politica `Basic256Sha256` e fidarsi del
   certificato del server (primo scambio).

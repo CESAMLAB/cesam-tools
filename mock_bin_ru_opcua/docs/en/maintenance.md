@@ -116,9 +116,10 @@ Security is implemented in [`opcua_server.rs`](../../src/opcua_server.rs):
 auto-generated certificate and anonymous and/or username/password tokens
 (`ServerUserToken::user_pass`). The log filter
 `opcua_crypto::certificate_store=off` ([`main.rs`](../../src/main.rs)) only
-concerns None mode (no certificate); in encrypted mode it has no effect. Future
-directions: `Aes256Sha256RsaPss` policies, an explicit PKI trust list rather than
-`trust_client_certs`, X.509 tokens.
+concerns None mode (no certificate); in encrypted mode it has no effect. Client
+certificate trust is **configurable** (`trust_client_certs`: automatic by default,
+or strict via `pki/trusted/`). Remaining directions: `Aes256Sha256RsaPss`
+policies, X.509 tokens.
 
 ---
 

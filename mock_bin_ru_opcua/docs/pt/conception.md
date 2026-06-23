@@ -100,7 +100,8 @@ do OPC UA face aos protocolos de campo (Modbus/NAMUR, sem segurança).
   certificado. A IHM exibe um **aviso laranja**.
 - **Modo cifrado (Fase 2)**: endpoint `Basic256Sha256` / `SignAndEncrypt`. Um
   **certificado de instância** auto-assinado é gerado no primeiro arranque (`pki/`);
-  o servidor confia nos certificados de cliente. **Autenticação** por
+  a confiança nos certificados de cliente é **regulável** (`trust_client_certs`:
+  automática, ou estrita via `pki/trusted/`). **Autenticação** por
   utilizador/palavra-passe (`ServerUserToken::user_pass`) e/ou anónimo. A IHM
   exibe um **aviso verde** 🔒.
 

@@ -22,14 +22,17 @@ OPC UA TCP binario. La **seguridad** es configurable (sección `[security]` del 
 - **Sin cifrar**: ni autenticación ni cifrado. Exponer únicamente en una
   **red de confianza**. Arranque instantáneo (ningún certificado).
 - **Cifrado**: se genera un **certificado de instancia autofirmado** en el primer
-  arranque (en `pki/`). El servidor confía en los certificados de cliente
-  (`trust_client_certs`, práctico para un simulador). Autenticación por
+  arranque (en `pki/`). Confianza en los certificados de cliente **configurable**
+  (`trust_client_certs`): **automática** (por defecto, práctica para un simulador) o
+  **estricta** — el cliente debe entonces estar preaprobado en `pki/trusted/` (de lo
+  contrario se deposita en `pki/rejected/` y se rechaza). Autenticación por
   **usuario/contraseña** si `username` está informado; en caso contrario (o además)
   token **anónimo** si `allow_anonymous`. ⚠️ La generación RSA puede tardar algunos
   segundos en el primer arranque (debug).
 
-Ajustes (`[security]`): `encryption` (bool), `allow_anonymous` (bool), `username`
-(vacío = sin auth por contraseña), `password` (en claro — **solo simulador**).
+Ajustes (`[security]`): `encryption` (bool), `allow_anonymous` (bool),
+`trust_client_certs` (bool, por defecto `true`), `username` (vacío = sin auth por
+contraseña), `password` (en claro — **solo simulador**).
 
 ---
 

@@ -100,6 +100,11 @@ pub struct SecurityConfig {
     pub username: String,
     /// Mot de passe en clair — **simulateur uniquement** (sur réseau de confiance).
     pub password: String,
+    /// **Confiance automatique** des certificats clients (mode chiffré). `true`
+    /// (défaut, confort simulateur) : tout client est accepté. `false` (**strict**) :
+    /// le certificat du client doit être pré-approuvé dans `pki/trusted/` (sinon il
+    /// est déposé dans `pki/rejected/` et la connexion est refusée).
+    pub trust_client_certs: bool,
 }
 
 impl Default for SecurityConfig {
@@ -111,6 +116,7 @@ impl Default for SecurityConfig {
             allow_anonymous: true,
             username: String::new(),
             password: String::new(),
+            trust_client_certs: true,
         }
     }
 }
@@ -344,6 +350,7 @@ mod tests {
                 allow_anonymous: false,
                 username: "scada".to_string(),
                 password: "secret".to_string(),
+                trust_client_certs: false,
             },
             ..AppConfig::default()
         };

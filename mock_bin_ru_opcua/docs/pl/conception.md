@@ -100,9 +100,10 @@ OPC UA na tle protokołów obiektowych (Modbus/NAMUR, bez bezpieczeństwa).
   GUI wyświetla **pomarańczowy baner** ostrzegawczy.
 - **Tryb szyfrowany (Faza 2)**: endpoint `Basic256Sha256` / `SignAndEncrypt`.
   Samopodpisany **certyfikat instancji** jest generowany przy pierwszym
-  uruchomieniu (`pki/`); serwer ufa certyfikatom klientów. **Uwierzytelnianie**
-  za pomocą użytkownika/hasła (`ServerUserToken::user_pass`) i/lub anonimowe. GUI
-  wyświetla **zielony baner** 🔒.
+  uruchomieniu (`pki/`); zaufanie do certyfikatów klientów jest **konfigurowalne**
+  (`trust_client_certs`: automatyczne lub ścisłe przez `pki/trusted/`).
+  **Uwierzytelnianie** za pomocą użytkownika/hasła (`ServerUserToken::user_pass`)
+  i/lub anonimowe. GUI wyświetla **zielony baner** 🔒.
 
 Tryb ustawia się w modalu *Ustawienia*; zmiana **restartuje** serwer na gorąco
 (`OpcuaServerActor`).

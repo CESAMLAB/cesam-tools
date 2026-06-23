@@ -116,9 +116,10 @@ De beveiliging is geïmplementeerd in [`opcua_server.rs`](../../src/opcua_server
 automatisch gegenereerd certificaat en anonieme en/of gebruiker/wachtwoord-tokens
 (`ServerUserToken::user_pass`). Het logfilter `opcua_crypto::certificate_store=off`
 ([`main.rs`](../../src/main.rs)) betreft alleen de None-modus (geen certificaat); in
-versleutelde modus heeft het geen effect. Verdere mogelijkheden: beleidsregels
-`Aes256Sha256RsaPss`, een expliciete PKI-vertrouwenslijst in plaats van
-`trust_client_certs`, X.509-tokens.
+versleutelde modus heeft het geen effect. Het vertrouwen van de clientcertificaten is
+**instelbaar** (`trust_client_certs`: automatisch standaard, of strikt via
+`pki/trusted/`). Verdere mogelijkheden: beleidsregels `Aes256Sha256RsaPss`,
+X.509-tokens.
 
 ---
 

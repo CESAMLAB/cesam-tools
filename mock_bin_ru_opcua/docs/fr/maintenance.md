@@ -115,8 +115,9 @@ La sécurité est implémentée dans [`opcua_server.rs`](../../src/opcua_server.
 certificat auto-généré et jetons anonyme et/ou utilisateur/mot de passe
 (`ServerUserToken::user_pass`). Le filtre de log `opcua_crypto::certificate_store=off`
 ([`main.rs`](../../src/main.rs)) ne concerne que le mode None (pas de certificat) ;
-en mode chiffré il est sans effet. Pistes : politiques `Aes256Sha256RsaPss`, liste
-de confiance PKI explicite plutôt que `trust_client_certs`, jetons X.509.
+en mode chiffré il est sans effet. La confiance des certificats clients est
+**réglable** (`trust_client_certs` : auto par défaut, ou strict via `pki/trusted/`).
+Pistes restantes : politiques `Aes256Sha256RsaPss`, jetons X.509.
 
 ---
 

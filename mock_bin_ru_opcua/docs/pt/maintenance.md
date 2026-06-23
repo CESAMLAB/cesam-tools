@@ -115,8 +115,9 @@ A segurança está implementada em [`opcua_server.rs`](../../src/opcua_server.rs
 certificado auto-gerado e tokens anónimo e/ou utilizador/palavra-passe
 (`ServerUserToken::user_pass`). O filtro de log `opcua_crypto::certificate_store=off`
 ([`main.rs`](../../src/main.rs)) só diz respeito ao modo None (sem certificado);
-em modo cifrado não tem efeito. Pistas: políticas `Aes256Sha256RsaPss`, lista
-de confiança PKI explícita em vez de `trust_client_certs`, tokens X.509.
+em modo cifrado não tem efeito. A confiança nos certificados de cliente é
+**regulável** (`trust_client_certs`: automática por predefinição, ou estrita via
+`pki/trusted/`). Pistas restantes: políticas `Aes256Sha256RsaPss`, tokens X.509.
 
 ---
 

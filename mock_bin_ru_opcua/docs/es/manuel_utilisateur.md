@@ -72,7 +72,8 @@ seguridad **None**, usuario **Anonymous**. Los nodos se describen en la
 - **Endpoint**: **IP de escucha** y **puerto** del servidor OPC UA. Un cambio
   **reinicia** el servidor en caliente (las sesiones en curso se cierran limpiamente).
 - **Seguridad OPC UA**: **Cifrado** (`Basic256Sha256`), **Permitir anónimo**,
-  **Usuario** / **Contraseña** (campos activos cuando el cifrado está marcado).
+  **Confianza auto. de los certificados de cliente**, **Usuario** / **Contraseña**
+  (campos activos cuando el cifrado está marcado).
   Activar el cifrado genera un certificado en el primer arranque (algunos
   segundos) y reinicia el servidor.
 - **Proceso (función de transferencia)**: ganancia `K`, constante de tiempo `τ`, retardo
@@ -93,11 +94,12 @@ La seguridad OPC UA es **configurable** en *Parámetros*:
   ninguna protección. **No exponer en una red abierta.** Un banner **naranja**
   lo recuerda.
 - **Con cifrado**: endpoint **`Basic256Sha256`** (firmado + cifrado). El
-  servidor genera su certificado en el primer arranque y acepta los certificados
-  de cliente. Se puede exigir un **usuario / contraseña** o permitir
-  el anónimo. Un banner **verde 🔒** confirma el cifrado. Para conectarse, el
-  cliente debe entonces usar la política `Basic256Sha256` y confiar en el
-  certificado del servidor (primer intercambio).
+  servidor genera su certificado en el primer arranque. La **confianza en los
+  certificados de cliente** es configurable (automática por defecto, o estricta).
+  Se puede exigir un **usuario / contraseña** o permitir el anónimo. Un banner
+  **verde 🔒** confirma el cifrado. Para conectarse, el cliente debe entonces usar
+  la política `Basic256Sha256` y confiar en el certificado del servidor (primer
+  intercambio).
 
 La contraseña se almacena **en claro** en el archivo TOML: es un
 **simulador**, para usar en una red de confianza.

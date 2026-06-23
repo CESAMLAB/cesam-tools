@@ -99,8 +99,9 @@ against fieldbus protocols (Modbus/NAMUR, without security).
   token — trusted network only, instant startup, no certificate. The GUI shows an
   **orange warning banner**.
 - **Encrypted mode**: a `Basic256Sha256` / `SignAndEncrypt` endpoint. A
-  self-signed **instance certificate** is generated on first launch (`pki/`); the
-  server trusts client certificates. **Authentication** via username/password
+  self-signed **instance certificate** is generated on first launch (`pki/`);
+  client certificate trust is **configurable** (`trust_client_certs`: automatic, or
+  strict via `pki/trusted/`). **Authentication** via username/password
   (`ServerUserToken::user_pass`) and/or anonymous. The GUI shows a **green
   banner** 🔒.
 

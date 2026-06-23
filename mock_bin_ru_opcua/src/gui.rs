@@ -464,6 +464,7 @@ impl OpcuaGui {
                         ui.checkbox(&mut draft.security.encryption, t(Msg::Encryption));
                         ui.add_enabled_ui(draft.security.encryption, |ui| {
                             ui.checkbox(&mut draft.security.allow_anonymous, t(Msg::AllowAnonymous));
+                            ui.checkbox(&mut draft.security.trust_client_certs, t(Msg::TrustClientCerts));
                             egui::Grid::new("auth").num_columns(2).show(ui, |ui| {
                                 ui.label(t(Msg::Username));
                                 ui.text_edit_singleline(&mut draft.security.username);

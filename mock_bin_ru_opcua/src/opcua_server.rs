@@ -79,8 +79,9 @@ pub fn build(network: &NetworkConfig, security: &SecurityConfig) -> Result<(Serv
             // Certificat d'instance auto-signé (généré au 1er lancement dans `pki/`).
             .create_sample_keypair(true)
             .pki_dir("pki")
-            // Simulateur : on fait confiance aux certificats clients (pas de PKI à gérer).
-            .trust_client_certs(true)
+            // Confiance des certificats clients : automatique (confort simulateur)
+            // ou stricte (le client doit être pré-approuvé dans `pki/trusted/`).
+            .trust_client_certs(security.trust_client_certs)
             .add_endpoint(
                 "secure",
                 (

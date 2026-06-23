@@ -100,9 +100,10 @@ d'OPC UA face aux protocoles de terrain (Modbus/NAMUR, sans sécurité).
   certificat. L'IHM affiche un **bandeau orange** d'avertissement.
 - **Mode chiffré (Phase 2)** : endpoint `Basic256Sha256` / `SignAndEncrypt`. Un
   **certificat d'instance** auto-signé est généré au premier lancement (`pki/`) ;
-  le serveur fait confiance aux certificats clients. **Authentification** par
-  utilisateur/mot de passe (`ServerUserToken::user_pass`) et/ou anonyme. L'IHM
-  affiche un **bandeau vert** 🔒.
+  la confiance des certificats clients est **réglable** (`trust_client_certs` :
+  auto, ou stricte via `pki/trusted/`). **Authentification** par utilisateur/mot de
+  passe (`ServerUserToken::user_pass`) et/ou anonyme. L'IHM affiche un **bandeau
+  vert** 🔒.
 
 Le mode se règle dans le modal *Paramètres* ; un changement **relance** le serveur
 à chaud (`OpcuaServerActor`).
