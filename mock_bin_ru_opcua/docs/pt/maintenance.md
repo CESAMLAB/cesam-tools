@@ -81,9 +81,10 @@ um aviso se uma versão mais recente existir. Regulável por `check_updates`.
   dependência OpenSSL** → compilação cruzada limpa. Licença **MPL-2.0** (cf. `NOTICE`).
 - ⚠️ `async-opcua` não declara **nenhum MSRV**: validar na toolchain alvo antes
   de subir a versão.
-- ⚠️ A geração de certificado (`create_sample_keypair(true)`) está **voluntariamente
-  desativada**: a geração RSA em Rust puro é muito lenta em *debug* e escreveria
-  em `pki/`. Na Fase 1b (endpoint None), nenhum certificado é exigido.
+- ⚠️ O certificado de instância (`create_sample_keypair(true)` + `pki/`) só é gerado
+  **em modo cifrado** (`security.encryption`). Em modo None (predefinição), nenhum
+  certificado (arranque instantâneo). ⚠️ A geração RSA em Rust puro é lenta em
+  *debug*: contar alguns segundos na primeira passagem para modo cifrado.
 - `egui_plot` permanece **à frente uma versão menor** do `egui` (cf. ORME/OSNE).
 
 ---
@@ -107,11 +108,15 @@ em `Regulator::apply` (com higienização), adicionar um teste.
 Adicionar uma variante a `Msg` ([`i18n.rs`](../../src/i18n.rs)) e **as 8
 traduções** (tabela de tamanho fixo verificada na compilação).
 
-### 6.4 Fase 2 — segurança
+### 6.4 Segurança (`SecurityConfig`)
 
-Ativar um endpoint cifrado (`Basic256Sha256`), provisionar um certificado
-de instância, adicionar a autenticação de utilizador. Retirar então o filtro de log
-`opcua_crypto::certificate_store=off` colocado em [`main.rs`](../../src/main.rs).
+A segurança está implementada em [`opcua_server.rs`](../../src/opcua_server.rs):
+`security.encryption` adiciona um endpoint `Basic256Sha256`/`SignAndEncrypt` com
+certificado auto-gerado e tokens anónimo e/ou utilizador/palavra-passe
+(`ServerUserToken::user_pass`). O filtro de log `opcua_crypto::certificate_store=off`
+([`main.rs`](../../src/main.rs)) só diz respeito ao modo None (sem certificado);
+em modo cifrado não tem efeito. Pistas: políticas `Aes256Sha256RsaPss`, lista
+de confiança PKI explícita em vez de `trust_client_certs`, tokens X.509.
 
 ---
 

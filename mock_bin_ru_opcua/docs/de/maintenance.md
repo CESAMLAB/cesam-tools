@@ -81,10 +81,11 @@ Banner, wenn eine neuere Version existiert. Einstellbar über `check_updates`.
   OpenSSL-Abhängigkeit** → saubere Cross-Kompilierung. Lizenz **MPL-2.0** (vgl. `NOTICE`).
 - ⚠️ `async-opcua` deklariert **keine MSRV**: vor dem Anheben der Version auf der
   Ziel-Toolchain validieren.
-- ⚠️ Die Zertifikatserzeugung (`create_sample_keypair(true)`) ist **absichtlich
-  deaktiviert**: die RSA-Erzeugung in reinem Rust ist im *Debug* sehr langsam und
-  würde in `pki/` schreiben. In Phase 1b (None-Endpoint) ist kein Zertifikat
-  erforderlich.
+- ⚠️ Das Instanzzertifikat (`create_sample_keypair(true)` + `pki/`) wird **nur im
+  verschlüsselten Modus** erzeugt (`security.encryption`). Im None-Modus (Standard)
+  kein Zertifikat (sofortiger Start). ⚠️ Die RSA-Erzeugung in reinem Rust ist im
+  *Debug* langsam: beim ersten Wechsel in den verschlüsselten Modus einige Sekunden
+  einplanen.
 - `egui_plot` bleibt **eine Minor-Version voraus** gegenüber `egui` (vgl. ORME/OSNE).
 
 ---
@@ -108,12 +109,16 @@ Das Enum `Command` ([`regulator.rs`](../../src/regulator.rs)) erweitern, den Fal
 Eine Variante zu `Msg` ([`i18n.rs`](../../src/i18n.rs)) hinzufügen und **die 8
 Übersetzungen** (Array fester Größe, bei der Kompilierung geprüft).
 
-### 6.4 Phase 2 — Sicherheit
+### 6.4 Sicherheit (`SecurityConfig`)
 
-Einen verschlüsselten Endpoint aktivieren (`Basic256Sha256`), ein Instanzzertifikat
-bereitstellen, die Benutzerauthentifizierung hinzufügen. Dann den Log-Filter
-`opcua_crypto::certificate_store=off` entfernen, der in [`main.rs`](../../src/main.rs)
-gesetzt ist.
+Die Sicherheit ist in [`opcua_server.rs`](../../src/opcua_server.rs) implementiert:
+`security.encryption` fügt einen Endpoint `Basic256Sha256`/`SignAndEncrypt` mit
+automatisch erzeugtem Zertifikat sowie anonymen und/oder Benutzer-/Passwort-Token
+(`ServerUserToken::user_pass`) hinzu. Der Log-Filter
+`opcua_crypto::certificate_store=off` ([`main.rs`](../../src/main.rs)) betrifft nur den
+None-Modus (kein Zertifikat); im verschlüsselten Modus ist er wirkungslos. Ansätze:
+Richtlinien `Aes256Sha256RsaPss`, explizite PKI-Vertrauensliste statt
+`trust_client_certs`, X.509-Token.
 
 ---
 

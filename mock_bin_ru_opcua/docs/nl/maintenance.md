@@ -81,9 +81,11 @@ banner als er een recentere versie bestaat. Instelbaar via `check_updates`.
   OpenSSL-afhankelijkheid** → schone cross-compilatie. Licentie **MPL-2.0** (zie `NOTICE`).
 - ⚠️ `async-opcua` declareert **geen MSRV**: valideer op de doel-toolchain voordat
   je de versie bumpt.
-- ⚠️ De certificaatgeneratie (`create_sample_keypair(true)`) is **bewust
-  uitgeschakeld**: RSA-generatie in puur Rust is erg traag in *debug* en zou in
-  `pki/` schrijven. In Fase 1b (None-endpoint) is geen certificaat vereist.
+- ⚠️ Het instantiecertificaat (`create_sample_keypair(true)` + `pki/`) wordt
+  **alleen in versleutelde modus** gegenereerd (`security.encryption`). In de
+  None-modus (standaard) geen certificaat (onmiddellijke start). ⚠️ De RSA-generatie
+  in puur Rust is traag in *debug*: reken op enkele seconden bij de eerste overgang
+  naar de versleutelde modus.
 - `egui_plot` blijft **een minor vooruit** op `egui` (zie ORME/OSNE).
 
 ---
@@ -107,11 +109,16 @@ geval in `Regulator::apply` (met sanering), voeg een test toe.
 Voeg een variant toe aan `Msg` ([`i18n.rs`](../../src/i18n.rs)) en **de 8
 vertalingen** (array van vaste grootte gecontroleerd bij het compileren).
 
-### 6.4 Fase 2 — beveiliging
+### 6.4 Beveiliging (`SecurityConfig`)
 
-Activeer een versleutelde endpoint (`Basic256Sha256`), lever een
-instantiecertificaat, voeg gebruikersauthenticatie toe. Verwijder dan het logfilter
-`opcua_crypto::certificate_store=off` dat in [`main.rs`](../../src/main.rs) is geplaatst.
+De beveiliging is geïmplementeerd in [`opcua_server.rs`](../../src/opcua_server.rs):
+`security.encryption` voegt een endpoint `Basic256Sha256`/`SignAndEncrypt` toe met
+automatisch gegenereerd certificaat en anonieme en/of gebruiker/wachtwoord-tokens
+(`ServerUserToken::user_pass`). Het logfilter `opcua_crypto::certificate_store=off`
+([`main.rs`](../../src/main.rs)) betreft alleen de None-modus (geen certificaat); in
+versleutelde modus heeft het geen effect. Verdere mogelijkheden: beleidsregels
+`Aes256Sha256RsaPss`, een expliciete PKI-vertrouwenslijst in plaats van
+`trust_client_certs`, X.509-tokens.
 
 ---
 

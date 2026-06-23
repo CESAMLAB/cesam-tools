@@ -71,6 +71,10 @@ beveiliging **None**, gebruiker **Anonymous**. De nodes worden beschreven in de
 - **Updates controleren bij het opstarten** + knop **Nu controleren**.
 - **Endpoint**: **luister-IP** en **poort** van de OPC UA-server. Een wijziging
   **herstart** de server warm (de lopende sessies worden netjes gesloten).
+- **OPC UA-beveiliging**: **Versleuteling** (`Basic256Sha256`), **Anoniem toestaan**,
+  **Gebruiker** / **Wachtwoord** (velden actief wanneer versleuteling is aangevinkt).
+  Versleuteling inschakelen genereert bij de eerste start een certificaat (enkele
+  seconden) en herstart de server.
 - **Proces (overdrachtsfunctie)**: versterking `K`, tijdconstante `τ`, zuivere
   dode tijd, omgevingswaarde.
 - **Setpointgrenzen**: min / max (automatisch herordend indien omgekeerd).
@@ -83,11 +87,20 @@ overschrijven via de omgevingsvariabele `MOCK_CONFIG`).
 
 ## 5. Beveiliging
 
-OPC UA **kan** beveiligd worden (certificaten, versleuteling, authenticatie), maar
-in de huidige toestand (**Fase 1b**) stelt de simulator slechts één **beveiliging
-None** **anonieme** endpoint beschikbaar: geen enkele bescherming. **Niet
-blootstellen op een open netwerk.** De waarschuwingsbanner herinnert daar permanent
-aan. De echte beveiliging is voorzien in **Fase 2**.
+De OPC UA-beveiliging is **instelbaar** in *Parameters*:
+
+- **Zonder versleuteling** (standaard): endpoint **beveiliging None**, **anonieme**
+  toegang — geen enkele bescherming. **Niet blootstellen op een open netwerk.** Een
+  **oranje** banner herinnert daaraan.
+- **Met versleuteling**: endpoint **`Basic256Sha256`** (ondertekend + versleuteld).
+  De server genereert zijn certificaat bij de eerste start en aanvaardt de
+  clientcertificaten. Men kan een **gebruiker / wachtwoord** vereisen en/of het
+  anonieme token toestaan. Een **groene banner 🔒** bevestigt de versleuteling. Om
+  verbinding te maken moet de client dan het beleid `Basic256Sha256` gebruiken en
+  het servercertificaat vertrouwen (eerste uitwisseling).
+
+Het wachtwoord wordt **in klare tekst** opgeslagen in het TOML-bestand: het is een
+**simulator**, te gebruiken op een vertrouwd netwerk.
 
 ---
 

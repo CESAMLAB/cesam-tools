@@ -92,13 +92,20 @@ the OPC UA nodes read the shared snapshot directly.
 
 ## 5. Security
 
-- **Phase 1b (current state)**: a **single endpoint**, `SecurityPolicy::None`,
-  **anonymous** token. No authentication nor encryption: **trusted network
-  only**. The GUI shows a permanent **warning banner**. No certificate is
-  generated (pure-Rust RSA generation is slow in debug).
-- **Phase 2 (planned)**: encrypted endpoints (`Basic256Sha256`), instance
-  certificate, user authentication. This is the **differentiator** of OPC UA
-  against fieldbus protocols.
+Security is **configurable** (`SecurityConfig`) and is OPC UA's differentiator
+against fieldbus protocols (Modbus/NAMUR, without security).
+
+- **Unencrypted mode (default)**: a `SecurityPolicy::None` endpoint, **anonymous**
+  token — trusted network only, instant startup, no certificate. The GUI shows an
+  **orange warning banner**.
+- **Encrypted mode**: a `Basic256Sha256` / `SignAndEncrypt` endpoint. A
+  self-signed **instance certificate** is generated on first launch (`pki/`); the
+  server trusts client certificates. **Authentication** via username/password
+  (`ServerUserToken::user_pass`) and/or anonymous. The GUI shows a **green
+  banner** 🔒.
+
+The mode is set in the *Settings* modal; a change **restarts** the server at
+runtime (`OpcuaServerActor`).
 
 ---
 

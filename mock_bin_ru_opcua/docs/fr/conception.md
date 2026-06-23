@@ -92,13 +92,20 @@ mémoire séparée** : les nœuds OPC UA lisent directement l'instantané partag
 
 ## 5. Sécurité
 
-- **Phase 1b (état actuel)** : un **seul endpoint**, `SecurityPolicy::None`, jeton
-  **anonyme**. Aucune authentification ni chiffrement : **réseau de confiance
-  uniquement**. L'IHM affiche un **bandeau d'avertissement** permanent. Aucun
-  certificat n'est généré (la génération RSA en Rust pur est lente en debug).
-- **Phase 2 (prévue)** : endpoints chiffrés (`Basic256Sha256`), certificat
-  d'instance, authentification utilisateur. C'est le **différenciateur** d'OPC UA
-  face aux protocoles de terrain.
+La sécurité est **réglable** (`SecurityConfig`) et constitue le différenciateur
+d'OPC UA face aux protocoles de terrain (Modbus/NAMUR, sans sécurité).
+
+- **Mode non chiffré (défaut)** : un endpoint `SecurityPolicy::None`, jeton
+  **anonyme** — réseau de confiance uniquement, démarrage instantané, aucun
+  certificat. L'IHM affiche un **bandeau orange** d'avertissement.
+- **Mode chiffré (Phase 2)** : endpoint `Basic256Sha256` / `SignAndEncrypt`. Un
+  **certificat d'instance** auto-signé est généré au premier lancement (`pki/`) ;
+  le serveur fait confiance aux certificats clients. **Authentification** par
+  utilisateur/mot de passe (`ServerUserToken::user_pass`) et/ou anonyme. L'IHM
+  affiche un **bandeau vert** 🔒.
+
+Le mode se règle dans le modal *Paramètres* ; un changement **relance** le serveur
+à chaud (`OpcuaServerActor`).
 
 ---
 

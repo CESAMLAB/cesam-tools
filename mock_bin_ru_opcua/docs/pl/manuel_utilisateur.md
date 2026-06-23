@@ -70,6 +70,10 @@ bezpieczeństwo **None**, użytkownik **Anonymous**. Węzły są opisane w
 - **Sprawdzaj aktualizacje przy starcie** + przycisk **Sprawdź teraz**.
 - **Endpoint**: **IP nasłuchiwania** i **port** serwera OPC UA. Zmiana
   **przeładowuje** serwer na gorąco (bieżące sesje są zamykane czysto).
+- **Bezpieczeństwo OPC UA**: **Szyfrowanie** (`Basic256Sha256`), **Zezwalaj na
+  anonimowość**, **Użytkownik** / **Hasło** (pola aktywne, gdy szyfrowanie jest
+  zaznaczone). Włączenie szyfrowania generuje certyfikat przy pierwszym
+  uruchomieniu (kilka sekund) i restartuje serwer.
 - **Proces (funkcja przejścia)**: wzmocnienie `K`, stała czasowa `τ`, czyste
   opóźnienie, wartość otoczenia.
 - **Granice wartości zadanej**: min / max (porządkowane automatycznie, jeśli
@@ -83,11 +87,20 @@ przez zmienną środowiskową `MOCK_CONFIG`).
 
 ## 5. Bezpieczeństwo
 
-OPC UA **może** być zabezpieczone (certyfikaty, szyfrowanie, uwierzytelnianie),
-ale w obecnym stanie (**Faza 1b**) symulator udostępnia jedynie endpoint
-**bezpieczeństwo None** **anonimowy**: brak jakiejkolwiek ochrony. **Nie
-udostępniać w sieci otwartej.** Baner ostrzegawczy stale o tym przypomina.
-Prawdziwe bezpieczeństwo jest przewidziane w **Fazie 2**.
+Bezpieczeństwo OPC UA jest **konfigurowalne** w *Ustawieniach*:
+
+- **Bez szyfrowania** (domyślnie): endpoint **bezpieczeństwo None**, dostęp
+  **anonimowy** — brak jakiejkolwiek ochrony. **Nie udostępniać w sieci
+  otwartej.** Przypomina o tym **pomarańczowy** baner.
+- **Z szyfrowaniem**: endpoint **`Basic256Sha256`** (podpisany + szyfrowany).
+  Serwer generuje swój certyfikat przy pierwszym uruchomieniu i akceptuje
+  certyfikaty klientów. Można wymagać **użytkownika / hasła** i/lub zezwolić na
+  anonimowość. **Zielony baner 🔒** potwierdza szyfrowanie. Aby się połączyć,
+  klient musi wtedy użyć polityki `Basic256Sha256` i zaufać certyfikatowi serwera
+  (pierwsza wymiana).
+
+Hasło jest przechowywane **jawnym tekstem** w pliku TOML: to **symulator**,
+do użycia w sieci zaufanej.
 
 ---
 

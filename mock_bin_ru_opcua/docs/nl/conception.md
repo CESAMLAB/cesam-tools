@@ -92,13 +92,21 @@ geheugentabel**: de OPC UA-nodes lezen rechtstreeks uit de gedeelde momentopname
 
 ## 5. Beveiliging
 
-- **Fase 1b (huidige toestand)**: één **enkele endpoint**, `SecurityPolicy::None`,
-  **anoniem** token. Geen authenticatie of versleuteling: **uitsluitend vertrouwd
-  netwerk**. De GUI toont permanent een **waarschuwingsbanner**. Er wordt geen
-  certificaat gegenereerd (RSA-generatie in puur Rust is traag in debug).
-- **Fase 2 (voorzien)**: versleutelde endpoints (`Basic256Sha256`), instantie-
-  certificaat, gebruikersauthenticatie. Dit is de **onderscheidende factor** van
-  OPC UA ten opzichte van de veldprotocollen.
+De beveiliging is **instelbaar** (`SecurityConfig`) en vormt de onderscheidende
+factor van OPC UA ten opzichte van de veldprotocollen (Modbus/NAMUR, zonder
+beveiliging).
+
+- **Onversleutelde modus (standaard)**: een endpoint `SecurityPolicy::None`,
+  **anoniem** token — uitsluitend vertrouwd netwerk, onmiddellijke start, geen
+  certificaat. De GUI toont een **oranje waarschuwingsbanner**.
+- **Versleutelde modus (Fase 2)**: endpoint `Basic256Sha256` / `SignAndEncrypt`.
+  Een zelfondertekend **instantiecertificaat** wordt bij de eerste start gegenereerd
+  (`pki/`); de server vertrouwt de clientcertificaten. **Authenticatie** met
+  gebruiker/wachtwoord (`ServerUserToken::user_pass`) en/of anoniem. De GUI toont
+  een **groene banner** 🔒.
+
+De modus wordt ingesteld in het modale venster *Parameters*; een wijziging
+**herstart** de server warm (`OpcuaServerActor`).
 
 ---
 

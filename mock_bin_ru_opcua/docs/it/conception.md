@@ -92,13 +92,20 @@ di memoria separata**: i nodi OPC UA leggono direttamente l'istantanea condivisa
 
 ## 5. Sicurezza
 
-- **Fase 1b (stato attuale)**: un **solo endpoint**, `SecurityPolicy::None`, token
-  **anonimo**. Nessuna autenticazione né cifratura: **solo rete fidata**.
-  L'IHM mostra un **banner di avviso** permanente. Nessun certificato viene
-  generato (la generazione RSA in Rust puro è lenta in debug).
-- **Fase 2 (prevista)**: endpoint cifrati (`Basic256Sha256`), certificato
-  di istanza, autenticazione utente. È il **fattore differenziante** di OPC UA
-  rispetto ai protocolli di campo.
+La sicurezza è **regolabile** (`SecurityConfig`) e costituisce il fattore
+differenziante di OPC UA rispetto ai protocolli di campo (Modbus/NAMUR, senza sicurezza).
+
+- **Modalità non cifrata (default)**: un endpoint `SecurityPolicy::None`, token
+  **anonimo** — solo rete fidata, avvio istantaneo, nessun
+  certificato. L'IHM mostra un **banner arancione** di avviso.
+- **Modalità cifrata (Fase 2)**: endpoint `Basic256Sha256` / `SignAndEncrypt`. Un
+  **certificato di istanza** autofirmato viene generato al primo avvio (`pki/`);
+  il server si fida dei certificati client. **Autenticazione** tramite
+  utente/password (`ServerUserToken::user_pass`) e/o anonima. L'IHM
+  mostra un **banner verde** 🔒.
+
+La modalità si regola nel modale *Parametri*; una modifica **riavvia** il server
+a caldo (`OpcuaServerActor`).
 
 ---
 

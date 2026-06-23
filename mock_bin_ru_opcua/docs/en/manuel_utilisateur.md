@@ -70,6 +70,10 @@ Connect an OPC UA client (UaExpert, etc.) to `opc.tcp://127.0.0.1:4840/`, securi
 - **Check for updates at startup** + **Check now** button.
 - **Endpoint**: **listening IP** and **port** of the OPC UA server. A change
   **restarts** the server at runtime (ongoing sessions are closed cleanly).
+- **OPC UA security**: **Encryption** (`Basic256Sha256`), **Allow anonymous**,
+  **Username** / **Password** (fields active when encryption is checked).
+  Enabling encryption generates a certificate on first launch (a few seconds) and
+  restarts the server.
 - **Process (transfer function)**: gain `K`, time constant `τ`, pure delay,
   ambient value.
 - **Setpoint bounds**: min / max (reordered automatically if inverted).
@@ -82,10 +86,19 @@ the `MOCK_CONFIG` environment variable).
 
 ## 5. Security
 
-OPC UA **can** be secured (certificates, encryption, authentication), but as it
-stands (**Phase 1b**) the simulator exposes only a **security None** **anonymous**
-endpoint: no protection. **Do not expose on an open network.** The warning banner
-reminds you of this permanently. Real security is planned for **Phase 2**.
+OPC UA security is **configurable** in *Settings*:
+
+- **Without encryption** (default): a **security None** endpoint, **anonymous**
+  access — no protection. **Do not expose on an open network.** An **orange**
+  banner reminds you of this.
+- **With encryption**: a **`Basic256Sha256`** endpoint (signed + encrypted). The
+  server generates its certificate on first launch and accepts client
+  certificates. You can require a **username / password** and/or allow anonymous.
+  A **green 🔒** banner confirms encryption. To connect, the client must then use
+  the `Basic256Sha256` policy and trust the server certificate (first exchange).
+
+The password is stored **in cleartext** in the TOML file: this is a
+**simulator**, to be used on a trusted network.
 
 ---
 

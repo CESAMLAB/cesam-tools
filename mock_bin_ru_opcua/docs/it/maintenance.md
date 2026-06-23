@@ -81,9 +81,10 @@ un banner se esiste una versione più recente. Regolabile tramite `check_updates
   dipendenza da OpenSSL** → cross-compilazione pulita. Licenza **MPL-2.0** (cfr. `NOTICE`).
 - ⚠️ `async-opcua` non dichiara **alcun MSRV**: validare sulla toolchain target prima
   di alzare la versione.
-- ⚠️ La generazione di certificato (`create_sample_keypair(true)`) è **volontariamente
-  disabilitata**: la generazione RSA in Rust puro è molto lenta in *debug* e scriverebbe
-  in `pki/`. In Fase 1b (endpoint None), nessun certificato è richiesto.
+- ⚠️ Il certificato di istanza (`create_sample_keypair(true)` + `pki/`) viene generato
+  **solo in modalità cifrata** (`security.encryption`). In modalità None (default), nessun
+  certificato (avvio istantaneo). ⚠️ La generazione RSA in Rust puro è lenta in
+  *debug*: contare alcuni secondi al primo passaggio in modalità cifrata.
 - `egui_plot` resta **in anticipo di una minore** su `egui` (cfr. ORME/OSNE).
 
 ---
@@ -107,11 +108,15 @@ in `Regulator::apply` (con sanificazione), aggiungere un test.
 Aggiungere una variante a `Msg` ([`i18n.rs`](../../src/i18n.rs)) e **le 8
 traduzioni** (tabella di dimensione fissa verificata alla compilazione).
 
-### 6.4 Fase 2 — sicurezza
+### 6.4 Sicurezza (`SecurityConfig`)
 
-Attivare un endpoint cifrato (`Basic256Sha256`), provvedere un certificato
-di istanza, aggiungere l'autenticazione utente. Rimuovere allora il filtro di log
-`opcua_crypto::certificate_store=off` posto in [`main.rs`](../../src/main.rs).
+La sicurezza è implementata in [`opcua_server.rs`](../../src/opcua_server.rs):
+`security.encryption` aggiunge un endpoint `Basic256Sha256`/`SignAndEncrypt` con
+certificato autogenerato e token anonimo e/o utente/password
+(`ServerUserToken::user_pass`). Il filtro di log `opcua_crypto::certificate_store=off`
+([`main.rs`](../../src/main.rs)) riguarda solo la modalità None (nessun certificato);
+in modalità cifrata è senza effetto. Spunti: politiche `Aes256Sha256RsaPss`, lista
+di fiducia PKI esplicita anziché `trust_client_certs`, token X.509.
 
 ---
 

@@ -82,9 +82,10 @@ newer version exists. Configurable via `check_updates`.
   `NOTICE`).
 - ⚠️ `async-opcua` declares **no MSRV**: validate on the target toolchain before
   bumping the version.
-- ⚠️ Certificate generation (`create_sample_keypair(true)`) is **intentionally
-  disabled**: pure-Rust RSA generation is very slow in *debug* and would write
-  into `pki/`. In Phase 1b (None endpoint), no certificate is required.
+- ⚠️ The instance certificate (`create_sample_keypair(true)` + `pki/`) is generated
+  **only in encrypted mode** (`security.encryption`). In None mode (default), no
+  certificate (instant startup). ⚠️ Pure-Rust RSA generation is slow in *debug*:
+  expect a few seconds on the first switch to encrypted mode.
 - `egui_plot` stays **one minor ahead** of `egui` (see ORME/OSNE).
 
 ---
@@ -108,11 +109,16 @@ case in `Regulator::apply` (with sanitization), add a test.
 Add a variant to `Msg` ([`i18n.rs`](../../src/i18n.rs)) and **all 8
 translations** (fixed-size array verified at compile time).
 
-### 6.4 Phase 2 — security
+### 6.4 Security (`SecurityConfig`)
 
-Enable an encrypted endpoint (`Basic256Sha256`), provision an instance
-certificate, add user authentication. Then remove the log filter
-`opcua_crypto::certificate_store=off` set in [`main.rs`](../../src/main.rs).
+Security is implemented in [`opcua_server.rs`](../../src/opcua_server.rs):
+`security.encryption` adds a `Basic256Sha256`/`SignAndEncrypt` endpoint with an
+auto-generated certificate and anonymous and/or username/password tokens
+(`ServerUserToken::user_pass`). The log filter
+`opcua_crypto::certificate_store=off` ([`main.rs`](../../src/main.rs)) only
+concerns None mode (no certificate); in encrypted mode it has no effect. Future
+directions: `Aes256Sha256RsaPss` policies, an explicit PKI trust list rather than
+`trust_client_certs`, X.509 tokens.
 
 ---
 

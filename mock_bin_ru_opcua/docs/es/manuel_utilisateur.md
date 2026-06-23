@@ -71,6 +71,10 @@ seguridad **None**, usuario **Anonymous**. Los nodos se describen en la
 - **Verificar las actualizaciones al arrancar** + botón **Verificar ahora**.
 - **Endpoint**: **IP de escucha** y **puerto** del servidor OPC UA. Un cambio
   **reinicia** el servidor en caliente (las sesiones en curso se cierran limpiamente).
+- **Seguridad OPC UA**: **Cifrado** (`Basic256Sha256`), **Permitir anónimo**,
+  **Usuario** / **Contraseña** (campos activos cuando el cifrado está marcado).
+  Activar el cifrado genera un certificado en el primer arranque (algunos
+  segundos) y reinicia el servidor.
 - **Proceso (función de transferencia)**: ganancia `K`, constante de tiempo `τ`, retardo
   puro, valor ambiente.
 - **Límites de consigna**: mín / máx (reordenados automáticamente si están invertidos).
@@ -83,11 +87,20 @@ anulable mediante la variable de entorno `MOCK_CONFIG`).
 
 ## 5. Seguridad
 
-OPC UA **puede** estar protegido (certificados, cifrado, autenticación), pero
-en su estado actual (**Fase 1b**) el simulador solo expone un endpoint **seguridad None**
-**anónimo**: ninguna protección. **No exponer en una red abierta.** El
-banner de advertencia lo recuerda permanentemente. La seguridad real está prevista
-en la **Fase 2**.
+La seguridad OPC UA es **configurable** en *Parámetros*:
+
+- **Sin cifrado** (por defecto): endpoint **seguridad None**, acceso **anónimo** —
+  ninguna protección. **No exponer en una red abierta.** Un banner **naranja**
+  lo recuerda.
+- **Con cifrado**: endpoint **`Basic256Sha256`** (firmado + cifrado). El
+  servidor genera su certificado en el primer arranque y acepta los certificados
+  de cliente. Se puede exigir un **usuario / contraseña** o permitir
+  el anónimo. Un banner **verde 🔒** confirma el cifrado. Para conectarse, el
+  cliente debe entonces usar la política `Basic256Sha256` y confiar en el
+  certificado del servidor (primer intercambio).
+
+La contraseña se almacena **en claro** en el archivo TOML: es un
+**simulador**, para usar en una red de confianza.
 
 ---
 

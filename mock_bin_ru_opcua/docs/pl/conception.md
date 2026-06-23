@@ -92,13 +92,20 @@ pamięci**: węzły OPC UA odczytują bezpośrednio współdzielony zrzut.
 
 ## 5. Bezpieczeństwo
 
-- **Faza 1b (stan obecny)**: **jeden endpoint**, `SecurityPolicy::None`, token
-  **anonimowy**. Brak uwierzytelniania i szyfrowania: **wyłącznie sieć zaufana**.
-  GUI wyświetla stały **baner ostrzegawczy**. Żaden certyfikat nie jest generowany
-  (generowanie RSA w czystym Rust jest wolne w trybie debug).
-- **Faza 2 (przewidziana)**: szyfrowane endpointy (`Basic256Sha256`), certyfikat
-  instancji, uwierzytelnianie użytkownika. To **wyróżnik** OPC UA na tle
-  protokołów obiektowych.
+Bezpieczeństwo jest **konfigurowalne** (`SecurityConfig`) i stanowi wyróżnik
+OPC UA na tle protokołów obiektowych (Modbus/NAMUR, bez bezpieczeństwa).
+
+- **Tryb nieszyfrowany (domyślny)**: endpoint `SecurityPolicy::None`, token
+  **anonimowy** — wyłącznie sieć zaufana, natychmiastowy start, brak certyfikatu.
+  GUI wyświetla **pomarańczowy baner** ostrzegawczy.
+- **Tryb szyfrowany (Faza 2)**: endpoint `Basic256Sha256` / `SignAndEncrypt`.
+  Samopodpisany **certyfikat instancji** jest generowany przy pierwszym
+  uruchomieniu (`pki/`); serwer ufa certyfikatom klientów. **Uwierzytelnianie**
+  za pomocą użytkownika/hasła (`ServerUserToken::user_pass`) i/lub anonimowe. GUI
+  wyświetla **zielony baner** 🔒.
+
+Tryb ustawia się w modalu *Ustawienia*; zmiana **restartuje** serwer na gorąco
+(`OpcuaServerActor`).
 
 ---
 

@@ -73,6 +73,10 @@ Sicherheit **None**, Benutzer **Anonymous**. Die Knoten sind in der
 - **Endpoint**: **Lausch-IP** und **Port** des OPC-UA-Servers. Eine Änderung
   **startet** den Server im laufenden Betrieb neu (laufende Sitzungen werden sauber
   geschlossen).
+- **OPC-UA-Sicherheit**: **Verschlüsselung** (`Basic256Sha256`), **Anonym erlauben**,
+  **Benutzer** / **Passwort** (Felder aktiv, wenn die Verschlüsselung angehakt ist).
+  Das Aktivieren der Verschlüsselung erzeugt beim ersten Start ein Zertifikat (einige
+  Sekunden) und startet den Server neu.
 - **Prozess (Übertragungsfunktion)**: Verstärkung `K`, Zeitkonstante `τ`, reine
   Totzeit, Umgebungswert.
 - **Sollwertgrenzen**: min / max (automatisch neu geordnet, wenn vertauscht).
@@ -85,11 +89,20 @@ Die Einstellungen werden in `mock_ru_opcua.toml` gespeichert (aktuelles Verzeich
 
 ## 5. Sicherheit
 
-OPC UA **kann** abgesichert werden (Zertifikate, Verschlüsselung, Authentifizierung),
-aber im aktuellen Zustand (**Phase 1b**) stellt der Simulator nur einen Endpoint
-**Sicherheit None** **anonym** bereit: keinerlei Schutz. **Nicht in einem offenen
-Netzwerk bereitstellen.** Das Warnbanner erinnert dauerhaft daran. Echte Sicherheit
-ist für **Phase 2** vorgesehen.
+Die OPC-UA-Sicherheit ist unter *Parameter* **einstellbar**:
+
+- **Ohne Verschlüsselung** (Standard): Endpoint **Sicherheit None**, **anonymer**
+  Zugriff — kein Schutz. **Nicht in einem offenen Netzwerk bereitstellen.** Ein
+  **oranges** Banner erinnert daran.
+- **Mit Verschlüsselung**: Endpoint **`Basic256Sha256`** (signiert + verschlüsselt).
+  Der Server erzeugt sein Zertifikat beim ersten Start und akzeptiert die
+  Client-Zertifikate. Man kann **Benutzer / Passwort** verlangen und/oder den anonymen
+  Zugriff erlauben. Ein **grünes Banner 🔒** bestätigt die Verschlüsselung. Zum
+  Verbinden muss der Client dann die Richtlinie `Basic256Sha256` verwenden und dem
+  Serverzertifikat vertrauen (erster Austausch).
+
+Das Passwort wird **im Klartext** in der TOML-Datei gespeichert: es handelt sich um
+einen **Simulator**, der in einem vertrauenswürdigen Netzwerk zu verwenden ist.
 
 ---
 
@@ -109,7 +122,3 @@ Größen, `Boolean` für `Run`/`Auto`); andernfalls liefert der Server
 **Ohne grafische Oberfläche starten?** *Headless* kompilieren:
 `cargo run -p mock_bin_ru_opcua --no-default-features` — der OPC-UA-Server und die
 Simulation laufen ohne IHM.
-
-**Eine Meldung „encrypted endpoints disabled“ erscheint.** Das ist in Phase 1b
-normal: es wird kein Instanzzertifikat bereitgestellt (verschlüsselte Endpoints nicht
-verfügbar). Der None-Endpoint funktioniert hingegen.

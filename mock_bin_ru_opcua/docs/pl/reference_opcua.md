@@ -8,19 +8,29 @@
 
 ---
 
-## 1. Endpoint
+## 1. Endpoint i bezpieczeństwo
 
-| Element | Wartość |
-|---|---|
-| URL | `opc.tcp://<bind_ip>:<port>/` (domyślnie `opc.tcp://0.0.0.0:4840/`) |
-| Transport | OPC UA TCP binarny |
-| Polityka bezpieczeństwa | `None` |
-| Tryb bezpieczeństwa | `None` |
-| Token użytkownika | `Anonymous` |
+URL to `opc.tcp://<bind_ip>:<port>/` (domyślnie `opc.tcp://0.0.0.0:4840/`),
+transport OPC UA TCP binarny. **Bezpieczeństwo** jest konfigurowalne (sekcja
+`[security]` pliku TOML / modal *Ustawienia*) i wyznacza udostępniany endpoint:
 
-⚠️ **Bezpieczeństwo None**: ani uwierzytelniania, ani szyfrowania (Faza 1b).
-Udostępniać wyłącznie w **sieci zaufanej**. Prawdziwe bezpieczeństwo
-(`Basic256Sha256`, certyfikaty, uwierzytelnianie) przewidziane w **Fazie 2**.
+| Tryb | `encryption` | Polityka | Tryb bezpieczeństwa | Tokeny |
+|---|:--:|---|---|---|
+| **Nieszyfrowany** (domyślnie) | `false` | `None` | `None` | `Anonymous` |
+| **Szyfrowany** | `true` | `Basic256Sha256` | `SignAndEncrypt` | `Anonymous` (jeśli `allow_anonymous`) i/lub użytkownik/hasło |
+
+- **Nieszyfrowany**: ani uwierzytelniania, ani szyfrowania. Udostępniać wyłącznie
+  w **sieci zaufanej**. Natychmiastowy start (brak certyfikatu).
+- **Szyfrowany**: **samopodpisany certyfikat instancji** jest generowany przy
+  pierwszym uruchomieniu (w `pki/`). Serwer ufa certyfikatom klientów
+  (`trust_client_certs`, wygodne dla symulatora). Uwierzytelnianie za pomocą
+  **użytkownika/hasła**, jeśli `username` jest podane; w przeciwnym razie (lub
+  dodatkowo) token **anonimowy**, jeśli `allow_anonymous`. ⚠️ Generowanie RSA może
+  zająć kilka sekund przy pierwszym uruchomieniu (debug).
+
+Ustawienia (`[security]`): `encryption` (bool), `allow_anonymous` (bool),
+`username` (puste = brak uwierzytelniania hasłem), `password` (jawnym tekstem —
+**tylko symulator**).
 
 ---
 

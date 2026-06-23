@@ -8,19 +8,28 @@
 
 ---
 
-## 1. Endpoint
+## 1. Endpoint & security
 
-| Element | Value |
-|---|---|
-| URL | `opc.tcp://<bind_ip>:<port>/` (default `opc.tcp://0.0.0.0:4840/`) |
-| Transport | OPC UA binary TCP |
-| Security policy | `None` |
-| Security mode | `None` |
-| User token | `Anonymous` |
+The URL is `opc.tcp://<bind_ip>:<port>/` (default `opc.tcp://0.0.0.0:4840/`),
+binary OPC UA TCP transport. **Security** is configurable (the `[security]`
+section of the TOML / *Settings* modal) and determines the exposed endpoint:
 
-⚠️ **Security None**: neither authentication nor encryption (Phase 1b). Expose
-only on a **trusted network**. Real security (`Basic256Sha256`, certificates,
-auth) planned for **Phase 2**.
+| Mode | `encryption` | Policy | Security mode | Tokens |
+|---|:--:|---|---|---|
+| **Unencrypted** (default) | `false` | `None` | `None` | `Anonymous` |
+| **Encrypted** | `true` | `Basic256Sha256` | `SignAndEncrypt` | `Anonymous` (if `allow_anonymous`) and/or username/password |
+
+- **Unencrypted**: neither authentication nor encryption. Expose only on a
+  **trusted network**. Instant startup (no certificate).
+- **Encrypted**: a **self-signed instance certificate** is generated on first
+  launch (in `pki/`). The server trusts client certificates
+  (`trust_client_certs`, convenient for a simulator). **Username/password**
+  authentication if `username` is set; otherwise (or in addition) an **anonymous**
+  token if `allow_anonymous`. ⚠️ RSA generation can take a few seconds on first
+  launch (debug).
+
+Settings (`[security]`): `encryption` (bool), `allow_anonymous` (bool), `username`
+(empty = no password auth), `password` (cleartext — **simulator only**).
 
 ---
 

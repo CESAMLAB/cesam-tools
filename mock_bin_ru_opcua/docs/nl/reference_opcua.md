@@ -8,19 +8,29 @@
 
 ---
 
-## 1. Endpoint
+## 1. Endpoint & beveiliging
 
-| Element | Waarde |
-|---|---|
-| URL | `opc.tcp://<bind_ip>:<port>/` (standaard `opc.tcp://0.0.0.0:4840/`) |
-| Transport | OPC UA TCP binair |
-| Beveiligingsbeleid | `None` |
-| Beveiligingsmodus | `None` |
-| Gebruikerstoken | `Anonymous` |
+De URL is `opc.tcp://<bind_ip>:<port>/` (standaard `opc.tcp://0.0.0.0:4840/`),
+binair OPC UA TCP-transport. De **beveiliging** is instelbaar (sectie `[security]`
+van de TOML / modaal venster *Parameters*) en bepaalt de blootgestelde endpoint:
 
-⚠️ **Beveiliging None**: noch authenticatie noch versleuteling (Fase 1b). Alleen
-bloot te stellen op een **vertrouwd netwerk**. Echte beveiliging (`Basic256Sha256`,
-certificaten, auth) voorzien in **Fase 2**.
+| Modus | `encryption` | Beleid | Beveiligingsmodus | Tokens |
+|---|:--:|---|---|---|
+| **Onversleuteld** (standaard) | `false` | `None` | `None` | `Anonymous` |
+| **Versleuteld** | `true` | `Basic256Sha256` | `SignAndEncrypt` | `Anonymous` (indien `allow_anonymous`) en/of gebruiker/wachtwoord |
+
+- **Onversleuteld**: noch authenticatie noch versleuteling. Alleen bloot te stellen
+  op een **vertrouwd netwerk**. Onmiddellijke start (geen certificaat).
+- **Versleuteld**: een **zelfondertekend instantiecertificaat** wordt bij de eerste
+  start gegenereerd (in `pki/`). De server vertrouwt de clientcertificaten
+  (`trust_client_certs`, handig voor een simulator). Authenticatie met
+  **gebruiker/wachtwoord** als `username` is ingevuld; anders (of daarnaast) een
+  **anoniem** token als `allow_anonymous`. ⚠️ De RSA-generatie kan bij de eerste
+  start enkele seconden duren (debug).
+
+Instellingen (`[security]`): `encryption` (bool), `allow_anonymous` (bool),
+`username` (leeg = geen wachtwoordauthenticatie), `password` (in klare tekst —
+**alleen simulator**).
 
 ---
 

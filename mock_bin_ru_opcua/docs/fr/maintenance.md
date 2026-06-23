@@ -81,9 +81,10 @@ un bandeau si une version plus récente existe. Réglable par `check_updates`.
   dépendance OpenSSL** → cross-compilation propre. Licence **MPL-2.0** (cf. `NOTICE`).
 - ⚠️ `async-opcua` ne déclare **aucun MSRV** : valider sur la toolchain cible avant
   de bumper la version.
-- ⚠️ La génération de certificat (`create_sample_keypair(true)`) est **volontairement
-  désactivée** : la génération RSA en Rust pur est très lente en *debug* et écrirait
-  dans `pki/`. En Phase 1b (endpoint None), aucun certificat n'est requis.
+- ⚠️ Le certificat d'instance (`create_sample_keypair(true)` + `pki/`) n'est généré
+  **qu'en mode chiffré** (`security.encryption`). En mode None (défaut), aucun
+  certificat (démarrage instantané). ⚠️ La génération RSA en Rust pur est lente en
+  *debug* : compter quelques secondes au premier passage en mode chiffré.
 - `egui_plot` reste **en avance d'une mineure** sur `egui` (cf. ORME/OSNE).
 
 ---
@@ -107,11 +108,15 @@ dans `Regulator::apply` (avec assainissement), ajouter un test.
 Ajouter une variante à `Msg` ([`i18n.rs`](../../src/i18n.rs)) et **les 8
 traductions** (tableau de taille fixe vérifié à la compilation).
 
-### 6.4 Phase 2 — sécurité
+### 6.4 Sécurité (`SecurityConfig`)
 
-Activer un endpoint chiffré (`Basic256Sha256`), provisionner un certificat
-d'instance, ajouter l'authentification utilisateur. Retirer alors le filtre de log
-`opcua_crypto::certificate_store=off` posé dans [`main.rs`](../../src/main.rs).
+La sécurité est implémentée dans [`opcua_server.rs`](../../src/opcua_server.rs) :
+`security.encryption` ajoute un endpoint `Basic256Sha256`/`SignAndEncrypt` avec
+certificat auto-généré et jetons anonyme et/ou utilisateur/mot de passe
+(`ServerUserToken::user_pass`). Le filtre de log `opcua_crypto::certificate_store=off`
+([`main.rs`](../../src/main.rs)) ne concerne que le mode None (pas de certificat) ;
+en mode chiffré il est sans effet. Pistes : politiques `Aes256Sha256RsaPss`, liste
+de confiance PKI explicite plutôt que `trust_client_certs`, jetons X.509.
 
 ---
 

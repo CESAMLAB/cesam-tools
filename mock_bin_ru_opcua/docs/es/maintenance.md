@@ -81,9 +81,10 @@ un banner si existe una versión más reciente. Ajustable mediante `check_update
   dependencia de OpenSSL** → compilación cruzada limpia. Licencia **MPL-2.0** (cf. `NOTICE`).
 - ⚠️ `async-opcua` no declara **ninguna MSRV**: validar en la toolchain destino antes
   de subir la versión.
-- ⚠️ La generación de certificado (`create_sample_keypair(true)`) está **deliberadamente
-  desactivada**: la generación RSA en Rust puro es muy lenta en *debug* y escribiría
-  en `pki/`. En Fase 1b (endpoint None), no se requiere ningún certificado.
+- ⚠️ El certificado de instancia (`create_sample_keypair(true)` + `pki/`) se genera
+  **únicamente en modo cifrado** (`security.encryption`). En modo None (por defecto), ningún
+  certificado (arranque instantáneo). ⚠️ La generación RSA en Rust puro es lenta en
+  *debug*: contar algunos segundos en el primer paso a modo cifrado.
 - `egui_plot` se mantiene **una versión menor por delante** de `egui` (cf. ORME/OSNE).
 
 ---
@@ -107,11 +108,15 @@ en `Regulator::apply` (con saneamiento), añadir una prueba.
 Añadir una variante a `Msg` ([`i18n.rs`](../../src/i18n.rs)) y **las 8
 traducciones** (tabla de tamaño fijo verificada en compilación).
 
-### 6.4 Fase 2 — seguridad
+### 6.4 Seguridad (`SecurityConfig`)
 
-Activar un endpoint cifrado (`Basic256Sha256`), aprovisionar un certificado
-de instancia, añadir la autenticación de usuario. Retirar entonces el filtro de log
-`opcua_crypto::certificate_store=off` puesto en [`main.rs`](../../src/main.rs).
+La seguridad está implementada en [`opcua_server.rs`](../../src/opcua_server.rs):
+`security.encryption` añade un endpoint `Basic256Sha256`/`SignAndEncrypt` con
+certificado autogenerado y tokens anónimo o usuario/contraseña
+(`ServerUserToken::user_pass`). El filtro de log `opcua_crypto::certificate_store=off`
+([`main.rs`](../../src/main.rs)) solo concierne al modo None (sin certificado);
+en modo cifrado no tiene efecto. Líneas de evolución: políticas `Aes256Sha256RsaPss`, lista
+de confianza PKI explícita en lugar de `trust_client_certs`, tokens X.509.
 
 ---
 

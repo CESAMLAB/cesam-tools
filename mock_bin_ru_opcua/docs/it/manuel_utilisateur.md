@@ -71,6 +71,10 @@ sicurezza **None**, utente **Anonymous**. I nodi sono descritti nel
 - **Verifica gli aggiornamenti all'avvio** + pulsante **Verifica ora**.
 - **Endpoint**: **IP di ascolto** e **porta** del server OPC UA. Una modifica
   **riavvia** il server a caldo (le sessioni in corso vengono chiuse correttamente).
+- **Sicurezza OPC UA**: **Cifratura** (`Basic256Sha256`), **Consenti anonimo**,
+  **Utente** / **Password** (campi attivi quando la cifratura è selezionata).
+  Attivare la cifratura genera un certificato al primo avvio (alcuni
+  secondi) e riavvia il server.
 - **Processo (funzione di trasferimento)**: guadagno `K`, costante di tempo `τ`, ritardo
   puro, valore ambiente.
 - **Limiti di setpoint**: min / max (riordinati automaticamente se invertiti).
@@ -83,11 +87,20 @@ sovrascrivibile tramite la variabile d'ambiente `MOCK_CONFIG`).
 
 ## 5. Sicurezza
 
-OPC UA **può** essere protetto (certificati, cifratura, autenticazione), ma
-allo stato attuale (**Fase 1b**) il simulatore espone solo un endpoint **sicurezza None**
-**anonimo**: nessuna protezione. **Non esporre su una rete aperta.** Il
-banner di avviso lo ricorda permanentemente. La sicurezza reale è prevista
-in **Fase 2**.
+La sicurezza OPC UA è **regolabile** in *Parametri*:
+
+- **Senza cifratura** (default): endpoint **sicurezza None**, accesso **anonimo** —
+  nessuna protezione. **Non esporre su una rete aperta.** Un banner **arancione**
+  lo ricorda.
+- **Con cifratura**: endpoint **`Basic256Sha256`** (firmato + cifrato). Il
+  server genera il proprio certificato al primo avvio e accetta i certificati
+  client. Si può richiedere un **utente / password** e/o consentire
+  l'anonimo. Un banner **verde 🔒** conferma la cifratura. Per connettersi, il
+  client deve allora usare la politica `Basic256Sha256` e fidarsi del
+  certificato del server (primo scambio).
+
+La password è memorizzata **in chiaro** nel file TOML: si tratta di un
+**simulatore**, da usare su rete fidata.
 
 ---
 

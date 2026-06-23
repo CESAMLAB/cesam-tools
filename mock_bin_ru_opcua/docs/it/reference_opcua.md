@@ -8,19 +8,28 @@
 
 ---
 
-## 1. Endpoint
+## 1. Endpoint e sicurezza
 
-| Elemento | Valore |
-|---|---|
-| URL | `opc.tcp://<bind_ip>:<port>/` (default `opc.tcp://0.0.0.0:4840/`) |
-| Trasporto | OPC UA TCP binario |
-| Politica di sicurezza | `None` |
-| Modalità di sicurezza | `None` |
-| Token utente | `Anonymous` |
+L'URL è `opc.tcp://<bind_ip>:<port>/` (default `opc.tcp://0.0.0.0:4840/`), trasporto
+OPC UA TCP binario. La **sicurezza** è regolabile (sezione `[security]` del TOML / modale
+*Parametri*) e determina l'endpoint esposto:
 
-⚠️ **Sicurezza None**: né autenticazione né cifratura (Fase 1b). Da esporre
-solo su una **rete fidata**. Sicurezza reale (`Basic256Sha256`, certificati,
-auth) prevista in **Fase 2**.
+| Modalità | `encryption` | Politica | Modalità di sicurezza | Token |
+|---|:--:|---|---|---|
+| **Non cifrato** (default) | `false` | `None` | `None` | `Anonymous` |
+| **Cifrato** | `true` | `Basic256Sha256` | `SignAndEncrypt` | `Anonymous` (se `allow_anonymous`) e/o utente/password |
+
+- **Non cifrato**: né autenticazione né cifratura. Da esporre solo su una
+  **rete fidata**. Avvio istantaneo (nessun certificato).
+- **Cifrato**: un **certificato di istanza** autofirmato viene generato al primo
+  avvio (in `pki/`). Il server si fida dei certificati client
+  (`trust_client_certs`, pratico per un simulatore). Autenticazione tramite
+  **utente/password** se `username` è valorizzato; altrimenti (o in aggiunta)
+  token **anonimo** se `allow_anonymous`. ⚠️ La generazione RSA può richiedere alcuni
+  secondi al primo avvio (debug).
+
+Impostazioni (`[security]`): `encryption` (bool), `allow_anonymous` (bool), `username`
+(vuoto = nessuna auth password), `password` (in chiaro — **solo simulatore**).
 
 ---
 

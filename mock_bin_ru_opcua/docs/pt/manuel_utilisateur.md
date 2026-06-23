@@ -71,6 +71,10 @@ segurança **None**, utilizador **Anonymous**. Os nós estão descritos na
 - **Verificar as atualizações no arranque** + botão **Verificar agora**.
 - **Endpoint**: **IP de escuta** e **porta** do servidor OPC UA. Uma alteração
   **reinicia** o servidor a quente (as sessões em curso são fechadas limpamente).
+- **Segurança OPC UA**: **Cifragem** (`Basic256Sha256`), **Permitir o anónimo**,
+  **Utilizador** / **Palavra-passe** (campos ativos quando a cifragem está marcada).
+  Ativar a cifragem gera um certificado no primeiro arranque (alguns
+  segundos) e reinicia o servidor.
 - **Processo (função de transferência)**: ganho `K`, constante de tempo `τ`, atraso
   puro, valor ambiente.
 - **Limites de referência**: min / max (reordenados automaticamente se invertidos).
@@ -83,11 +87,20 @@ substituível pela variável de ambiente `MOCK_CONFIG`).
 
 ## 5. Segurança
 
-O OPC UA **pode** ser protegido (certificados, cifragem, autenticação), mas
-no estado atual (**Fase 1b**) o simulador só expõe um endpoint **segurança None**
-**anónimo**: nenhuma proteção. **Não expor numa rede aberta.** O
-aviso de advertência lembra-o permanentemente. A segurança real está prevista
-na **Fase 2**.
+A segurança OPC UA é **regulável** em *Parâmetros*:
+
+- **Sem cifragem** (predefinição): endpoint **segurança None**, acesso **anónimo** —
+  nenhuma proteção. **Não expor numa rede aberta.** Um aviso **laranja**
+  lembra-o.
+- **Com cifragem**: endpoint **`Basic256Sha256`** (assinado + cifrado). O
+  servidor gera o seu certificado no primeiro arranque e aceita os certificados
+  de cliente. Pode exigir-se um **utilizador / palavra-passe** e/ou permitir
+  o anónimo. Um aviso **verde 🔒** confirma a cifragem. Para se ligar, o
+  cliente deve então utilizar a política `Basic256Sha256` e confiar no
+  certificado do servidor (primeira troca).
+
+A palavra-passe é armazenada **em claro** no ficheiro TOML: é um
+**simulador**, a utilizar numa rede de confiança.
 
 ---
 

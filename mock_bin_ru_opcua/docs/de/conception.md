@@ -93,13 +93,21 @@ Speichertabelle**: die OPC-UA-Knoten lesen direkt aus dem geteilten Schnappschus
 
 ## 5. Sicherheit
 
-- **Phase 1b (aktueller Zustand)**: ein **einziger Endpoint**, `SecurityPolicy::None`,
-  **anonymes** Token. Keine Authentifizierung, keine Verschlüsselung: **nur
-  vertrauenswürdiges Netzwerk**. Die IHM zeigt dauerhaft ein **Warnbanner**. Es wird
-  kein Zertifikat erzeugt (die RSA-Erzeugung in reinem Rust ist im Debug langsam).
-- **Phase 2 (geplant)**: verschlüsselte Endpoints (`Basic256Sha256`),
-  Instanzzertifikat, Benutzerauthentifizierung. Das ist das
-  **Unterscheidungsmerkmal** von OPC UA gegenüber den Feldprotokollen.
+Die Sicherheit ist **einstellbar** (`SecurityConfig`) und bildet das
+Unterscheidungsmerkmal von OPC UA gegenüber den Feldprotokollen (Modbus/NAMUR, ohne
+Sicherheit).
+
+- **Unverschlüsselter Modus (Standard)**: ein Endpoint `SecurityPolicy::None`,
+  **anonymes** Token — nur vertrauenswürdiges Netzwerk, sofortiger Start, kein
+  Zertifikat. Die IHM zeigt ein **orangefarbenes Warnbanner**.
+- **Verschlüsselter Modus**: Endpoint `Basic256Sha256` / `SignAndEncrypt`. Ein
+  selbstsigniertes **Instanzzertifikat** wird beim ersten Start erzeugt (`pki/`);
+  der Server vertraut den Client-Zertifikaten. **Authentifizierung** per
+  Benutzer/Passwort (`ServerUserToken::user_pass`) und/oder anonym. Die IHM zeigt
+  ein **grünes Banner** 🔒.
+
+Der Modus wird im Modal *Einstellungen* eingestellt; eine Änderung **startet** den
+Server im laufenden Betrieb neu (`OpcuaServerActor`).
 
 ---
 

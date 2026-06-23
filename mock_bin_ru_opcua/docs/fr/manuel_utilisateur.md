@@ -71,6 +71,10 @@ sécurité **None**, utilisateur **Anonymous**. Les nœuds sont décrits dans la
 - **Vérifier les mises à jour au démarrage** + bouton **Vérifier maintenant**.
 - **Endpoint** : **IP d'écoute** et **port** du serveur OPC UA. Un changement
   **relance** le serveur à chaud (les sessions en cours sont fermées proprement).
+- **Sécurité OPC UA** : **Chiffrement** (`Basic256Sha256`), **Autoriser l'anonyme**,
+  **Utilisateur** / **Mot de passe** (champs actifs quand le chiffrement est coché).
+  Activer le chiffrement génère un certificat au premier lancement (quelques
+  secondes) et relance le serveur.
 - **Procédé (fonction de transfert)** : gain `K`, constante de temps `τ`, retard
   pur, valeur ambiante.
 - **Bornes de consigne** : min / max (réordonnées automatiquement si inversées).
@@ -83,11 +87,20 @@ surchargeable via la variable d'environnement `MOCK_CONFIG`).
 
 ## 5. Sécurité
 
-OPC UA **peut** être sécurisé (certificats, chiffrement, authentification), mais
-en l'état (**Phase 1b**) le simulateur n'expose qu'un endpoint **sécurité None**
-**anonyme** : aucune protection. **Ne pas exposer sur un réseau ouvert.** Le
-bandeau d'avertissement le rappelle en permanence. La sécurité réelle est prévue
-en **Phase 2**.
+La sécurité OPC UA est **réglable** dans *Paramètres* :
+
+- **Sans chiffrement** (défaut) : endpoint **sécurité None**, accès **anonyme** —
+  aucune protection. **Ne pas exposer sur un réseau ouvert.** Un bandeau **orange**
+  le rappelle.
+- **Avec chiffrement** : endpoint **`Basic256Sha256`** (signé + chiffré). Le
+  serveur génère son certificat au premier lancement et accepte les certificats
+  clients. On peut exiger un **utilisateur / mot de passe** et/ou autoriser
+  l'anonyme. Un bandeau **vert 🔒** confirme le chiffrement. Pour se connecter, le
+  client doit alors utiliser la politique `Basic256Sha256` et faire confiance au
+  certificat du serveur (premier échange).
+
+Le mot de passe est stocké **en clair** dans le fichier TOML : c'est un
+**simulateur**, à utiliser sur réseau de confiance.
 
 ---
 
@@ -108,6 +121,6 @@ grandeurs, `Boolean` pour `Run`/`Auto`) ; sinon le serveur renvoie
 `cargo run -p mock_bin_ru_opcua --no-default-features` — le serveur OPC UA et la
 simulation tournent sans IHM.
 
-**Un message « encrypted endpoints disabled » apparaît.** C'est normal en
-Phase 1b : aucun certificat d'instance n'est provisionné (endpoints chiffrés
-indisponibles). L'endpoint None, lui, fonctionne.
+**Un message « encrypted endpoints disabled » apparaît.** Normal en **mode non
+chiffré** : aucun certificat d'instance n'est provisionné. Activez le
+**Chiffrement** dans *Paramètres* pour un endpoint sécurisé.
