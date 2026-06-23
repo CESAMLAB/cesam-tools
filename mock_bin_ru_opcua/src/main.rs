@@ -2,7 +2,8 @@
 //!
 //! Assemble :
 //! - l'**acteur de simulation** : régulateur PID + procédé du premier ordre ;
-//! - l'**acteur réseau** : serveur **OPC UA** (sécurité None) (re)configurable à chaud ;
+//! - l'**acteur réseau** : serveur **OPC UA** (sécurité `None` anonyme ou
+//!   `Basic256Sha256` chiffré + auth) (re)configurable à chaud ;
 //! - l'**interface graphique** (feature `gui`) : pilotage et visualisation.
 
 // En mode headless, certaines API ne servent qu'à l'IHM.
