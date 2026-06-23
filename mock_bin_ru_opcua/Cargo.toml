@@ -38,3 +38,7 @@ egui_plot = { workspace = true, optional = true }
 image = { workspace = true, optional = true }
 # Vérification de mise à jour (feature `gui` : commodité poste de travail).
 mock_lib_update = { workspace = true, optional = true }
+
+[dev-dependencies]
+# Client OPC UA pour les tests d'intégration (round-trip lecture/écriture).
+async-opcua = { workspace = true, features = ["client"] }

@@ -1,8 +1,8 @@
 //! Serveur **OPC UA** : expose le régulateur simulé via un espace d'adressage
 //! minimal et route les écritures clients vers l'acteur de simulation.
 //!
-//! - Endpoint unique `opc.tcp://<bind_ip>:<port>/`, sécurité **None** (anonyme) —
-//!   la sécurité (certificats, `Basic256Sha256`, auth) viendra en Phase 2.
+//! - Endpoint `opc.tcp://<bind_ip>:<port>/` ; sécurité **None** anonyme (défaut) ou
+//!   **`Basic256Sha256`/SignAndEncrypt** + auth selon [`SecurityConfig`].
 //! - Lectures : callbacks branchés sur l'instantané partagé (valeurs vivantes,
 //!   échantillonnées pour les abonnements).
 //! - Écritures : callbacks qui émettent une [`Command`] vers l'acteur de
@@ -29,6 +29,11 @@ type Sim = ActorRef<SimulationMsg>;
 
 /// URI du namespace applicatif (les nœuds métier y vivent).
 const NS_URI: &str = "urn:cesam-lab:ru-opcua";
+/// URI de l'application serveur. **Distinct de [`NS_URI`]** : l'`application_uri`
+/// définit le namespace « local » (index 1) ; le confondre avec `NS_URI` ferait
+/// pointer `get_namespace_index(NS_URI)` sur l'index 1 au lieu de celui du node
+/// manager → nœuds créés dans le mauvais namespace (`BadNodeIdUnknown`).
+const APP_URI: &str = "urn:cesam-lab:ru-opcua-server";
 /// Identifiant du jeton utilisateur anonyme.
 const ANONYMOUS: &str = "ANONYMOUS";
 /// Clé du jeton utilisateur/mot de passe (mode chiffré).
@@ -44,8 +49,8 @@ const USER_PASS_ID: &str = "user_pass";
 pub fn build(network: &NetworkConfig, security: &SecurityConfig) -> Result<(Server, ServerHandle)> {
     let mut builder = ServerBuilder::new()
         .application_name("CESAM-Lab RU OPC UA")
-        .application_uri(NS_URI)
-        .product_uri(NS_URI)
+        .application_uri(APP_URI)
+        .product_uri(APP_URI)
         .host(network.bind_ip.clone())
         .port(network.port)
         .discovery_urls(vec![network.endpoint_url()])
@@ -203,4 +208,209 @@ fn on_write_bool(nm: &SimpleNodeManager, ns: u16, name: &str, sim: Sim, make: fn
             None => StatusCode::BadNothingToDo,
         }
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::{Arc, Mutex};
+    use std::time::Duration;
+
+    use ractor::Actor;
+
+    use opcua::client::{ClientBuilder, IdentityToken};
+    use opcua::types::{
+        AttributeId, DataValue, EndpointDescription, MessageSecurityMode, NodeId, ReadValueId,
+        TimestampsToReturn, UserTokenPolicy, Variant, WriteValue,
+    };
+
+    use super::{build, install, NS_URI};
+    use crate::actors::{SimulationActor, SimulationArgs};
+    use crate::config::{NetworkConfig, SecurityConfig};
+    use crate::regulator::{Regulator, RegulatorConfig};
+
+    /// Attribue un port TCP libre sur la boucle locale.
+    async fn free_port() -> u16 {
+        let l = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        l.local_addr().unwrap().port()
+    }
+
+    /// Écriture de la valeur d'un nœud (attribut `Value`).
+    fn write_value(ns: u16, name: &str, value: impl Into<Variant>) -> WriteValue {
+        WriteValue {
+            node_id: NodeId::new(ns, name),
+            attribute_id: AttributeId::Value as u32,
+            value: DataValue::new_now(value.into()),
+            ..Default::default()
+        }
+    }
+
+    /// Round-trip complet client↔serveur sur l'endpoint **None** (anonyme) :
+    /// connexion, écriture de `Run`/`Setpoint`, relecture après application.
+    #[tokio::test]
+    async fn client_read_write_round_trip_none() {
+        let port = free_port().await;
+        let cfg = RegulatorConfig::default();
+        let snapshot = Arc::new(Mutex::new(Regulator::new(cfg).snapshot()));
+        let (sim, _sj) = Actor::spawn(
+            None,
+            SimulationActor,
+            SimulationArgs { config: cfg, snapshot: snapshot.clone() },
+        )
+        .await
+        .unwrap();
+
+        let network = NetworkConfig { bind_ip: "127.0.0.1".to_string(), port };
+        let (server, server_handle) = build(&network, &SecurityConfig::default()).unwrap();
+        install(&server_handle, snapshot.clone(), sim.clone()).unwrap();
+        let server_task = tokio::spawn(async move {
+            let _ = server.run().await;
+        });
+        // Laisse le serveur lier le socket.
+        tokio::time::sleep(Duration::from_millis(300)).await;
+
+        let ns = server_handle.get_namespace_index(NS_URI).unwrap();
+        let url = network.endpoint_url();
+
+        let mut client = ClientBuilder::new()
+            .application_name("ru_opcua-test-client")
+            .application_uri("urn:cesam-lab:ru-opcua-test")
+            // Endpoint None : aucun certificat client (pas de génération RSA).
+            .create_sample_keypair(false)
+            .trust_server_certs(true)
+            .session_retry_limit(3)
+            .client()
+            .unwrap();
+        let endpoint: EndpointDescription = (
+            url.as_str(),
+            "None",
+            MessageSecurityMode::None,
+            UserTokenPolicy::anonymous(),
+        )
+            .into();
+        let (session, event_loop) = client
+            .connect_to_matching_endpoint(endpoint, IdentityToken::Anonymous)
+            .await
+            .unwrap();
+        let loop_handle = event_loop.spawn();
+        session.wait_for_connection().await;
+
+        // Lecture initiale : la mesure démarre à l'ambiant.
+        let pv0 = session
+            .read(&[ReadValueId::from(NodeId::new(ns, "ProcessValue"))], TimestampsToReturn::Both, 0.0)
+            .await
+            .unwrap();
+        assert!(matches!(pv0[0].value, Some(Variant::Double(_))), "PV lue : {pv0:?}");
+
+        // Écritures.
+        let writes = vec![
+            write_value(ns, "Run", true),
+            write_value(ns, "Setpoint", 80.0_f64),
+        ];
+        let results = session.write(&writes).await.unwrap();
+        assert!(results.iter().all(|s| s.is_good()), "écritures OK : {results:?}");
+
+        // Laisse l'acteur de simulation appliquer les commandes.
+        tokio::time::sleep(Duration::from_millis(200)).await;
+
+        // Relecture.
+        let reads = vec![
+            ReadValueId::from(NodeId::new(ns, "Setpoint")),
+            ReadValueId::from(NodeId::new(ns, "Run")),
+        ];
+        let values = session.read(&reads, TimestampsToReturn::Both, 0.0).await.unwrap();
+        let sp = match &values[0].value {
+            Some(Variant::Double(d)) => *d,
+            v => panic!("consigne inattendue : {v:?}"),
+        };
+        let run = match &values[1].value {
+            Some(Variant::Boolean(b)) => *b,
+            v => panic!("run inattendu : {v:?}"),
+        };
+        assert!((sp - 80.0).abs() < 1e-6, "consigne relue = {sp}");
+        assert!(run, "Run relu = {run}");
+
+        let _ = session.disconnect().await;
+        loop_handle.abort();
+        server_task.abort();
+        sim.stop(None);
+    }
+
+    /// Round-trip sur l'endpoint **chiffré** (`Basic256Sha256` / SignAndEncrypt),
+    /// jeton anonyme : prouve la génération du certificat serveur et le canal
+    /// sécurisé de bout en bout avec un vrai client. **Ignoré par défaut** : la
+    /// génération RSA (serveur + client) est lente en *debug*. À lancer
+    /// explicitement : `cargo test -p mock_bin_ru_opcua -- --ignored`.
+    #[tokio::test]
+    #[ignore = "génération RSA lente en debug (cert serveur + keypair client)"]
+    async fn client_round_trip_encrypted() {
+        let port = free_port().await;
+        let cfg = RegulatorConfig::default();
+        let snapshot = Arc::new(Mutex::new(Regulator::new(cfg).snapshot()));
+        let (sim, _sj) = Actor::spawn(
+            None,
+            SimulationActor,
+            SimulationArgs { config: cfg, snapshot: snapshot.clone() },
+        )
+        .await
+        .unwrap();
+
+        let network = NetworkConfig { bind_ip: "127.0.0.1".to_string(), port };
+        let security = SecurityConfig {
+            encryption: true,
+            ..SecurityConfig::default() // anonyme autorisé, pas d'utilisateur
+        };
+        let (server, server_handle) = build(&network, &security).unwrap();
+        install(&server_handle, snapshot.clone(), sim.clone()).unwrap();
+        let server_task = tokio::spawn(async move {
+            let _ = server.run().await;
+        });
+        tokio::time::sleep(Duration::from_millis(500)).await;
+
+        let ns = server_handle.get_namespace_index(NS_URI).unwrap();
+        let url = network.endpoint_url();
+
+        let mut client = ClientBuilder::new()
+            .application_name("ru_opcua-test-client")
+            .application_uri("urn:cesam-lab:ru-opcua-test")
+            // Endpoint chiffré : le client a besoin d'un certificat (généré ici).
+            .create_sample_keypair(true)
+            .trust_server_certs(true)
+            .session_retry_limit(3)
+            .client()
+            .unwrap();
+        let endpoint: EndpointDescription = (
+            url.as_str(),
+            "Basic256Sha256",
+            MessageSecurityMode::SignAndEncrypt,
+            UserTokenPolicy::anonymous(),
+        )
+            .into();
+        let (session, event_loop) = client
+            .connect_to_matching_endpoint(endpoint, IdentityToken::Anonymous)
+            .await
+            .unwrap();
+        let loop_handle = event_loop.spawn();
+        session.wait_for_connection().await;
+
+        let results = session
+            .write(&[write_value(ns, "Setpoint", 55.0_f64)])
+            .await
+            .unwrap();
+        assert!(results.iter().all(|s| s.is_good()), "écriture OK : {results:?}");
+
+        let values = session
+            .read(&[ReadValueId::from(NodeId::new(ns, "Setpoint"))], TimestampsToReturn::Both, 0.0)
+            .await
+            .unwrap();
+        let sp = match &values[0].value {
+            Some(Variant::Double(d)) => *d,
+            v => panic!("consigne inattendue : {v:?}"),
+        };
+        assert!((sp - 55.0).abs() < 1e-6, "consigne relue = {sp}");
+
+        let _ = session.disconnect().await;
+        loop_handle.abort();
+        server_task.abort();
+        sim.stop(None);
+    }
 }
