@@ -37,10 +37,10 @@ use regulator::Regulator;
 use gui::OpcuaGui;
 
 fn main() -> anyhow::Result<()> {
-    // `opcua_crypto::certificate_store=off` : en Phase 1b (endpoint None seul), le
-    // serveur n'a pas de certificat d'instance ; on tait l'ERROR trompeur du
-    // magasin de certificats (le WARN « encrypted endpoints disabled » reste, lui,
-    // exact). À retirer en Phase 2 quand de vrais certificats seront provisionnés.
+    // `opcua_crypto::certificate_store=off` : en mode **non chiffré** (endpoint None,
+    // défaut), le serveur n'a pas de certificat d'instance ; on tait l'ERROR
+    // trompeur du magasin de certificats. En mode **chiffré** (`security.encryption`),
+    // un certificat est généré → pas d'ERROR, le filtre est sans effet.
     let filter = "info,opcua_crypto::certificate_store=off";
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or(filter)).init();
 
@@ -74,6 +74,7 @@ fn main() -> anyhow::Result<()> {
             OpcuaServerActor,
             OpcuaServerArgs {
                 network: config.network.clone(),
+                security: config.security.clone(),
                 sim: sim_actor.clone(),
                 snapshot: snapshot.clone(),
                 status: status.clone(),

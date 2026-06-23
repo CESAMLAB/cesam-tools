@@ -86,6 +86,43 @@ impl Default for RegulationConfig {
     }
 }
 
+/// Paramètres de **sécurité OPC UA** (Phase 2).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct SecurityConfig {
+    /// Active un endpoint **chiffré** `Basic256Sha256` (SignAndEncrypt). Génère un
+    /// certificat d'instance auto-signé au premier lancement (dans `pki/`).
+    /// Désactivé : un seul endpoint `None` anonyme (réseau de confiance).
+    pub encryption: bool,
+    /// Autorise le jeton **anonyme** (en plus d'un éventuel utilisateur/mot de passe).
+    pub allow_anonymous: bool,
+    /// Identifiant utilisateur (**vide** = pas d'authentification par mot de passe).
+    pub username: String,
+    /// Mot de passe en clair — **simulateur uniquement** (sur réseau de confiance).
+    pub password: String,
+}
+
+impl Default for SecurityConfig {
+    fn default() -> Self {
+        // Défaut = Phase 1b : pas de chiffrement, endpoint None anonyme (démarrage
+        // instantané, aucun certificat généré).
+        Self {
+            encryption: false,
+            allow_anonymous: true,
+            username: String::new(),
+            password: String::new(),
+        }
+    }
+}
+
+impl SecurityConfig {
+    /// `true` si une authentification par utilisateur/mot de passe est configurée.
+    #[must_use]
+    pub fn has_user(&self) -> bool {
+        !self.username.trim().is_empty()
+    }
+}
+
 /// Configuration complète de l'application.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
@@ -94,6 +131,7 @@ pub struct AppConfig {
     pub network: NetworkConfig,
     pub process: ProcessConfig,
     pub regulation: RegulationConfig,
+    pub security: SecurityConfig,
     /// Vérifier au démarrage si une version plus récente est publiée (feature
     /// `gui`). Activé par défaut ; désactivable depuis le modal *Paramètres*.
     pub check_updates: bool,
@@ -106,6 +144,7 @@ impl Default for AppConfig {
             network: NetworkConfig::default(),
             process: ProcessConfig::default(),
             regulation: RegulationConfig::default(),
+            security: SecurityConfig::default(),
             check_updates: true,
         }
     }
@@ -154,6 +193,13 @@ impl AppConfig {
 
         // Gains et bornes PID.
         self.regulation.pid = sanitize_pid(self.regulation.pid, dr.pid);
+
+        // Sécurité : garde-fou anti-verrouillage — en chiffré sans utilisateur ni
+        // anonyme, plus aucun jeton ne permettrait de se connecter → on réautorise
+        // l'anonyme (sur transport chiffré).
+        if self.security.encryption && !self.security.allow_anonymous && !self.security.has_user() {
+            self.security.allow_anonymous = true;
+        }
 
         if self != before {
             log::warn!("Configuration sanitized: out-of-range or non-finite values were corrected");
@@ -268,5 +314,42 @@ mod tests {
     fn endpoint_url_format() {
         let net = NetworkConfig { bind_ip: "127.0.0.1".to_string(), port: 4840 };
         assert_eq!(net.endpoint_url(), "opc.tcp://127.0.0.1:4840/");
+    }
+
+    #[test]
+    fn security_default_is_phase1b() {
+        let s = SecurityConfig::default();
+        assert!(!s.encryption && s.allow_anonymous && !s.has_user());
+    }
+
+    #[test]
+    fn sanitize_reenables_anonymous_when_no_token_left() {
+        let cfg = AppConfig {
+            security: SecurityConfig {
+                encryption: true,
+                allow_anonymous: false, // et aucun utilisateur
+                ..SecurityConfig::default()
+            },
+            ..AppConfig::default()
+        }
+        .sanitized();
+        assert!(cfg.security.allow_anonymous, "garde-fou : au moins un jeton");
+    }
+
+    #[test]
+    fn security_with_user_round_trips_through_toml() {
+        let cfg = AppConfig {
+            security: SecurityConfig {
+                encryption: true,
+                allow_anonymous: false,
+                username: "scada".to_string(),
+                password: "secret".to_string(),
+            },
+            ..AppConfig::default()
+        };
+        let s = toml::to_string_pretty(&cfg).unwrap();
+        let back: AppConfig = toml::from_str(&s).unwrap();
+        assert_eq!(cfg, back);
+        assert!(back.security.has_user());
     }
 }

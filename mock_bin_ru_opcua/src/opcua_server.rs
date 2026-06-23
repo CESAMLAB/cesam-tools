@@ -14,14 +14,14 @@ use opcua::nodes::VariableBuilder;
 use opcua::server::address_space::AddressSpace;
 use opcua::server::diagnostics::NamespaceMetadata;
 use opcua::server::node_manager::memory::{simple_node_manager, SimpleNodeManager};
-use opcua::server::{Server, ServerBuilder, ServerHandle};
+use opcua::server::{Server, ServerBuilder, ServerHandle, ServerUserToken};
 use opcua::types::{
     DataTypeId, DataValue, MessageSecurityMode, NodeId, ObjectId, StatusCode, Variant,
 };
 use ractor::ActorRef;
 
 use crate::actors::{SharedSnapshot, SimulationMsg};
-use crate::config::NetworkConfig;
+use crate::config::{NetworkConfig, SecurityConfig};
 use crate::regulator::{Command, Snapshot};
 
 /// Référence vers l'acteur de simulation, capturée par les callbacks d'écriture.
@@ -29,12 +29,20 @@ type Sim = ActorRef<SimulationMsg>;
 
 /// URI du namespace applicatif (les nœuds métier y vivent).
 const NS_URI: &str = "urn:cesam-lab:ru-opcua";
-/// Identifiant du jeton utilisateur anonyme (sécurité None).
+/// Identifiant du jeton utilisateur anonyme.
 const ANONYMOUS: &str = "ANONYMOUS";
+/// Clé du jeton utilisateur/mot de passe (mode chiffré).
+const USER_PASS_ID: &str = "user_pass";
 
-/// Construit le serveur OPC UA (un seul endpoint, sécurité None) selon `network`.
-pub fn build(network: &NetworkConfig) -> Result<(Server, ServerHandle)> {
-    ServerBuilder::new()
+/// Construit le serveur OPC UA selon `network` et `security`.
+///
+/// - `security.encryption = false` : un endpoint **`None`** anonyme (Phase 1b,
+///   démarrage instantané, aucun certificat).
+/// - `security.encryption = true` : un endpoint **`Basic256Sha256` / SignAndEncrypt**.
+///   Un certificat d'instance auto-signé est généré au premier lancement (`pki/`).
+///   Jetons acceptés : anonyme (si `allow_anonymous`) et/ou utilisateur/mot de passe.
+pub fn build(network: &NetworkConfig, security: &SecurityConfig) -> Result<(Server, ServerHandle)> {
+    let mut builder = ServerBuilder::new()
         .application_name("CESAM-Lab RU OPC UA")
         .application_uri(NS_URI)
         .product_uri(NS_URI)
@@ -47,8 +55,40 @@ pub fn build(network: &NetworkConfig) -> Result<(Server, ServerHandle)> {
                 ..Default::default()
             },
             "ru-opcua",
-        ))
-        .add_endpoint(
+        ));
+
+    if security.encryption {
+        // Jetons utilisateur acceptés sur l'endpoint chiffré.
+        let mut tokens: Vec<&str> = Vec::new();
+        if security.allow_anonymous || !security.has_user() {
+            tokens.push(ANONYMOUS);
+        }
+        if security.has_user() {
+            builder = builder.add_user_token(
+                USER_PASS_ID,
+                ServerUserToken::user_pass(security.username.clone(), security.password.clone()),
+            );
+            tokens.push(USER_PASS_ID);
+        }
+        builder = builder
+            // Certificat d'instance auto-signé (généré au 1er lancement dans `pki/`).
+            .create_sample_keypair(true)
+            .pki_dir("pki")
+            // Simulateur : on fait confiance aux certificats clients (pas de PKI à gérer).
+            .trust_client_certs(true)
+            .add_endpoint(
+                "secure",
+                (
+                    "/",
+                    SecurityPolicy::Basic256Sha256,
+                    MessageSecurityMode::SignAndEncrypt,
+                    tokens.as_slice(),
+                ),
+            );
+    } else {
+        // Phase 1b : endpoint None anonyme, sans certificat (l'ERROR bénin du
+        // magasin de certificats est filtré dans `main`).
+        builder = builder.create_sample_keypair(false).add_endpoint(
             "none",
             (
                 "/",
@@ -56,13 +96,10 @@ pub fn build(network: &NetworkConfig) -> Result<(Server, ServerHandle)> {
                 MessageSecurityMode::None,
                 &[ANONYMOUS] as &[&str],
             ),
-        )
-        .trust_client_certs(false)
-        // Endpoint None uniquement (Phase 1b) : pas de certificat d'instance. On
-        // n'en génère PAS (la génération RSA en Rust pur est très lente en debug et
-        // écrirait dans `pki/`). La vraie sécurité (endpoints chiffrés, certs) =
-        // Phase 2. L'ERROR bénin du magasin de certificats est filtré dans `main`.
-        .create_sample_keypair(false)
+        );
+    }
+
+    builder
         .build()
         .map_err(|e| anyhow!("OPC UA server build failed: {e}"))
 }

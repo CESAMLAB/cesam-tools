@@ -164,15 +164,12 @@ impl OpcuaGui {
             max: cfg.regulation.sp_max,
         });
         self.send(Command::SetPid(cfg.regulation.pid));
-        let _ = self.net.cast(OpcuaServerMsg::Reconfigure(cfg.network.clone()));
+        let _ = self.net.cast(OpcuaServerMsg::Reconfigure {
+            network: cfg.network.clone(),
+            security: cfg.security.clone(),
+        });
         self.save_config();
     }
-}
-
-/// Indique si l'endpoint OPC UA est anonyme (sécurité None) : toujours vrai en
-/// Phase 1b (la sécurité arrive en Phase 2). Le bandeau rappelle l'exposition.
-fn endpoint_is_anonymous() -> bool {
-    true
 }
 
 /// Éditeur des trois gains d'un PID. Renvoie la nouvelle config si modifiée.
@@ -277,7 +274,9 @@ impl OpcuaGui {
                 };
                 ui.colored_label(color, msg);
             }
-            if endpoint_is_anonymous() {
+            if self.config.security.encryption {
+                ui.colored_label(egui::Color32::from_rgb(0, 150, 0), t(Msg::SecuritySecured));
+            } else {
                 ui.colored_label(egui::Color32::from_rgb(200, 140, 0), t(Msg::SecurityAnonymous));
             }
             if let Ok(guard) = self.update.lock() {
@@ -458,6 +457,24 @@ impl OpcuaGui {
                             ui.label(t(Msg::Port));
                             ui.add(egui::DragValue::new(&mut draft.network.port).range(1..=65535));
                             ui.end_row();
+                        });
+
+                        ui.add_space(6.0);
+                        ui.label(egui::RichText::new(t(Msg::Security)).strong());
+                        ui.checkbox(&mut draft.security.encryption, t(Msg::Encryption));
+                        ui.add_enabled_ui(draft.security.encryption, |ui| {
+                            ui.checkbox(&mut draft.security.allow_anonymous, t(Msg::AllowAnonymous));
+                            egui::Grid::new("auth").num_columns(2).show(ui, |ui| {
+                                ui.label(t(Msg::Username));
+                                ui.text_edit_singleline(&mut draft.security.username);
+                                ui.end_row();
+                                ui.label(t(Msg::Password));
+                                ui.add(
+                                    egui::TextEdit::singleline(&mut draft.security.password)
+                                        .password(true),
+                                );
+                                ui.end_row();
+                            });
                         });
 
                         ui.add_space(6.0);

@@ -10,7 +10,7 @@ use tokio::task::JoinHandle;
 
 use opcua::server::ServerHandle;
 
-use crate::config::{NetworkConfig, ServerStatus};
+use crate::config::{NetworkConfig, SecurityConfig, ServerStatus};
 use crate::opcua_server;
 
 use super::{SharedSnapshot, SharedStatus, SimulationMsg};
@@ -18,13 +18,18 @@ use super::{SharedSnapshot, SharedStatus, SimulationMsg};
 /// Messages de l'acteur réseau.
 #[derive(Debug)]
 pub enum OpcuaServerMsg {
-    /// Applique une nouvelle configuration réseau (IP d'écoute, port).
-    Reconfigure(NetworkConfig),
+    /// Applique une nouvelle configuration réseau / sécurité (relance si l'IP, le
+    /// port ou les paramètres de sécurité changent).
+    Reconfigure {
+        network: NetworkConfig,
+        security: SecurityConfig,
+    },
 }
 
 /// Arguments de démarrage de l'acteur réseau.
 pub struct OpcuaServerArgs {
     pub network: NetworkConfig,
+    pub security: SecurityConfig,
     pub sim: ActorRef<SimulationMsg>,
     pub snapshot: SharedSnapshot,
     pub status: SharedStatus,
@@ -33,6 +38,7 @@ pub struct OpcuaServerArgs {
 /// État interne de l'acteur réseau.
 pub struct OpcuaServerState {
     network: NetworkConfig,
+    security: SecurityConfig,
     sim: ActorRef<SimulationMsg>,
     snapshot: SharedSnapshot,
     status: SharedStatus,
@@ -61,7 +67,7 @@ impl OpcuaServerState {
     fn restart(&mut self) {
         self.stop_current();
         let url = self.network.endpoint_url();
-        match opcua_server::build(&self.network) {
+        match opcua_server::build(&self.network, &self.security) {
             Ok((server, handle)) => {
                 if let Err(e) = opcua_server::install(&handle, self.snapshot.clone(), self.sim.clone()) {
                     self.set_status(ServerStatus {
@@ -78,7 +84,12 @@ impl OpcuaServerState {
                 });
                 self.task = Some(task);
                 self.server_handle = Some(handle);
-                log::info!("OPC UA server listening on {url} (SecurityPolicy::None)");
+                let policy = if self.security.encryption {
+                    "Basic256Sha256/SignAndEncrypt"
+                } else {
+                    "None/anonymous"
+                };
+                log::info!("OPC UA server listening on {url} ({policy})");
                 self.set_status(ServerStatus {
                     listening: true,
                     addr: url,
@@ -112,6 +123,7 @@ impl Actor for OpcuaServerActor {
     ) -> Result<Self::State, ActorProcessingErr> {
         let mut state = OpcuaServerState {
             network: args.network,
+            security: args.security,
             sim: args.sim,
             snapshot: args.snapshot,
             status: args.status,
@@ -129,10 +141,11 @@ impl Actor for OpcuaServerActor {
         state: &mut Self::State,
     ) -> Result<(), ActorProcessingErr> {
         match message {
-            OpcuaServerMsg::Reconfigure(cfg) => {
-                let rebind = cfg.bind_ip != state.network.bind_ip || cfg.port != state.network.port;
-                state.network = cfg;
-                if rebind {
+            OpcuaServerMsg::Reconfigure { network, security } => {
+                let changed = network != state.network || security != state.security;
+                state.network = network;
+                state.security = security;
+                if changed {
                     state.restart();
                 }
             }
