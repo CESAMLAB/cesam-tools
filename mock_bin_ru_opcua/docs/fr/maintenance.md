@@ -126,8 +126,21 @@ Pistes restantes : politiques `Aes256Sha256RsaPss`, jetons X.509.
 Le cœur métier (`regulator.rs`) et la configuration (`config.rs`) sont **purs et
 testés** : convergence PID, clamp de consigne, relaxation à l'arrêt, changement de
 procédé sans saut de PV, assainissement TOML, aller-retour TOML. L'i18n vérifie la
-non-vacuité et l'aller-retour de langue. La logique async (acteurs, serveur) reste
-mince et s'appuie sur ces briques testées.
+non-vacuité et l'aller-retour de langue.
+
+Des **tests d'intégration** couvrent en plus la couche réseau : aller-retour
+client↔serveur sur l'endpoint **None** (connexion, écriture, relecture), parité de
+l'acteur réseau, et — sur l'endpoint **chiffré** (`Basic256Sha256`) — l'aller-retour
+anonyme ainsi que l'**authentification utilisateur/mot de passe** (bon couple accepté,
+mauvais mot de passe refusé). Ces deux derniers sont marqués `#[ignore]` car la
+**génération RSA est lente en *debug*** ; on les lance explicitement :
+
+```bash
+cargo test -p mock_bin_ru_opcua -- --ignored
+```
+
+En **CI**, ils tournent en **`--release`** (RSA rapide) et **`--test-threads=1`** (les
+serveurs chiffrés partagent le répertoire `pki/` → exécution sérialisée).
 
 ---
 

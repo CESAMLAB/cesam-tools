@@ -44,6 +44,11 @@ jobs:
         run: cargo clippy --workspace --all-features --all-targets -- -D warnings
       - name: Tests (toutes features)
         run: cargo test --workspace --all-features
+      # Tests OPC UA chiffrés (auth + canal Basic256Sha256) : marqués #[ignore] car
+      # la génération RSA est lente en debug. On les lance en --release (RSA rapide)
+      # et --test-threads=1 (les serveurs chiffrés partagent le répertoire pki/).
+      - name: Tests OPC UA chiffrés (ignored, release)
+        run: cargo test -p mock_bin_ru_opcua --all-features --release -- --ignored --test-threads=1
       - name: Build release
         run: cargo build --release --workspace
 

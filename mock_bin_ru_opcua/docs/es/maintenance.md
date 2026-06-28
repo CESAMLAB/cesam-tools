@@ -127,8 +127,21 @@ tokens X.509.
 El núcleo de negocio (`regulator.rs`) y la configuración (`config.rs`) son **puros y
 probados**: convergencia PID, clamp de consigna, relajación al parar, cambio de
 proceso sin salto de PV, saneamiento TOML, ida y vuelta TOML. La i18n verifica la
-no vacuidad y la ida y vuelta de idioma. La lógica async (actores, servidor) se mantiene
-ligera y se apoya en estos bloques probados.
+no vacuidad y la ida y vuelta de idioma.
+
+Las **pruebas de integración** cubren además la capa de red: ida y vuelta
+cliente↔servidor en el endpoint **None** (conexión, escritura, relectura), paridad
+del actor de red y — en el endpoint **cifrado** (`Basic256Sha256`) — la ida y vuelta
+anónima así como la **autenticación usuario/contraseña** (par correcto aceptado,
+contraseña incorrecta rechazada). Estas dos últimas están marcadas con `#[ignore]`
+porque la **generación RSA es lenta en *debug***; se lanzan explícitamente:
+
+```bash
+cargo test -p mock_bin_ru_opcua -- --ignored
+```
+
+En **CI** se ejecutan en **`--release`** (RSA rápido) y **`--test-threads=1`** (los
+servidores cifrados comparten el directorio `pki/` → ejecución serializada).
 
 ---
 

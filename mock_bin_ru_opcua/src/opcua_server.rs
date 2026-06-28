@@ -414,4 +414,108 @@ mod tests {
         server_task.abort();
         sim.stop(None);
     }
+
+    /// Authentification **utilisateur/mot de passe** sur l'endpoint chiffré
+    /// (`Basic256Sha256` / SignAndEncrypt), anonyme **désactivé**. Vérifie les deux
+    /// faces de l'auth contre **un seul serveur** (un seul certificat généré) :
+    /// 1. le **bon** couple identifiants se connecte et round-trip une écriture ;
+    /// 2. un **mauvais** mot de passe est **refusé** (jamais connecté).
+    ///
+    /// **Ignoré par défaut** : génération RSA lente en *debug*. À lancer
+    /// explicitement : `cargo test -p mock_bin_ru_opcua -- --ignored`.
+    #[tokio::test]
+    #[ignore = "génération RSA lente en debug (cert serveur + keypair client)"]
+    async fn client_auth_user_pass_encrypted() {
+        const USER: &str = "scada";
+        const PASS: &str = "s3cret";
+
+        let port = free_port().await;
+        let cfg = RegulatorConfig::default();
+        let snapshot = Arc::new(Mutex::new(Regulator::new(cfg).snapshot()));
+        let (sim, _sj) = Actor::spawn(
+            None,
+            SimulationActor,
+            SimulationArgs { config: cfg, snapshot: snapshot.clone() },
+        )
+        .await
+        .unwrap();
+
+        let network = NetworkConfig { bind_ip: "127.0.0.1".to_string(), port };
+        let security = SecurityConfig {
+            encryption: true,
+            allow_anonymous: false, // seul le couple utilisateur/mot de passe est accepté
+            username: USER.to_string(),
+            password: PASS.to_string(),
+            trust_client_certs: true,
+        };
+        let (server, server_handle) = build(&network, &security).unwrap();
+        install(&server_handle, snapshot.clone(), sim.clone()).unwrap();
+        let server_task = tokio::spawn(async move {
+            let _ = server.run().await;
+        });
+        tokio::time::sleep(Duration::from_millis(500)).await;
+
+        let ns = server_handle.get_namespace_index(NS_URI).unwrap();
+        let url = network.endpoint_url();
+
+        // Client unique réutilisé pour les deux tentatives (un seul keypair RSA).
+        let mut client = ClientBuilder::new()
+            .application_name("ru_opcua-test-client")
+            .application_uri("urn:cesam-lab:ru-opcua-test")
+            .create_sample_keypair(true)
+            .trust_server_certs(true)
+            // Peu de tentatives : le cas « mauvais mot de passe » doit échouer vite.
+            .session_retry_limit(1)
+            .client()
+            .unwrap();
+        // L'endpoint est sélectionné par URL + politique + mode ; le jeton utilisateur
+        // est porté par l'`IdentityToken`, pas par la `UserTokenPolicy` du tuple.
+        let endpoint = || -> EndpointDescription {
+            (url.as_str(), "Basic256Sha256", MessageSecurityMode::SignAndEncrypt).into()
+        };
+
+        // 1) Bon couple identifiants → connexion + round-trip.
+        let (session, event_loop) = client
+            .connect_to_matching_endpoint(endpoint(), IdentityToken::new_user_name(USER, PASS))
+            .await
+            .unwrap();
+        let loop_handle = event_loop.spawn();
+        assert!(session.wait_for_connection().await, "bon couple : doit se connecter");
+
+        let results = session
+            .write(&[write_value(ns, "Setpoint", 42.0_f64)])
+            .await
+            .unwrap();
+        assert!(results.iter().all(|s| s.is_good()), "écriture OK : {results:?}");
+
+        let values = session
+            .read(&[ReadValueId::from(NodeId::new(ns, "Setpoint"))], TimestampsToReturn::Both, 0.0)
+            .await
+            .unwrap();
+        let sp = match &values[0].value {
+            Some(Variant::Double(d)) => *d,
+            v => panic!("consigne inattendue : {v:?}"),
+        };
+        assert!((sp - 42.0).abs() < 1e-6, "consigne relue = {sp}");
+
+        let _ = session.disconnect().await;
+        loop_handle.abort();
+
+        // 2) Mauvais mot de passe → rejet. `wait_for_connection` ne revient jamais si
+        //    la boucle d'événements s'arrête (auth refusée) → on borne par un timeout.
+        let (bad_session, bad_event_loop) = client
+            .connect_to_matching_endpoint(endpoint(), IdentityToken::new_user_name(USER, "mauvais"))
+            .await
+            .unwrap();
+        let bad_handle = bad_event_loop.spawn();
+        let connected = tokio::select! {
+            ok = bad_session.wait_for_connection() => ok,
+            () = tokio::time::sleep(Duration::from_secs(8)) => false,
+        };
+        assert!(!connected, "le mauvais mot de passe doit être refusé");
+        bad_handle.abort();
+
+        server_task.abort();
+        sim.stop(None);
+    }
 }

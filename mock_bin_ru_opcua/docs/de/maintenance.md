@@ -128,8 +128,23 @@ Richtlinien `Aes256Sha256RsaPss`, X.509-Token.
 Der fachliche Kern (`regulator.rs`) und die Konfiguration (`config.rs`) sind **rein
 und getestet**: PID-Konvergenz, Sollwert-Klemmung, Entspannung im Stopp, Prozesswechsel
 ohne PV-Sprung, TOML-Bereinigung, TOML-Hin-und-Rückweg. Die i18n prüft die
-Nicht-Leere und den Sprach-Hin-und-Rückweg. Die asynchrone Logik (Aktoren, Server)
-bleibt schlank und stützt sich auf diese getesteten Bausteine.
+Nicht-Leere und den Sprach-Hin-und-Rückweg.
+
+**Integrationstests** decken zusätzlich die Netzwerkschicht ab: Client↔Server-Hin-
+und-Rückweg am **None**-Endpunkt (Verbinden, Schreiben, Zurücklesen), Netzwerk-Aktor-
+Parität und — am **verschlüsselten** Endpunkt (`Basic256Sha256`) — der anonyme
+Hin-und-Rückweg sowie die **Benutzer-/Passwort-Authentifizierung** (richtiges Paar
+akzeptiert, falsches Passwort abgelehnt). Die letzten beiden sind mit `#[ignore]`
+markiert, da die **RSA-Erzeugung im *Debug* langsam** ist; sie werden ausdrücklich
+gestartet:
+
+```bash
+cargo test -p mock_bin_ru_opcua -- --ignored
+```
+
+In der **CI** laufen sie mit **`--release`** (schnelles RSA) und **`--test-threads=1`**
+(die verschlüsselten Server teilen sich das Verzeichnis `pki/` → serialisierte
+Ausführung).
 
 ---
 

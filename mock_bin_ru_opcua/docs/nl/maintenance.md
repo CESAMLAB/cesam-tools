@@ -128,8 +128,21 @@ X.509-tokens.
 De bedrijfskern (`regulator.rs`) en de configuratie (`config.rs`) zijn **puur en
 getest**: PID-convergentie, setpoint-clamp, relaxatie bij stilstand, proceswijziging
 zonder PV-sprong, TOML-sanering, TOML-heen-en-terug. De i18n controleert de
-niet-leegheid en het heen-en-terug van de taal. De async-logica (actoren, server)
-blijft dun en steunt op deze geteste bouwstenen.
+niet-leegheid en het heen-en-terug van de taal.
+
+**Integratietests** dekken daarnaast de netwerklaag af: client↔server heen-en-terug
+op het **None**-endpoint (verbinden, schrijven, teruglezen), netwerk-actor-pariteit
+en — op het **versleutelde** endpoint (`Basic256Sha256`) — de anonieme heen-en-terug
+evenals de **gebruiker/wachtwoord-authenticatie** (correct paar geaccepteerd, fout
+wachtwoord geweigerd). De laatste twee zijn gemarkeerd met `#[ignore]` omdat de
+**RSA-generatie traag is in *debug***; je start ze expliciet:
+
+```bash
+cargo test -p mock_bin_ru_opcua -- --ignored
+```
+
+In **CI** draaien ze in **`--release`** (snelle RSA) en **`--test-threads=1`** (de
+versleutelde servers delen de map `pki/` → geserialiseerde uitvoering).
 
 ---
 

@@ -131,8 +131,21 @@ Pozostałe kierunki: polityki `Aes256Sha256RsaPss`, tokeny X.509.
 Rdzeń biznesowy (`regulator.rs`) i konfiguracja (`config.rs`) są **czyste i
 testowane**: zbieżność PID, clamp wartości zadanej, relaksacja po zatrzymaniu,
 zmiana procesu bez skoku PV, odkażanie TOML, podróż tam i z powrotem TOML. i18n
-weryfikuje niepustość i podróż tam i z powrotem języka. Logika async (aktorzy,
-serwer) pozostaje cienka i opiera się na tych przetestowanych elementach.
+weryfikuje niepustość i podróż tam i z powrotem języka.
+
+**Testy integracyjne** pokrywają dodatkowo warstwę sieciową: podróż tam i z powrotem
+klient↔serwer na endpoincie **None** (połączenie, zapis, odczyt zwrotny), parytet
+aktora sieciowego oraz — na endpoincie **szyfrowanym** (`Basic256Sha256`) — podróż
+anonimowa, a także **uwierzytelnianie użytkownik/hasło** (poprawna para zaakceptowana,
+błędne hasło odrzucone). Dwa ostatnie są oznaczone `#[ignore]`, ponieważ **generowanie
+RSA jest wolne w trybie *debug***; uruchamia się je jawnie:
+
+```bash
+cargo test -p mock_bin_ru_opcua -- --ignored
+```
+
+W **CI** działają w **`--release`** (szybkie RSA) i **`--test-threads=1`** (szyfrowane
+serwery współdzielą katalog `pki/` → wykonanie zserializowane).
 
 ---
 

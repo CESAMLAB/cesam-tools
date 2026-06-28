@@ -126,8 +126,21 @@ em modo cifrado não tem efeito. A confiança nos certificados de cliente é
 O núcleo de negócio (`regulator.rs`) e a configuração (`config.rs`) são **puros e
 testados**: convergência PID, clamp de referência, relaxação à paragem, mudança de
 processo sem salto de PV, higienização TOML, ida e volta TOML. O i18n verifica a
-não-vacuidade e a ida e volta de idioma. A lógica async (atores, servidor) permanece
-fina e apoia-se nestes blocos testados.
+não-vacuidade e a ida e volta de idioma.
+
+Os **testes de integração** cobrem ainda a camada de rede: ida e volta
+cliente↔servidor no endpoint **None** (conexão, escrita, releitura), paridade do
+ator de rede e — no endpoint **cifrado** (`Basic256Sha256`) — a ida e volta anónima
+bem como a **autenticação utilizador/palavra-passe** (par correto aceite, palavra-passe
+errada recusada). Estes dois últimos estão marcados com `#[ignore]` porque a
+**geração RSA é lenta em *debug***; lançam-se explicitamente:
+
+```bash
+cargo test -p mock_bin_ru_opcua -- --ignored
+```
+
+Em **CI** correm em **`--release`** (RSA rápido) e **`--test-threads=1`** (os
+servidores cifrados partilham o diretório `pki/` → execução serializada).
 
 ---
 

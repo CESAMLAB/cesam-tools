@@ -128,8 +128,21 @@ policies, X.509 tokens.
 The business core (`regulator.rs`) and the configuration (`config.rs`) are **pure
 and tested**: PID convergence, setpoint clamp, relaxation at stop, process change
 without a PV jump, TOML sanitization, TOML round-trip. The i18n checks
-non-emptiness and the language round-trip. The async logic (actors, server) stays
-thin and relies on these tested building blocks.
+non-emptiness and the language round-trip.
+
+**Integration tests** additionally cover the network layer: client↔server
+round-trip on the **None** endpoint (connect, write, read back), network-actor
+parity, and — on the **encrypted** endpoint (`Basic256Sha256`) — the anonymous
+round-trip as well as **user/password authentication** (correct pair accepted,
+wrong password rejected). The latter two are marked `#[ignore]` because **RSA
+generation is slow in *debug***; run them explicitly:
+
+```bash
+cargo test -p mock_bin_ru_opcua -- --ignored
+```
+
+In **CI** they run in **`--release`** (fast RSA) and **`--test-threads=1`** (the
+encrypted servers share the `pki/` directory → serialized execution).
 
 ---
 
