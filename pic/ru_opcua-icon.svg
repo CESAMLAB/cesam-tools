@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>RU/OPC UA — Régulateur de procédé simulé (OPC UA)</title>
+  <g>
+    <circle cx="128" cy="128" r="62" fill="#1A171B"/>
+    <path d="M 72.85 183.15 A 78 78 0 1 1 183.15 183.15" fill="none" stroke="#F29400" stroke-width="13" stroke-linecap="round"/>
+    <line x1="98.3" y1="157.7" x2="89.82" y2="166.18" stroke="#F29400" stroke-width="5" stroke-linecap="round"/>
+    <line x1="88.06" y1="140.98" x2="76.64" y2="144.69" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="86.52" y1="121.43" x2="74.66" y2="119.55" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="94.02" y1="103.31" x2="84.31" y2="96.26" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="108.93" y1="90.58" x2="103.48" y2="79.89" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="128" y1="86" x2="128" y2="74" stroke="#F29400" stroke-width="5" stroke-linecap="round"/>
+    <line x1="147.07" y1="90.58" x2="152.52" y2="79.89" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="161.98" y1="103.31" x2="171.69" y2="96.26" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="169.48" y1="121.43" x2="181.34" y2="119.55" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="167.94" y1="140.98" x2="179.36" y2="144.69" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="157.7" y1="157.7" x2="166.18" y2="166.18" stroke="#F29400" stroke-width="5" stroke-linecap="round"/>
+    <polygon points="161.46,90.84 120.57,121.31 115.96,141.38 135.43,134.69" fill="#F29400"/>
+    <circle cx="128" cy="128" r="13" fill="#F29400"/>
+    <circle cx="128" cy="128" r="5" fill="#1A171B"/>
+    <line x1="57.29" y1="198.71" x2="29.23" y2="143.64" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="29.23" y1="143.64" x2="38.9" y2="82.6" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="38.9" y1="82.6" x2="82.6" y2="38.9" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="82.6" y1="38.9" x2="143.64" y2="29.23" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="143.64" y1="29.23" x2="198.71" y2="57.29" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="198.71" y1="57.29" x2="226.77" y2="112.36" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="226.77" y1="112.36" x2="217.1" y2="173.4" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="57.29" cy="198.71" r="7" fill="#F29400"/>
+    <circle cx="57.29" cy="198.71" r="2.8" fill="#1A171B"/>
+    <circle cx="29.23" cy="143.64" r="7" fill="#F29400"/>
+    <circle cx="29.23" cy="143.64" r="2.8" fill="#1A171B"/>
+    <circle cx="38.9" cy="82.6" r="7" fill="#F29400"/>
+    <circle cx="38.9" cy="82.6" r="2.8" fill="#1A171B"/>
+    <circle cx="82.6" cy="38.9" r="7" fill="#F29400"/>
+    <circle cx="82.6" cy="38.9" r="2.8" fill="#1A171B"/>
+    <circle cx="143.64" cy="29.23" r="7" fill="#F29400"/>
+    <circle cx="143.64" cy="29.23" r="2.8" fill="#1A171B"/>
+    <circle cx="198.71" cy="57.29" r="7" fill="#F29400"/>
+    <circle cx="198.71" cy="57.29" r="2.8" fill="#1A171B"/>
+    <circle cx="226.77" cy="112.36" r="7" fill="#F29400"/>
+    <circle cx="226.77" cy="112.36" r="2.8" fill="#1A171B"/>
+    <circle cx="217.1" cy="173.4" r="7" fill="#F29400"/>
+    <circle cx="217.1" cy="173.4" r="2.8" fill="#1A171B"/>
+  </g>
+</svg>
