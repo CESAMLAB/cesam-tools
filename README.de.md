@@ -25,6 +25,7 @@ Gateways **ohne reale Hardware**.
 |-------|---------|--------------|-----------|-----|
 | [`mock_bin_ru_modbustcp`](mock_bin_ru_modbustcp) | **ORME** | Regler (PID / TOR / PWM) auf Übertragungsfunktion | Modbus TCP & RTU (Slave) | egui |
 | [`mock_bin_su_namur`](mock_bin_su_namur) | **OSNE** | Labor-Überkopfrührer: Motor-Übertragungsfunktion, schnelle Drehzahlregelung, einstellbare viskose Last | NAMUR über TCP & seriell RS-232 (Slave) | egui |
+| [`mock_bin_ru_opcua`](mock_bin_ru_opcua) | **ORUE** | Prozessregler (Anti-Windup-PID) auf Prozess erster Ordnung, mit konfigurierbarer OPC-UA-Sicherheit | OPC UA (Server) | egui |
 
 Geteilte Bibliothek:
 
@@ -104,9 +105,46 @@ Er teilt die Architektur von ORME (synchrones Geschäftsmodell, `ractor`-Aktoren
 `egui`-Oberfläche). Starten Sie ihn mit `cargo run -p mock_bin_su_namur`; der
 NAMUR-Server lauscht standardmäßig auf `0.0.0.0:4001`.
 
+## ORUE — der simulierte OPC-UA-Regler
+
+<p align="center">
+  <img src="pic/ru_opcua-logo.svg" alt="ORUE — Open Regulator UA Emulator" height="120">
+</p>
+
+> **ORUE** — *Open Regulator UA Emulator*. **„Vereinheitlichen Sie den Prozess."**
+> Ein Prozessregler, der nur auf Ihrem OPC-UA-Adressraum existiert.
+
+Ein vollständiger virtueller Prozessregler:
+
+- **Prozess**, modelliert durch eine Übertragungsfunktion erster Ordnung,
+  geführt von einem **Anti-Windup-PID**, getaktet alle 0,5 s.
+- **OPC-UA-Server** (`async-opcua`, Tokio-nativ, 100 % Rust-Krypto — ohne OpenSSL,
+  MPL-2.0-Stack). **Konfigurierbare Sicherheit** (`SecurityConfig`):
+  `None`/anonym standardmäßig (sofortiger Start) **oder** `Basic256Sha256` /
+  SignAndEncrypt mit selbstsigniertem Zertifikat (`pki/`, beim ersten
+  verschlüsselten Lauf erzeugt), dazu anonyme und/oder
+  **Benutzer-/Passwort**-Token.
+- **Eine Haltung, die sich von ORME/OSNE unterscheidet**: Die OPC-UA-Sicherheit
+  beruht auf **Zertifikat + Authentifizierung**, nicht auf einer IP-Whitelist (es
+  gibt **keine**); der Server akzeptiert **mehrere gleichzeitige Client-Sitzungen**
+  (kein Single-Master, der letzte Schreiber gewinnt). Die Standardeinstellung
+  `None`/anonym auf `0.0.0.0:4840` ist die offenste des Workspace — ein
+  IHM-Banner warnt, sobald die Verschlüsselung aus ist.
+- **Grafische Oberfläche** auf einer Seite: Steuerung, **Trendkurve** in Echtzeit
+  und ein **Parameter-Modal** (Netzwerk, Prozess-Übertragungsfunktion, PID-
+  Verstärkungen, Sollwertgrenzen, Sicherheit, i18n in 8 Sprachen).
+- **Persistierte Konfiguration** im TOML-Format (`mock_ru_opcua.toml`), beim Start
+  neu geladen, mit Schaltfläche zum Zurücksetzen auf die Standardwerte.
+
+Er teilt die Architektur von ORME (synchrones Geschäftsmodell, `ractor`-Aktoren,
+`egui`-Oberfläche). Starten Sie ihn mit `cargo run -p mock_bin_ru_opcua`; der
+OPC-UA-Server lauscht standardmäßig auf `0.0.0.0:4840`. Der Adressraum ist in
+[`mock_bin_ru_opcua/docs/de/reference_opcua.md`](mock_bin_ru_opcua/docs/de/reference_opcua.md)
+dokumentiert.
+
 ## Download
 
-Vorkompilierte Binärdateien sind auf der [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest)-Seite verfügbar — **keine Rust-Toolchain erforderlich**. Jedes Instrument liefert seine eigene ausführbare Datei (`orme`, `osne`).
+Vorkompilierte Binärdateien sind auf der [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest)-Seite verfügbar — **keine Rust-Toolchain erforderlich**. Jedes Instrument liefert seine eigene ausführbare Datei (`orme`, `osne`, `ru_opcua`).
 
 **ORME** (Modbus-Regler):
 
@@ -124,8 +162,16 @@ Vorkompilierte Binärdateien sind auf der [**Releases**](https://github.com/CESA
 | Windows x86_64 | [`osne-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-windows-x86_64.exe) | — |
 | Raspberry Pi arm64 (Pi OS 64-bit) | [`osne-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-rpi-arm64) | [`osne-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/osne-rpi-arm64-headless) |
 
+**ORUE** (OPC-UA-Regler):
+
+| Plattform | GUI | Headless (nur TCP, ohne GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`ru_opcua-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_opcua-linux-x86_64) | [`ru_opcua-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_opcua-linux-x86_64-headless) |
+| Windows x86_64 | [`ru_opcua-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_opcua-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`ru_opcua-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_opcua-rpi-arm64) | [`ru_opcua-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_opcua-rpi-arm64-headless) |
+
 ```bash
-chmod +x orme-linux-x86_64        # Linux / Raspberry Pi (genauso für osne-*)
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi (genauso für osne-*, ru_opcua-*)
 ./orme-linux-x86_64
 ```
 
@@ -195,6 +241,13 @@ verfügbar in acht Sprachen (`docs/<sprache>/`). Deutsche Versionen:
 - [NAMUR-Befehlssatz](mock_bin_su_namur/docs/de/commandes_namur.md) — Protokollreferenz (Kanäle, Befehle, Beispiele).
 - [Softwarewartung](mock_bin_su_namur/docs/de/maintenance.md) — Build, Konfiguration, Erweiterung, Fehlerbehebung.
 
+**ORUE** (OPC-UA-Regler):
+
+- [**Benutzerhandbuch**](mock_bin_ru_opcua/docs/de/manuel_utilisateur.md) — Einstieg, IHM, Verbindung eines OPC-UA-Clients, FAQ.
+- [Entwurfsdokument](mock_bin_ru_opcua/docs/de/conception.md) — PID- + Prozessmodell, Aktorarchitektur, `async-opcua`-Stack, Sicherheit.
+- [OPC-UA-Referenz](mock_bin_ru_opcua/docs/de/reference_opcua.md) — Endpunkt, Namespace, Knoten (Lesen/Schreiben, Beispiele).
+- [Softwarewartung](mock_bin_ru_opcua/docs/de/maintenance.md) — Build, Konfiguration, Erweiterung, Fehlerbehebung.
+
 ## Marke & Logos
 
 Die Logos befinden sich in [`pic/`](pic/):
@@ -205,15 +258,21 @@ Die Logos befinden sich in [`pic/`](pic/):
 - [`osne-icon.svg`](pic/osne-icon.svg) / `osne-icon.png` — OSNE-Symbol
   (Rührflügel), auch als OSNE-Fenstersymbol eingebettet.
 - [`osne-logo.svg`](pic/osne-logo.svg) — vollständiges OSNE-Logo (Symbol + Text).
+- [`ru_opcua-icon.svg`](pic/ru_opcua-icon.svg) / `ru_opcua-icon.png` — ORUE-Symbol
+  (Reglerzifferblatt, umschlossen von einem OPC-UA-Knotenring), auch als
+  ORUE-Fenstersymbol eingebettet.
+- [`ru_opcua-logo.svg`](pic/ru_opcua-logo.svg) — vollständiges ORUE-Logo (Symbol + Text).
 - [`Logo-CESAM-Couleur-vect.png`](pic/Logo-CESAM-Couleur-vect.png) — CESAM-Lab-Logo.
 
 Jedes Symbol wird aus seinem `*-logo.gen.py`-Skript **generiert**
 ([`pic/orme-logo.gen.py`](pic/orme-logo.gen.py),
-[`pic/osne-logo.gen.py`](pic/osne-logo.gen.py)). Das OSNE-Skript rastert außerdem
-`osne-icon.png` direkt (via Pillow); die ORME-`.svg` wird anschließend gerastert.
+[`pic/osne-logo.gen.py`](pic/osne-logo.gen.py),
+[`pic/ru_opcua-logo.gen.py`](pic/ru_opcua-logo.gen.py)). Die OSNE- und
+ORUE-Skripte rastern außerdem ihre `-icon.png` direkt (via Pillow); die
+ORME-`.svg` wird anschließend gerastert.
 
 Installieren Sie unter **Wayland** das Taskleistensymbol eines Instruments mit
-`scripts/install-desktop.sh [orme|osne]`.
+`scripts/install-desktop.sh [orme|osne|ru_opcua]`.
 
 ## Lizenz
 

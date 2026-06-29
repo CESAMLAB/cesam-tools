@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=RU OPC UA
+Name=ORUE
 GenericName=Régulateur simulé (OPC UA)
 Comment=Simulateur d'unité de régulation industrielle sur OPC UA — CESAM-Lab
 Exec=ru_opcua

@@ -1,4 +1,5 @@
-//! Régulateur de procédé simulé exposé en **OPC UA** (RU/OPC UA).
+//! Régulateur de procédé simulé exposé en **OPC UA** — marque **ORUE**
+//! (*Open Regulator UA Emulator*) ; nom technique : RU/OPC UA.
 //!
 //! Assemble :
 //! - l'**acteur de simulation** : régulateur PID + procédé du premier ordre ;
@@ -89,7 +90,7 @@ fn main() -> anyhow::Result<()> {
 
     #[cfg(feature = "gui")]
     {
-        let title = format!("RU/OPC UA — {}", i18n::tr(config.language, i18n::Msg::AppSubtitle));
+        let title = format!("ORUE — {}", i18n::tr(config.language, i18n::Msg::AppSubtitle));
         let mut viewport = eframe::egui::ViewportBuilder::default()
             .with_inner_size([1080.0, 700.0])
             .with_min_inner_size([860.0, 540.0])

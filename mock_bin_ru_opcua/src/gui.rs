@@ -227,7 +227,7 @@ impl OpcuaGui {
             ui.add_space(2.0);
             ui.horizontal(|ui| {
                 ui.add(egui::Label::new(
-                    egui::RichText::new(format!("RU/OPC UA — {}", t(Msg::AppSubtitle))).size(22.0).strong(),
+                    egui::RichText::new(format!("ORUE — {}", t(Msg::AppSubtitle))).size(22.0).strong(),
                 ))
                 .on_hover_text("Regulation Unit over OPC UA — CESAM-Lab");
 

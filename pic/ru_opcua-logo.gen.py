@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Génère le logo RU/OPC UA (régulateur OPC UA) — icône carrée + lockup horizontal.
+"""Génère le logo ORUE (régulateur OPC UA) — icône carrée + lockup horizontal.
+
+Marque : **ORUE** = *Open Regulator UA Emulator* (nom technique : RU/OPC UA).
+
 
 Style CESAM-Lab, cohérent avec ORME et OSNE : orange #F29400, anthracite #1A171B,
 blanc, gris. Motif : le **cadran de régulation** d'ORME (RU = Regulation Unit, même
@@ -90,26 +93,26 @@ def dial(cx, cy, scale=1.0):
 
 # --- Icône carrée 256×256 (cadran + anneau centrés) ---
 icon = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
-  <title>RU/OPC UA — Régulateur de procédé simulé (OPC UA)</title>
+  <title>ORUE — Open Regulator UA Emulator</title>
   {dial(128, 128)}
 </svg>
 '''
 open("ru_opcua-icon.svg", "w").write(icon)
 
 # --- Lockup horizontal 760×240 (icône + texte) ---
-# Le grand titre « RU/OPC UA » et le sous-titre sont figés à une largeur fixe via
-# `textLength` + `lengthAdjust` : ils occupent toujours la même place QUELLE QUE SOIT
-# la police du visiteur (GitHub n'a pas DejaVu Sans et substitue une police plus
-# large, ce qui couperait le texte à droite).
+# Marque **ORUE** (Open Regulator UA Emulator), même schéma qu'ORME/OSNE : grand
+# titre 4 lettres, deux dernières en orange (« OR » encre + « UE » orange). Le
+# sous-titre est figé à une largeur fixe via `textLength` + `lengthAdjust` : il
+# occupe toujours la même place QUELLE QUE SOIT la police du visiteur (GitHub n'a
+# pas DejaVu Sans et substitue une police plus large, ce qui couperait le texte).
 FONT = "'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif"
-TITLE_W = 480   # largeur fixe du grand titre -> fin à x=250+480=730 < 760
-SUBTITLE_W = 480  # largeur fixe du sous-titre -> fin à x=252+480=732 < 760
+SUBTITLE_W = 410  # largeur fixe du sous-titre -> fin à x=252+410=662 < 760
 # Couleurs du texte adaptées au thème : sur fond sombre (GitHub dark mode), l'encre
 # anthracite et le sous-titre gris deviennent illisibles -> on les éclaircit via
 # @media (prefers-color-scheme: dark). L'orange et le cadran fonctionnent sur les
-# deux fonds. « RU/ » en encre, « OPC UA » en orange (l'unité vs le protocole).
+# deux fonds. « OR » en encre, « UE » en orange (régulateur vs OPC UA).
 logo = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 240" width="760" height="240">
-  <title>RU/OPC UA — Régulateur de procédé simulé (OPC UA)</title>
+  <title>ORUE — Open Regulator UA Emulator</title>
   <style>
     .ink {{ fill: {DARK}; }}
     .sub {{ fill: {GREY}; }}
@@ -121,14 +124,13 @@ logo = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 240" width="
   <g transform="translate(2,0)">
     {dial(120, 120)}
   </g>
-  <text x="250" y="118" font-family="{FONT}" font-size="96" font-weight="800"
-        class="ink" letter-spacing="2"
-        textLength="{TITLE_W}" lengthAdjust="spacingAndGlyphs">RU/<tspan fill="{ORANGE}">OPC UA</tspan></text>
+  <text x="250" y="118" font-family="{FONT}" font-size="104" font-weight="800"
+        class="ink" letter-spacing="2">OR<tspan fill="{ORANGE}">UE</tspan></text>
   <text x="252" y="158" font-family="{FONT}" font-size="27" font-weight="600"
         class="sub" letter-spacing="0.5"
-        textLength="{SUBTITLE_W}" lengthAdjust="spacingAndGlyphs">Simulated process regulator (OPC UA)</text>
+        textLength="{SUBTITLE_W}" lengthAdjust="spacingAndGlyphs">Open Regulator UA Emulator</text>
   <text x="252" y="192" font-family="{FONT}" font-size="23" font-weight="700"
-        fill="{ORANGE}" font-style="italic">« Exposez le procédé. »</text>
+        fill="{ORANGE}" font-style="italic">« Unifiez le procédé. »</text>
 </svg>
 '''
 open("ru_opcua-logo.svg", "w").write(logo)

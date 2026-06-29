@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
-  <title>RU/OPC UA — Régulateur de procédé simulé (OPC UA)</title>
+  <title>ORUE — Open Regulator UA Emulator</title>
   <g>
     <circle cx="128" cy="128" r="62" fill="#1A171B"/>
     <path d="M 72.85 183.15 A 78 78 0 1 1 183.15 183.15" fill="none" stroke="#F29400" stroke-width="13" stroke-linecap="round"/>
