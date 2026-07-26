@@ -90,7 +90,7 @@ docs/                    Entwurf, NAMUR-Befehle, Handbuch, Wartung (mehrsprachig
 
 **Goldene Regel**: Die Fachlogik (`mock_lib_control`, `motor.rs`, `stirrer.rs`)
 bleibt **synchron und getestet**; das Asynchrone bleibt auf die Aktoren und die IO
-beschränkt. Exakte Nachbildung des Reglers **ORME** (`mock_bin_ru_modbustcp`) —
+beschränkt. Exakte Nachbildung des Reglers **ORME** (`mock_bin_ru_modbus`) —
 gleiche Invarianten.
 
 ---

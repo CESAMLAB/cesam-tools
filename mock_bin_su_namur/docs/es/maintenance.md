@@ -91,7 +91,7 @@ docs/                    Concepción, comandos NAMUR, manual, mantenimiento (mul
 
 **Regla de oro**: la lógica de negocio (`mock_lib_control`, `motor.rs`,
 `stirrer.rs`) sigue siendo **síncrona y probada**; lo asíncrono se limita a los
-actores y a la IO. Calco exacto del regulador **ORME** (`mock_bin_ru_modbustcp`) —
+actores y a la IO. Calco exacto del regulador **ORME** (`mock_bin_ru_modbus`) —
 mismos invariantes.
 
 ---

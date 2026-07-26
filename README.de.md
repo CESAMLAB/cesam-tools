@@ -23,7 +23,7 @@ Gateways **ohne reale Hardware**.
 
 | Crate | Produkt | Beschreibung | Protokoll | IHM |
 |-------|---------|--------------|-----------|-----|
-| [`mock_bin_ru_modbustcp`](mock_bin_ru_modbustcp) | **ORME** | Regler (PID / TOR / PWM) auf Übertragungsfunktion | Modbus TCP & RTU (Slave) | egui |
+| [`mock_bin_ru_modbus`](mock_bin_ru_modbus) | **ORME** | Regler (PID / TOR / PWM) auf Übertragungsfunktion | Modbus TCP & RTU (Slave) | egui |
 | [`mock_bin_su_namur`](mock_bin_su_namur) | **OSNE** | Labor-Überkopfrührer: Motor-Übertragungsfunktion, schnelle Drehzahlregelung, einstellbare viskose Last | NAMUR über TCP & seriell RS-232 (Slave) | egui |
 | [`mock_bin_ru_opcua`](mock_bin_ru_opcua) | **ORUE** | Prozessregler (Anti-Windup-PID) auf Prozess erster Ordnung, mit konfigurierbarer OPC-UA-Sicherheit | OPC UA (Server) | egui |
 
@@ -57,7 +57,7 @@ Ein vollständiger virtueller Industrieregler:
 - **Grafische Oberfläche** auf einer Seite: Steuerung, **Trendkurve** in Echtzeit,
   **Live-Modbus-Adresstabelle** und ein **Parameter-Modal** (Transport TCP/RTU,
   Port, erlaubte IPs, serielle Parameter, Übertragungsfunktion, Sollwertgrenzen).
-- **Persistierte Konfiguration** im TOML-Format (`mock_ru_modbustcp.toml`),
+- **Persistierte Konfiguration** im TOML-Format (`mock_ru_modbus.toml`),
   beim Start neu geladen, mit Schaltfläche zum Zurücksetzen auf die Standardwerte.
 
 ### Asynchrone Architektur
@@ -187,19 +187,19 @@ sha256sum -c SHA256SUMS
 # Voraussetzung: Rust stable (Edition 2021, >= 1.85).
 # Linux-Systemabhängigkeiten für die IHM: libxkbcommon, libwayland/xcb, openGL.
 
-cargo run -p mock_bin_ru_modbustcp
+cargo run -p mock_bin_ru_modbus
 ```
 
 Das Fenster öffnet sich und der Modbus-TCP-Server lauscht auf `0.0.0.0:5502`.
 Der **Port**, die **Lausch-IP** und die **IP-Whitelist** werden im Modal
 **⚙ Parameter** eingestellt (im laufenden Betrieb angewandt) und dann in
-`mock_ru_modbustcp.toml` **persistiert**. Die **Sprache der Oberfläche**
+`mock_ru_modbus.toml` **persistiert**. Die **Sprache der Oberfläche**
 (Französisch, Englisch, Deutsch, Spanisch, Italienisch, Portugiesisch,
 Niederländisch, Polnisch) wird in demselben Modal gewählt und persistiert. Um eine
 andere Konfigurationsdatei zu verwenden:
 
 ```bash
-MOCK_CONFIG=/pfad/zu/ma_config.toml cargo run -p mock_bin_ru_modbustcp
+MOCK_CONFIG=/pfad/zu/ma_config.toml cargo run -p mock_bin_ru_modbus
 ```
 
 ### Die Modbus-Verbindung testen
@@ -213,7 +213,7 @@ mbpoll -m tcp -a 1 -t 3:float -r 1 -p 5502 127.0.0.1   # PV lesen (f32)
 ```
 
 Die vollständige Adresstabelle ist in
-[`mock_bin_ru_modbustcp/src/map.rs`](mock_bin_ru_modbustcp/src/map.rs) dokumentiert.
+[`mock_bin_ru_modbus/src/map.rs`](mock_bin_ru_modbus/src/map.rs) dokumentiert.
 
 ## Entwicklung
 
@@ -229,10 +229,10 @@ verfügbar in acht Sprachen (`docs/<sprache>/`). Deutsche Versionen:
 
 **ORME** (Modbus-Regler):
 
-- [**Benutzerhandbuch**](mock_bin_ru_modbustcp/docs/de/manuel_utilisateur.md) — Einstieg, IHM, Parameter, FAQ.
-- [Entwurfsdokument](mock_bin_ru_modbustcp/docs/de/conception.md) — Architektur und technische Entscheidungen.
-- [Modbus-Adresstabelle](mock_bin_ru_modbustcp/docs/de/table_modbus.md) — vollständiger Adressplan.
-- [Softwarewartung](mock_bin_ru_modbustcp/docs/de/maintenance.md) — Build, Konfiguration, Erweiterung, Fehlerbehebung.
+- [**Benutzerhandbuch**](mock_bin_ru_modbus/docs/de/manuel_utilisateur.md) — Einstieg, IHM, Parameter, FAQ.
+- [Entwurfsdokument](mock_bin_ru_modbus/docs/de/conception.md) — Architektur und technische Entscheidungen.
+- [Modbus-Adresstabelle](mock_bin_ru_modbus/docs/de/table_modbus.md) — vollständiger Adressplan.
+- [Softwarewartung](mock_bin_ru_modbus/docs/de/maintenance.md) — Build, Konfiguration, Erweiterung, Fehlerbehebung.
 
 **OSNE** (NAMUR-Laborrührer):
 

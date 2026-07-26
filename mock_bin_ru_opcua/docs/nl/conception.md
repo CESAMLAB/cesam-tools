@@ -5,7 +5,7 @@
 > Crate: `mock_bin_ru_opcua` · Uitvoerbaar bestand: **ru_opcua** (*Regulation Unit over OPC UA*)
 
 Architectuur- en modelleringsdocument. Gemodelleerd naar de regelaar **ORME**
-(`mock_bin_ru_modbustcp`): dezelfde opdeling **synchroon bedrijfsmodel / ractor-
+(`mock_bin_ru_modbus`): dezelfde opdeling **synchroon bedrijfsmodel / ractor-
 actoren / protocollaag / egui-GUI**, dezelfde invarianten. Alleen het **transport**
 verandert: **OPC UA** in plaats van Modbus.
 

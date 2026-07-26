@@ -22,7 +22,7 @@ demonstrating supervisors, PLCs or gateways **without real hardware**.
 
 | Crate | Product | Description | Protocol | GUI |
 |-------|---------|-------------|-----------|-----|
-| [`mock_bin_ru_modbustcp`](mock_bin_ru_modbustcp) | **ORME** | Controller (PID / TOR / PWM) over a transfer function | Modbus TCP & RTU (slave) | egui |
+| [`mock_bin_ru_modbus`](mock_bin_ru_modbus) | **ORME** | Controller (PID / TOR / PWM) over a transfer function | Modbus TCP & RTU (slave) | egui |
 | [`mock_bin_su_namur`](mock_bin_su_namur) | **OSNE** | Overhead lab stirrer: motor transfer function, fast speed control, adjustable viscous load | NAMUR over TCP & serial RS-232 (slave) | egui |
 | [`mock_bin_ru_opcua`](mock_bin_ru_opcua) | **ORUE** | Process regulator (anti-windup PID) over a first-order process, with configurable OPC UA security | OPC UA (server) | egui |
 
@@ -55,7 +55,7 @@ A complete virtual industrial controller:
 - **Single-page graphical interface**: operation, real-time **trend curve**, **live
   Modbus address table**, and a **Settings modal** (TCP/RTU transport, port,
   allowed IPs, serial parameters, transfer function, setpoint bounds).
-- **Configuration persisted** in TOML format (`mock_ru_modbustcp.toml`), reloaded
+- **Configuration persisted** in TOML format (`mock_ru_modbus.toml`), reloaded
   at startup, with a reset-to-defaults button.
 
 ### Asynchronous architecture
@@ -182,18 +182,18 @@ sha256sum -c SHA256SUMS
 # Prerequisites: Rust stable (2021 edition, >= 1.85).
 # Linux system dependencies for the GUI: libxkbcommon, libwayland/xcb, openGL.
 
-cargo run -p mock_bin_ru_modbustcp
+cargo run -p mock_bin_ru_modbus
 ```
 
 The window opens and the Modbus TCP server listens on `0.0.0.0:5502`. The **port**,
 the **listening IP** and the **IP allowlist** are set in the **⚙ Settings** modal
-(applied at runtime) then are **persisted** in `mock_ru_modbustcp.toml`. The
+(applied at runtime) then are **persisted** in `mock_ru_modbus.toml`. The
 **interface language** (French, English, German, Spanish, Italian, Portuguese,
 Dutch, Polish) is chosen in this same modal and is persisted. To use another
 configuration file:
 
 ```bash
-MOCK_CONFIG=/path/to/ma_config.toml cargo run -p mock_bin_ru_modbustcp
+MOCK_CONFIG=/path/to/ma_config.toml cargo run -p mock_bin_ru_modbus
 ```
 
 ### Test the Modbus link
@@ -207,7 +207,7 @@ mbpoll -m tcp -a 1 -t 3:float -r 1 -p 5502 127.0.0.1   # read PV (f32)
 ```
 
 The complete address table is documented in
-[`mock_bin_ru_modbustcp/src/map.rs`](mock_bin_ru_modbustcp/src/map.rs).
+[`mock_bin_ru_modbus/src/map.rs`](mock_bin_ru_modbus/src/map.rs).
 
 ## Development
 
@@ -223,10 +223,10 @@ in eight languages (`docs/<language>/`). English versions:
 
 **ORME** (Modbus controller):
 
-- [**User manual**](mock_bin_ru_modbustcp/docs/en/manuel_utilisateur.md) — getting started, GUI, settings, FAQ.
-- [Design document](mock_bin_ru_modbustcp/docs/en/conception.md) — architecture and technical choices.
-- [Modbus address table](mock_bin_ru_modbustcp/docs/en/table_modbus.md) — complete addressing plan.
-- [Software maintenance](mock_bin_ru_modbustcp/docs/en/maintenance.md) — build, configuration, extension, troubleshooting.
+- [**User manual**](mock_bin_ru_modbus/docs/en/manuel_utilisateur.md) — getting started, GUI, settings, FAQ.
+- [Design document](mock_bin_ru_modbus/docs/en/conception.md) — architecture and technical choices.
+- [Modbus address table](mock_bin_ru_modbus/docs/en/table_modbus.md) — complete addressing plan.
+- [Software maintenance](mock_bin_ru_modbus/docs/en/maintenance.md) — build, configuration, extension, troubleshooting.
 
 **OSNE** (NAMUR lab stirrer):
 

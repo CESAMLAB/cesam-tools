@@ -90,7 +90,7 @@ docs/                    Concezione, comandi NAMUR, manuale, manutenzione (multi
 
 **Regola d'oro**: la logica di dominio (`mock_lib_control`, `motor.rs`,
 `stirrer.rs`) resta **sincrona e testata**; l'asincrono è confinato agli attori e
-all'IO. Calco esatto del regolatore **ORME** (`mock_bin_ru_modbustcp`) — stessi
+all'IO. Calco esatto del regolatore **ORME** (`mock_bin_ru_modbus`) — stessi
 invarianti.
 
 ---

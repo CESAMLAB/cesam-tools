@@ -19,7 +19,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$Pkg = "mock_bin_ru_modbustcp"
+$Pkg = "mock_bin_ru_modbus"
 $Target = "x86_64-pc-windows-msvc"
 
 # Racine du dépôt (le script est dans scripts\).

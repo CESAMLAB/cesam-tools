@@ -13,7 +13,7 @@
 .env.local
 
 # Configuration runtime générée par les instruments (par utilisateur)
-mock_ru_modbustcp.toml
+mock_ru_modbus.toml
 mock_su_namur.toml
 
 # OS

@@ -5,7 +5,7 @@
 > Crate: `mock_bin_su_namur` · Uitvoerbaar bestand: **OSNE** (*Open Stirrer NAMUR Emulator*)
 
 Architectuur- en modelleringsdocument. Gemodelleerd naar de **ORME**-regelaar
-(`mock_bin_ru_modbustcp`): dezelfde opdeling **synchrone bedrijfslogica / ractor-
+(`mock_bin_ru_modbus`): dezelfde opdeling **synchrone bedrijfslogica / ractor-
 acteurs / protocollaag / egui-GUI**, dezelfde invarianten.
 
 ---

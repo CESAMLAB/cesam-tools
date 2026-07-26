@@ -2611,7 +2611,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "mock_bin_ru_modbustcp"
+name = "mock_bin_ru_modbus"
 version = "0.2.0"
 dependencies = [
  "anyhow",

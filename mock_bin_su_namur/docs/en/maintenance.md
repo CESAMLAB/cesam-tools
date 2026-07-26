@@ -90,7 +90,7 @@ docs/                    Design, NAMUR commands, manual, maintenance (multilingu
 
 **Golden rule**: the business logic (`mock_lib_control`, `motor.rs`, `stirrer.rs`)
 stays **synchronous and tested**; async is confined to the actors and IO. Exact
-copy of the **ORME** controller (`mock_bin_ru_modbustcp`) — same invariants.
+copy of the **ORME** controller (`mock_bin_ru_modbus`) — same invariants.
 
 ---
 

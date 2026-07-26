@@ -90,7 +90,7 @@ docs/                    Projekt, komendy NAMUR, podręcznik, utrzymanie (wieloj
 
 **Złota zasada**: logika biznesowa (`mock_lib_control`, `motor.rs`, `stirrer.rs`)
 pozostaje **synchroniczna i przetestowana**; asynchroniczność jest ograniczona do
-aktorów i IO. Dokładna kopia regulatora **ORME** (`mock_bin_ru_modbustcp`) — te
+aktorów i IO. Dokładna kopia regulatora **ORME** (`mock_bin_ru_modbus`) — te
 same niezmienniki.
 
 ---

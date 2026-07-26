@@ -90,7 +90,7 @@ docs/                    Conception, commandes NAMUR, manuel, maintenance (multi
 
 **Règle d'or** : la logique métier (`mock_lib_control`, `motor.rs`, `stirrer.rs`)
 reste **synchrone et testée** ; l'asynchrone est cantonné aux acteurs et à l'IO.
-Calque exact du régulateur **ORME** (`mock_bin_ru_modbustcp`) — mêmes invariants.
+Calque exact du régulateur **ORME** (`mock_bin_ru_modbus`) — mêmes invariants.
 
 ---
 

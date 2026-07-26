@@ -5,7 +5,7 @@
 > Crate: `mock_bin_ru_opcua` · Executable: **ru_opcua** (*Regulation Unit over OPC UA*)
 
 Architecture and modeling document. Modeled on the **ORME** regulator
-(`mock_bin_ru_modbustcp`): same split into **synchronous business model / ractor
+(`mock_bin_ru_modbus`): same split into **synchronous business model / ractor
 actors / protocol layer / egui GUI**, same invariants. Only the **transport**
 changes: **OPC UA** instead of Modbus.
 

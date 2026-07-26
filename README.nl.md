@@ -23,7 +23,7 @@ demonstreren **zonder echte hardware**.
 
 | Crate | Product | Beschrijving | Protocol | GUI |
 |-------|---------|--------------|----------|-----|
-| [`mock_bin_ru_modbustcp`](mock_bin_ru_modbustcp) | **ORME** | Regelaar (PID / TOR / PWM) op overdrachtsfunctie | Modbus TCP & RTU (slave) | egui |
+| [`mock_bin_ru_modbus`](mock_bin_ru_modbus) | **ORME** | Regelaar (PID / TOR / PWM) op overdrachtsfunctie | Modbus TCP & RTU (slave) | egui |
 | [`mock_bin_su_namur`](mock_bin_su_namur) | **OSNE** | Bovenroerder voor laboratorium: motoroverdrachtsfunctie, snelle toerenregeling, instelbare viskeuze belasting | NAMUR over TCP & serieel RS-232 (slave) | egui |
 | [`mock_bin_ru_opcua`](mock_bin_ru_opcua) | **ORUE** | Procesregelaar (anti-windup-PID) op een eerste-orde-proces, met instelbare OPC UA-beveiliging | OPC UA (server) | egui |
 
@@ -56,7 +56,7 @@ Een volledige virtuele industriële regelaar:
 - **Grafische interface** op één pagina: besturing, real-time **trendgrafiek**,
   **live Modbus-adrestabel**, en een **Parameters-modaal** (transport TCP/RTU,
   poort, toegestane IP's, seriële parameters, overdrachtsfunctie, setpointgrenzen).
-- **Persistente configuratie** in TOML-formaat (`mock_ru_modbustcp.toml`), herladen
+- **Persistente configuratie** in TOML-formaat (`mock_ru_modbus.toml`), herladen
   bij opstart, met knop om terug te zetten naar de standaardwaarden.
 
 ### Asynchrone architectuur
@@ -186,18 +186,18 @@ sha256sum -c SHA256SUMS
 # Vereisten: Rust stable (editie 2021, >= 1.85).
 # Linux-systeemafhankelijkheden voor de GUI: libxkbcommon, libwayland/xcb, openGL.
 
-cargo run -p mock_bin_ru_modbustcp
+cargo run -p mock_bin_ru_modbus
 ```
 
 Het venster opent en de Modbus TCP-server luistert op `0.0.0.0:5502`.
 De **poort**, het **luister-IP** en de **IP-witte lijst** worden ingesteld in het
 **⚙ Parameters**-modaal (tijdens werking toegepast) en vervolgens **persistent
-opgeslagen** in `mock_ru_modbustcp.toml`. De **taal van de interface** (Frans,
+opgeslagen** in `mock_ru_modbus.toml`. De **taal van de interface** (Frans,
 Engels, Duits, Spaans, Italiaans, Portugees, Nederlands, Pools) wordt in datzelfde
 modaal gekozen en is persistent. Om een ander configuratiebestand te gebruiken:
 
 ```bash
-MOCK_CONFIG=/pad/naar/ma_config.toml cargo run -p mock_bin_ru_modbustcp
+MOCK_CONFIG=/pad/naar/ma_config.toml cargo run -p mock_bin_ru_modbus
 ```
 
 ### De Modbus-verbinding testen
@@ -211,7 +211,7 @@ mbpoll -m tcp -a 1 -t 3:float -r 1 -p 5502 127.0.0.1   # PV lezen (f32)
 ```
 
 De volledige adrestabel is gedocumenteerd in
-[`mock_bin_ru_modbustcp/src/map.rs`](mock_bin_ru_modbustcp/src/map.rs).
+[`mock_bin_ru_modbus/src/map.rs`](mock_bin_ru_modbus/src/map.rs).
 
 ## Ontwikkeling
 
@@ -227,10 +227,10 @@ acht talen (`docs/<taal>/`). Nederlandse versies:
 
 **ORME** (Modbus-regelaar):
 
-- [**Gebruikershandleiding**](mock_bin_ru_modbustcp/docs/nl/manuel_utilisateur.md) — ingebruikname, GUI, parameters, FAQ.
-- [Ontwerpdocument](mock_bin_ru_modbustcp/docs/nl/conception.md) — architectuur en technische keuzes.
-- [Modbus-adrestabel](mock_bin_ru_modbustcp/docs/nl/table_modbus.md) — volledig adresseringsplan.
-- [Software-onderhoud](mock_bin_ru_modbustcp/docs/nl/maintenance.md) — build, configuratie, uitbreiding, probleemoplossing.
+- [**Gebruikershandleiding**](mock_bin_ru_modbus/docs/nl/manuel_utilisateur.md) — ingebruikname, GUI, parameters, FAQ.
+- [Ontwerpdocument](mock_bin_ru_modbus/docs/nl/conception.md) — architectuur en technische keuzes.
+- [Modbus-adrestabel](mock_bin_ru_modbus/docs/nl/table_modbus.md) — volledig adresseringsplan.
+- [Software-onderhoud](mock_bin_ru_modbus/docs/nl/maintenance.md) — build, configuratie, uitbreiding, probleemoplossing.
 
 **OSNE** (NAMUR-laboratoriumroerder):
 

@@ -5,7 +5,7 @@
 > Crate: `mock_bin_su_namur` · Executable: **OSNE** (*Open Stirrer NAMUR Emulator*)
 
 Architecture and modelling document. Modelled on the **ORME** controller
-(`mock_bin_ru_modbustcp`): same split into **synchronous business model / ractor
+(`mock_bin_ru_modbus`): same split into **synchronous business model / ractor
 actors / protocol layer / egui GUI**, same invariants.
 
 ---

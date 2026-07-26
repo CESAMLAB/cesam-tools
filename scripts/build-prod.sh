@@ -28,7 +28,7 @@ set -euo pipefail
 #   bin  = nom de l'exécutable produit ([[bin]] du crate)
 #   port = port du protocole de terrain (Modbus / NAMUR), pour Docker EXPOSE
 INSTRUMENTS=(
-  "mock_bin_ru_modbustcp:orme:5502"
+  "mock_bin_ru_modbus:orme:5502"
   "mock_bin_su_namur:osne:4001"
   "mock_bin_ru_opcua:ru_opcua:4840"
   # Sparkplug B : edge node MQTT **sortant** (client) — aucun port d'écoute → 0.

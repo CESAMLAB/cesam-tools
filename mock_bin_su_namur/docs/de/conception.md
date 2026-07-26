@@ -5,7 +5,7 @@
 > Crate: `mock_bin_su_namur` · Ausführbare Datei: **OSNE** (*Open Stirrer NAMUR Emulator*)
 
 Architektur- und Modellierungsdokument. Nach dem Vorbild des Reglers **ORME**
-(`mock_bin_ru_modbustcp`): gleiche Aufteilung **synchrones Fachmodell / ractor-
+(`mock_bin_ru_modbus`): gleiche Aufteilung **synchrones Fachmodell / ractor-
 Aktoren / Protokollschicht / egui-IHM**, gleiche Invarianten.
 
 ---

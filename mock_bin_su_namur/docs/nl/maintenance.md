@@ -91,7 +91,7 @@ docs/                    Conceptie, NAMUR-commando's, handleiding, onderhoud (me
 
 **Gulden regel**: de bedrijfslogica (`mock_lib_control`, `motor.rs`, `stirrer.rs`)
 blijft **synchroon en getest**; het asynchrone is beperkt tot de acteurs en de IO.
-Exacte kopie van de **ORME**-regelaar (`mock_bin_ru_modbustcp`) — dezelfde
+Exacte kopie van de **ORME**-regelaar (`mock_bin_ru_modbus`) — dezelfde
 invarianten.
 
 ---

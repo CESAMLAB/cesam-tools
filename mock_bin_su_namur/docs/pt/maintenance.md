@@ -90,7 +90,7 @@ docs/                    Conceção, comandos NAMUR, manual, manutenção (multi
 
 **Regra de ouro**: a lógica de negócio (`mock_lib_control`, `motor.rs`,
 `stirrer.rs`) mantém-se **síncrona e testada**; o assíncrono fica confinado aos
-atores e à IO. Decalque exato do regulador **ORME** (`mock_bin_ru_modbustcp`) —
+atores e à IO. Decalque exato do regulador **ORME** (`mock_bin_ru_modbus`) —
 mesmos invariantes.
 
 ---

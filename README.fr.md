@@ -23,7 +23,7 @@ ou passerelles **sans matériel réel**.
 
 | Crate | Produit | Description | Protocole | IHM |
 |-------|---------|-------------|-----------|-----|
-| [`mock_bin_ru_modbustcp`](mock_bin_ru_modbustcp) | **ORME** | Régulateur (PID / TOR / PWM) sur fonction de transfert | Modbus TCP & RTU (esclave) | egui |
+| [`mock_bin_ru_modbus`](mock_bin_ru_modbus) | **ORME** | Régulateur (PID / TOR / PWM) sur fonction de transfert | Modbus TCP & RTU (esclave) | egui |
 | [`mock_bin_su_namur`](mock_bin_su_namur) | **OSNE** | Agitateur de laboratoire à hélice : fonction de transfert du moteur, asservissement de vitesse rapide, charge visqueuse ajustable | NAMUR sur TCP & série RS-232 (esclave) | egui |
 | [`mock_bin_ru_opcua`](mock_bin_ru_opcua) | **ORUE** | Régulateur de procédé (PID anti-emballement) sur procédé du premier ordre, avec sécurité OPC UA configurable | OPC UA (serveur) | egui |
 
@@ -57,7 +57,7 @@ Un régulateur industriel virtuel complet :
   temps réel, **table d'adresses Modbus live**, et un **modal Paramètres**
   (transport TCP/RTU, port, IP autorisées, paramètres série, fonction de
   transfert, bornes de consigne).
-- **Configuration persistée** au format TOML (`mock_ru_modbustcp.toml`),
+- **Configuration persistée** au format TOML (`mock_ru_modbus.toml`),
   rechargée au démarrage, avec bouton de réinitialisation aux valeurs par défaut.
 
 ### Architecture asynchrone
@@ -187,18 +187,18 @@ sha256sum -c SHA256SUMS
 # Prérequis : Rust stable (édition 2021, >= 1.85).
 # Dépendances système Linux pour l'IHM : libxkbcommon, libwayland/xcb, openGL.
 
-cargo run -p mock_bin_ru_modbustcp
+cargo run -p mock_bin_ru_modbus
 ```
 
 La fenêtre s'ouvre et le serveur Modbus TCP écoute sur `0.0.0.0:5502`.
 Le **port**, l'**IP d'écoute** et la **liste blanche d'IP** se règlent dans le
 modal **⚙ Paramètres** (appliqué à chaud) puis sont **persistés** dans
-`mock_ru_modbustcp.toml`. La **langue de l'interface** (français, anglais,
+`mock_ru_modbus.toml`. La **langue de l'interface** (français, anglais,
 allemand, espagnol, italien, portugais, néerlandais, polonais) se choisit dans ce
 même modal et est persistée. Pour utiliser un autre fichier de configuration :
 
 ```bash
-MOCK_CONFIG=/chemin/vers/ma_config.toml cargo run -p mock_bin_ru_modbustcp
+MOCK_CONFIG=/chemin/vers/ma_config.toml cargo run -p mock_bin_ru_modbus
 ```
 
 ### Tester la liaison Modbus
@@ -212,7 +212,7 @@ mbpoll -m tcp -a 1 -t 3:float -r 1 -p 5502 127.0.0.1   # lire PV (f32)
 ```
 
 La table d'adresses complète est documentée dans
-[`mock_bin_ru_modbustcp/src/map.rs`](mock_bin_ru_modbustcp/src/map.rs).
+[`mock_bin_ru_modbus/src/map.rs`](mock_bin_ru_modbus/src/map.rs).
 
 ## Développement
 
@@ -228,10 +228,10 @@ disponible en huit langues (`docs/<langue>/`). Versions françaises :
 
 **ORME** (régulateur Modbus) :
 
-- [**Manuel utilisateur**](mock_bin_ru_modbustcp/docs/fr/manuel_utilisateur.md) — prise en main, IHM, paramètres, FAQ.
-- [Document de conception](mock_bin_ru_modbustcp/docs/fr/conception.md) — architecture et choix techniques.
-- [Table d'adresses Modbus](mock_bin_ru_modbustcp/docs/fr/table_modbus.md) — plan d'adressage complet.
-- [Maintenance logicielle](mock_bin_ru_modbustcp/docs/fr/maintenance.md) — build, configuration, extension, dépannage.
+- [**Manuel utilisateur**](mock_bin_ru_modbus/docs/fr/manuel_utilisateur.md) — prise en main, IHM, paramètres, FAQ.
+- [Document de conception](mock_bin_ru_modbus/docs/fr/conception.md) — architecture et choix techniques.
+- [Table d'adresses Modbus](mock_bin_ru_modbus/docs/fr/table_modbus.md) — plan d'adressage complet.
+- [Maintenance logicielle](mock_bin_ru_modbus/docs/fr/maintenance.md) — build, configuration, extension, dépannage.
 
 **OSNE** (agitateur de laboratoire NAMUR) :
 
