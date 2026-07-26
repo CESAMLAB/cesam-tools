@@ -31,6 +31,12 @@ INSTRUMENTS=(
   "mock_bin_ru_modbustcp:orme:5502"
   "mock_bin_su_namur:osne:4001"
   "mock_bin_ru_opcua:ru_opcua:4840"
+  # Sparkplug B : edge node MQTT **sortant** (client) — aucun port d'écoute → 0.
+  "mock_bin_ru_sparkplugb:ru_spb:0"
+  # S7 : serveur S7comm sur ISO-on-TCP (RFC1006), port standard 102.
+  "mock_bin_ru_s7:ru_s7:102"
+  # EtherNet/IP : adaptateur CIP (messagerie explicite), port standard 44818.
+  "mock_bin_ru_ethernetip:ru_eip:44818"
 )
 
 IMAGE_PREFIX="${IMAGE_PREFIX:-}"

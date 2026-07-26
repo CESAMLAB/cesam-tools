@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=ORSE
+GenericName=Régulateur simulé (Sparkplug B)
+Comment=Simulateur d'unité de régulation industrielle sur MQTT Sparkplug B — CESAM-Lab
+Exec=ru_spb
+Icon=ru_spb
+Terminal=false
+Categories=Utility;Engineering;Development;
+# Doit correspondre à l'app_id Wayland / WM_CLASS X11 défini dans main.rs.
+StartupWMClass=ru_spb

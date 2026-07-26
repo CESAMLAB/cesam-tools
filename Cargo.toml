@@ -6,6 +6,9 @@ members = [
     "mock_bin_ru_modbustcp",
     "mock_bin_su_namur",
     "mock_bin_ru_opcua",
+    "mock_bin_ru_sparkplugb",
+    "mock_bin_ru_s7",
+    "mock_bin_ru_ethernetip",
 ]
 
 [workspace.package]
@@ -26,6 +29,15 @@ ractor = { version = "0.15" }
 # --- OPC UA (serveur) — pile 100 % Rust (RustCrypto), sans OpenSSL ---
 # Prototype mock_bin_ru_opcua. La feature `server` tire le serveur tokio-natif.
 async-opcua = { version = "0.18", default-features = false, features = ["server"] }
+
+# --- MQTT Sparkplug B (client / Edge Node) ---
+# rumqttc : client MQTT async tokio. TLS via rustls (déjà dans l'arbre via async-opcua,
+# pas d'OpenSSL). default-features = false : on ne tire que le backend rustls.
+rumqttc = { version = "0.24", default-features = false, features = ["use-rustls"] }
+# sparkplug-rs : structs protobuf Eclipse Tahu (Payload / Metric / DataType) générés
+# via rust-protobuf (codegen 100 % Rust, pas de protoc → cross propre). Re-exporte la
+# crate `protobuf` (runtime) ; (dé)sérialisation via `sparkplug_rs::protobuf::Message`.
+sparkplug-rs = { version = "0.5" }
 
 # --- Modbus TCP (serveur/esclave) ---
 tokio-modbus = { version = "0.17", default-features = false, features = ["tcp-server"] }

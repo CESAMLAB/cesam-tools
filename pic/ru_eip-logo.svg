@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 240" width="760" height="240">
+  <title>OREE — Open Regulator EtherNet/IP Emulator</title>
+  <style>
+    .ink { fill: #1A171B; }
+    .sub { fill: #6E6A70; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #ECECEC; }
+      .sub { fill: #B7B3B9; }
+    }
+  </style>
+  <g transform="translate(2,0)">
+    <g>
+    <circle cx="120" cy="120" r="62" fill="#1A171B"/>
+    <path d="M 64.85 175.15 A 78 78 0 1 1 175.15 175.15" fill="none" stroke="#F29400" stroke-width="13" stroke-linecap="round"/>
+    <line x1="90.3" y1="149.7" x2="81.82" y2="158.18" stroke="#F29400" stroke-width="5" stroke-linecap="round"/>
+    <line x1="80.06" y1="132.98" x2="68.64" y2="136.69" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="78.52" y1="113.43" x2="66.66" y2="111.55" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="86.02" y1="95.31" x2="76.31" y2="88.26" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="100.93" y1="82.58" x2="95.48" y2="71.89" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="120" y1="78" x2="120" y2="66" stroke="#F29400" stroke-width="5" stroke-linecap="round"/>
+    <line x1="139.07" y1="82.58" x2="144.52" y2="71.89" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="153.98" y1="95.31" x2="163.69" y2="88.26" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="161.48" y1="113.43" x2="173.34" y2="111.55" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="159.94" y1="132.98" x2="171.36" y2="136.69" stroke="#4A464C" stroke-width="3" stroke-linecap="round"/>
+    <line x1="149.7" y1="149.7" x2="158.18" y2="158.18" stroke="#F29400" stroke-width="5" stroke-linecap="round"/>
+    <polygon points="153.46,82.84 112.57,113.31 107.96,133.38 127.43,126.69" fill="#F29400"/>
+    <circle cx="120" cy="120" r="13" fill="#F29400"/>
+    <circle cx="120" cy="120" r="5" fill="#1A171B"/>
+    <line x1="120" y1="220" x2="49.29" y2="190.71" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="49.29" y1="190.71" x2="20" y2="120" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="20" y1="120" x2="49.29" y2="49.29" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="49.29" y1="49.29" x2="120" y2="20" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="120" y1="20" x2="190.71" y2="49.29" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="190.71" y1="49.29" x2="220" y2="120" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="220" y1="120" x2="190.71" y2="190.71" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="190.71" y1="190.71" x2="120" y2="220" stroke="#F29400" stroke-width="3.5" stroke-linecap="round"/>
+    <polygon points="120,211.5 128.5,220 120,228.5 111.5,220" fill="#F29400"/>
+    <polygon points="120,216.6 123.4,220 120,223.4 116.6,220" fill="#1A171B"/>
+    <polygon points="49.29,182.21 57.79,190.71 49.29,199.21 40.79,190.71" fill="#F29400"/>
+    <polygon points="49.29,187.31 52.69,190.71 49.29,194.11 45.89,190.71" fill="#1A171B"/>
+    <polygon points="20,111.5 28.5,120 20,128.5 11.5,120" fill="#F29400"/>
+    <polygon points="20,116.6 23.4,120 20,123.4 16.6,120" fill="#1A171B"/>
+    <polygon points="49.29,40.79 57.79,49.29 49.29,57.79 40.79,49.29" fill="#F29400"/>
+    <polygon points="49.29,45.89 52.69,49.29 49.29,52.69 45.89,49.29" fill="#1A171B"/>
+    <polygon points="120,11.5 128.5,20 120,28.5 111.5,20" fill="#F29400"/>
+    <polygon points="120,16.6 123.4,20 120,23.4 116.6,20" fill="#1A171B"/>
+    <polygon points="190.71,40.79 199.21,49.29 190.71,57.79 182.21,49.29" fill="#F29400"/>
+    <polygon points="190.71,45.89 194.11,49.29 190.71,52.69 187.31,49.29" fill="#1A171B"/>
+    <polygon points="220,111.5 228.5,120 220,128.5 211.5,120" fill="#F29400"/>
+    <polygon points="220,116.6 223.4,120 220,123.4 216.6,120" fill="#1A171B"/>
+    <polygon points="190.71,182.21 199.21,190.71 190.71,199.21 182.21,190.71" fill="#F29400"/>
+    <polygon points="190.71,187.31 194.11,190.71 190.71,194.11 187.31,190.71" fill="#1A171B"/>
+  </g>
+  </g>
+  <text x="250" y="118" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="104" font-weight="800"
+        class="ink" letter-spacing="2">OR<tspan fill="#F29400">EE</tspan></text>
+  <text x="252" y="158" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="27" font-weight="600"
+        class="sub" letter-spacing="0.5"
+        textLength="420" lengthAdjust="spacingAndGlyphs">Open Regulator EtherNet/IP Emulator</text>
+  <text x="252" y="192" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="23" font-weight="700"
+        fill="#F29400" font-style="italic">« Connectez le procédé. »</text>
+</svg>

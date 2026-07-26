@@ -1,0 +1,369 @@
+//! Configuration de l'application : réseau **serveur EtherNet/IP** (CIP), procédé et
+//! régulation, avec persistance TOML. Toute valeur issue du fichier est **assainie**
+//! au chargement ([`AppConfig::sanitized`]) pour éviter tout `panic!` (`f32::clamp`)
+//! ou valeur aberrante.
+
+use std::net::IpAddr;
+use std::path::{Path, PathBuf};
+
+use mock_lib_control::PidConfig;
+use serde::{Deserialize, Serialize};
+
+use crate::i18n::Lang;
+use crate::regulator::{RegulatorConfig, DEFAULT_DT};
+
+const DEFAULT_CONFIG_FILE: &str = "mock_ru_ethernetip.toml";
+
+/// Port EtherNet/IP standard (44818) — pas de privilège requis.
+pub const DEFAULT_PORT: u16 = 44818;
+
+/// Paramètres réseau du serveur EtherNet/IP (CIP).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct NetworkConfig {
+    /// IP d'écoute.
+    pub bind_ip: String,
+    /// Port TCP (44818 standard EtherNet/IP).
+    pub port: u16,
+    /// Liste blanche d'IP (motifs avec jokers `*` par octet). Vide = tout autorisé.
+    pub allowlist: Vec<String>,
+}
+
+impl Default for NetworkConfig {
+    fn default() -> Self {
+        Self {
+            bind_ip: "0.0.0.0".to_string(),
+            port: DEFAULT_PORT,
+            allowlist: Vec::new(),
+        }
+    }
+}
+
+impl NetworkConfig {
+    /// Adresse d'écoute `ip:port` pour le bind et l'affichage.
+    #[must_use]
+    pub fn listen_addr(&self) -> String {
+        format!("{}:{}", self.bind_ip, self.port)
+    }
+
+    /// `true` si la posture est **exposée** : écoute sur toutes les interfaces
+    /// (`0.0.0.0`/`::`) **et** liste blanche vide.
+    #[must_use]
+    pub fn is_exposed(&self) -> bool {
+        let all_ifaces = self.bind_ip.trim() == "0.0.0.0" || self.bind_ip.trim() == "::";
+        all_ifaces && Allowlist::new(self.allowlist.clone()).is_empty()
+    }
+}
+
+/// Filtre d'adresses IP basé sur des motifs avec jokers `*` par octet (IPv4).
+///
+/// Une liste vide autorise toutes les connexions. Les adresses **IPv4-mapped IPv6**
+/// (`::ffff:a.b.c.d`) sont ramenées à leur IPv4 avant comparaison. Pour une IPv6
+/// « pure », seule l'égalité exacte de la représentation textuelle est gérée.
+#[derive(Debug, Clone, Default)]
+pub struct Allowlist {
+    patterns: Vec<String>,
+}
+
+impl Allowlist {
+    #[must_use]
+    pub fn new(patterns: Vec<String>) -> Self {
+        Self {
+            patterns: patterns
+                .into_iter()
+                .map(|p| p.trim().to_string())
+                .filter(|p| !p.is_empty())
+                .collect(),
+        }
+    }
+
+    /// `true` si aucune restriction (liste vide).
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.patterns.is_empty()
+    }
+
+    /// Indique si l'IP est autorisée.
+    #[must_use]
+    pub fn allows(&self, ip: IpAddr) -> bool {
+        if self.patterns.is_empty() {
+            return true;
+        }
+        self.patterns.iter().any(|pat| pattern_matches(pat, ip))
+    }
+}
+
+/// Teste un motif (`192.168.1.*`, `127.0.0.1`, …) contre une adresse IP.
+fn pattern_matches(pattern: &str, ip: IpAddr) -> bool {
+    let ip = match ip {
+        IpAddr::V6(v6) => v6.to_ipv4_mapped().map_or(IpAddr::V6(v6), IpAddr::V4),
+        v4 => v4,
+    };
+    match ip {
+        IpAddr::V4(v4) => {
+            let parts: Vec<&str> = pattern.split('.').collect();
+            if parts.len() != 4 {
+                return pattern == ip.to_string();
+            }
+            let octets = v4.octets();
+            parts
+                .iter()
+                .zip(octets.iter())
+                .all(|(p, o)| *p == "*" || p.parse::<u8>().map(|n| n == *o).unwrap_or(false))
+        }
+        IpAddr::V6(_) => pattern == ip.to_string(),
+    }
+}
+
+/// Paramètres du procédé simulé (fonction de transfert du premier ordre + retard).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct ProcessConfig {
+    pub k: f32,
+    pub tau: f32,
+    pub dead_time: f32,
+    pub ambient: f32,
+}
+
+impl Default for ProcessConfig {
+    fn default() -> Self {
+        let r = RegulatorConfig::default();
+        Self {
+            k: r.k,
+            tau: r.tau,
+            dead_time: r.dead_time,
+            ambient: r.ambient,
+        }
+    }
+}
+
+/// Paramètres de régulation persistés.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct RegulationConfig {
+    pub sp_min: f32,
+    pub sp_max: f32,
+    pub pid: PidConfig,
+}
+
+impl Default for RegulationConfig {
+    fn default() -> Self {
+        let r = RegulatorConfig::default();
+        Self {
+            sp_min: r.sp_min,
+            sp_max: r.sp_max,
+            pid: r.pid,
+        }
+    }
+}
+
+/// Configuration complète de l'application.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
+pub struct AppConfig {
+    pub language: Lang,
+    pub network: NetworkConfig,
+    pub process: ProcessConfig,
+    pub regulation: RegulationConfig,
+    pub check_updates: bool,
+}
+
+impl Default for AppConfig {
+    fn default() -> Self {
+        Self {
+            language: Lang::default(),
+            network: NetworkConfig::default(),
+            process: ProcessConfig::default(),
+            regulation: RegulationConfig::default(),
+            check_updates: true,
+        }
+    }
+}
+
+impl AppConfig {
+    /// Traduit la configuration en [`RegulatorConfig`] pour l'acteur de simulation.
+    #[must_use]
+    pub fn to_regulator_config(&self) -> RegulatorConfig {
+        let mut pid = self.regulation.pid;
+        pid.out_min = 0.0;
+        pid.out_max = 100.0;
+        RegulatorConfig {
+            dt: DEFAULT_DT,
+            sp_min: self.regulation.sp_min,
+            sp_max: self.regulation.sp_max,
+            pid,
+            k: self.process.k,
+            tau: self.process.tau,
+            dead_time: self.process.dead_time,
+            ambient: self.process.ambient,
+        }
+    }
+
+    /// Assainit les valeurs numériques issues du TOML (anti-panic / anti-aberration).
+    #[must_use]
+    pub fn sanitized(mut self) -> Self {
+        let before = self.clone();
+        let dp = ProcessConfig::default();
+        let dr = RegulationConfig::default();
+
+        self.process.k = finite_or(self.process.k, dp.k);
+        self.process.tau = finite_at_least(self.process.tau, 1e-3, dp.tau);
+        self.process.dead_time = finite_at_least(self.process.dead_time, 0.0, dp.dead_time);
+        self.process.ambient = finite_or(self.process.ambient, dp.ambient);
+
+        let mut s_min = finite_or(self.regulation.sp_min, dr.sp_min);
+        let mut s_max = finite_or(self.regulation.sp_max, dr.sp_max);
+        if s_min > s_max {
+            std::mem::swap(&mut s_min, &mut s_max);
+        }
+        self.regulation.sp_min = s_min;
+        self.regulation.sp_max = s_max;
+
+        self.regulation.pid = sanitize_pid(self.regulation.pid, dr.pid);
+
+        if self != before {
+            log::warn!("Configuration sanitized: out-of-range or non-finite values were corrected");
+        }
+        self
+    }
+
+    #[must_use]
+    pub fn path() -> PathBuf {
+        std::env::var_os("MOCK_CONFIG")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from(DEFAULT_CONFIG_FILE))
+    }
+
+    #[must_use]
+    pub fn load(path: &Path) -> Self {
+        match std::fs::read_to_string(path) {
+            Ok(content) => match toml::from_str::<Self>(&content) {
+                Ok(cfg) => {
+                    log::info!("Configuration loaded from {}", path.display());
+                    cfg.sanitized()
+                }
+                Err(e) => {
+                    log::warn!("Configuration unreadable ({e}) — using default values");
+                    Self::default()
+                }
+            },
+            Err(_) => {
+                log::info!("No configuration file ({}) — using default values", path.display());
+                Self::default()
+            }
+        }
+    }
+
+    pub fn save(&self, path: &Path) -> Result<(), String> {
+        let content = toml::to_string_pretty(self).map_err(|e| e.to_string())?;
+        std::fs::write(path, content).map_err(|e| e.to_string())?;
+        log::info!("Configuration saved to {}", path.display());
+        Ok(())
+    }
+}
+
+#[inline]
+fn finite_or(v: f32, default: f32) -> f32 {
+    if v.is_finite() {
+        v
+    } else {
+        default
+    }
+}
+
+#[inline]
+fn finite_at_least(v: f32, min: f32, default: f32) -> f32 {
+    if v.is_finite() {
+        v.max(min)
+    } else {
+        default
+    }
+}
+
+#[must_use]
+fn sanitize_pid(mut cfg: PidConfig, default: PidConfig) -> PidConfig {
+    cfg.kp = finite_at_least(cfg.kp, 0.0, default.kp);
+    cfg.ki = finite_at_least(cfg.ki, 0.0, default.ki);
+    cfg.kd = finite_at_least(cfg.kd, 0.0, default.kd);
+    let mut out_min = finite_or(cfg.out_min, default.out_min);
+    let mut out_max = finite_or(cfg.out_max, default.out_max);
+    if out_min > out_max {
+        std::mem::swap(&mut out_min, &mut out_max);
+    }
+    cfg.out_min = out_min;
+    cfg.out_max = out_max;
+    cfg
+}
+
+/// État courant du serveur EtherNet/IP, partagé avec l'IHM pour affichage.
+#[derive(Debug, Clone, Default)]
+pub struct ServerStatus {
+    /// `true` si le serveur écoute effectivement.
+    pub listening: bool,
+    /// Adresse d'écoute courante.
+    pub addr: String,
+    /// Dernière erreur réseau, le cas échéant.
+    pub error: Option<String>,
+    /// Adresse du dernier client S7 connecté (affichage).
+    pub peer: Option<String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn config_round_trips_through_toml() {
+        let cfg = AppConfig::default();
+        let s = toml::to_string_pretty(&cfg).unwrap();
+        let back: AppConfig = toml::from_str(&s).unwrap();
+        assert_eq!(cfg, back);
+    }
+
+    #[test]
+    fn sanitized_orders_inverted_bounds_without_panic() {
+        let mut cfg = AppConfig::default();
+        cfg.regulation.sp_min = 200.0;
+        cfg.regulation.sp_max = 0.0;
+        cfg.process.tau = f32::NAN;
+        cfg.process.dead_time = -5.0;
+        let cfg = cfg.sanitized();
+        assert!(cfg.regulation.sp_min <= cfg.regulation.sp_max);
+        assert!(cfg.process.tau.is_finite() && cfg.process.tau >= 1e-3);
+        assert!(cfg.process.dead_time >= 0.0);
+        let _ = crate::regulator::Regulator::new(cfg.to_regulator_config());
+    }
+
+    #[test]
+    fn listen_addr_format() {
+        let net = NetworkConfig { bind_ip: "127.0.0.1".to_string(), port: 44818, allowlist: vec![] };
+        assert_eq!(net.listen_addr(), "127.0.0.1:44818");
+    }
+
+    #[test]
+    fn empty_allowlist_allows_all() {
+        let f = Allowlist::new(vec![]);
+        assert!(f.allows("8.8.8.8".parse().unwrap()));
+    }
+
+    #[test]
+    fn wildcard_matches_subnet() {
+        let f = Allowlist::new(vec!["192.168.1.*".to_string()]);
+        assert!(f.allows("192.168.1.42".parse().unwrap()));
+        assert!(!f.allows("192.168.2.42".parse().unwrap()));
+    }
+
+    #[test]
+    fn ipv4_mapped_v6_is_reduced() {
+        let f = Allowlist::new(vec!["192.168.1.*".to_string()]);
+        assert!(f.allows("::ffff:192.168.1.42".parse().unwrap()));
+        assert!(!f.allows("::ffff:192.168.2.42".parse().unwrap()));
+    }
+
+    #[test]
+    fn exposed_when_all_ifaces_and_empty_allowlist() {
+        assert!(NetworkConfig::default().is_exposed());
+        let restricted = NetworkConfig { allowlist: vec!["10.0.0.*".to_string()], ..NetworkConfig::default() };
+        assert!(!restricted.is_exposed());
+    }
+}

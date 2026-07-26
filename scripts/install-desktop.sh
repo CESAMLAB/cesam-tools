@@ -15,13 +15,13 @@
 # L'exécutable doit être dans le PATH (ou ajustez `Exec=` du .desktop).
 #
 # Usage :
-#   scripts/install-desktop.sh [orme|osne|ru_opcua]   # défaut : orme
+#   scripts/install-desktop.sh [orme|osne|ru_opcua|ru_spb|ru_s7|ru_eip]   # défaut : orme
 set -euo pipefail
 
 BIN="${1:-orme}"
 case "$BIN" in
-  orme|osne|ru_opcua) ;;
-  *) echo "✗ Instrument inconnu : $BIN (attendu : orme | osne | ru_opcua)"; exit 1 ;;
+  orme|osne|ru_opcua|ru_spb|ru_s7|ru_eip) ;;
+  *) echo "✗ Instrument inconnu : $BIN (attendu : orme | osne | ru_opcua | ru_spb | ru_s7 | ru_eip)"; exit 1 ;;
 esac
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

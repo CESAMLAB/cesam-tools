@@ -22,7 +22,10 @@ LABEL org.opencontainers.image.title="${BIN}" \
 # dist/_docker/<bin>/<arch>/ par build-prod.sh.
 COPY dist/_docker/${BIN}/${TARGETARCH}/${BIN} /usr/local/bin/instrument
 
-# Port du protocole de terrain par défaut (Modbus 5502 pour ORME, NAMUR 4001 pour OSNE).
+# Port du protocole de terrain par défaut (Modbus 5502 pour ORME, NAMUR 4001 pour
+# OSNE, OPC UA 4840 pour ORUE). Les instruments **client** (edge node Sparkplug B,
+# ORSE) n'écoutent aucun port et passent PORT=0 : `EXPOSE 0` est une métadonnée
+# inerte (liveness assurée côté broker via le Last Will/NDEATH, pas par une socket).
 EXPOSE ${PORT}
 
 # Répertoire de travail : y monter un volume pour fournir/persister le fichier de

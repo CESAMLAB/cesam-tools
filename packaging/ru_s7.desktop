@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=ORSS
+GenericName=Régulateur simulé (S7)
+Comment=Simulateur d'unité de régulation industrielle sur Siemens S7 (ISO-on-TCP) — CESAM-Lab
+Exec=ru_s7
+Icon=ru_s7
+Terminal=false
+Categories=Utility;Engineering;Development;
+# Doit correspondre à l'app_id Wayland / WM_CLASS X11 défini dans main.rs.
+StartupWMClass=ru_s7

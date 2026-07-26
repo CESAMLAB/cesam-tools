@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=OREE
+GenericName=Régulateur simulé (EtherNet/IP)
+Comment=Simulateur d'unité de régulation industrielle sur EtherNet/IP (CIP) — CESAM-Lab
+Exec=ru_eip
+Icon=ru_eip
+Terminal=false
+Categories=Utility;Engineering;Development;
+# Doit correspondre à l'app_id Wayland / WM_CLASS X11 défini dans main.rs.
+StartupWMClass=ru_eip
