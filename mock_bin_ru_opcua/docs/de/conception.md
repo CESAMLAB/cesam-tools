@@ -21,10 +21,15 @@ Authentifizierung, Signatur und Verschlüsselung (vorgesehen in Phase 2).
 
 ---
 
-## 2. Physikalisches Modell ([`regulator.rs`](../../src/regulator.rs))
+## 2. Physikalisches Modell ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
 
-Der **Prozess** verwendet [`mock_lib_control::FirstOrderProcess`] erneut (geteilt mit
-ORME): Übertragungsfunktion erster Ordnung mit reiner Totzeit
+Das Fachmodell (Zustand, Konfiguration, Befehle, Simulationsschritt) befindet
+sich in der geteilten Crate [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs),
+**unverändert wiederverwendet** von ORUE, ORSE (Sparkplug B), ORSS (S7comm) und
+OREE (EtherNet/IP): diese vier Instrumente haben untereinander keine fachliche
+Neuheit, nur der Netzwerktransport ändert sich. Der **Prozess** verwendet
+[`mock_lib_control::FirstOrderProcess`] erneut (geteilt mit ORME):
+Übertragungsfunktion erster Ordnung mit reiner Totzeit
 
 ```text
 PV(s) / U(s) = K · e^(−L·s) / (1 + τ·s)
@@ -55,10 +60,11 @@ IHM (egui) ───Command(cast)──►  SimulationActor ──refresh──�
 OPC-UA-Server ─Command(cast)─►   (Regulator)    ──refresh──► SharedSnapshot ──► OPC-UA-Lesevorgänge
 ```
 
-- **`SimulationActor`** ([`actors/simulation.rs`](../../src/actors/simulation.rs)):
-  **alleiniger** Eigentümer des `Regulator`; treibt die Simulation über einen
-  neu armierten One-Shot-Timer voran (kein abgekoppelter Timer) und veröffentlicht
-  bei jedem Schritt einen `SharedSnapshot`.
+- **`SimulationActor`** ([`mock_lib_regulator::SimulationActor`](../../../mock_lib_regulator/src/simulation.rs),
+  reexportiert von [`actors/mod.rs`](../../src/actors/mod.rs)): **alleiniger**
+  Eigentümer des `Regulator`; treibt die Simulation über einen neu armierten
+  One-Shot-Timer voran (kein abgekoppelter Timer) und veröffentlicht bei jedem
+  Schritt einen `SharedSnapshot`.
 - **`OpcuaServerActor`** ([`actors/network.rs`](../../src/actors/network.rs)):
   besitzt den OPC-UA-Server (tokio-Task `server.run()`); im laufenden Betrieb
   neustartbar (`Reconfigure`: erneutes Binden, wenn sich IP/Port ändert); behält
@@ -127,5 +133,3 @@ Gleitkommazahlen). Datei: `mock_ru_opcua.toml` (überschreibbar durch `MOCK_CONF
 - OPC-UA-Methoden (`Reset`, `Autotune`) zusätzlich zu den Variablen.
 - Typisiertes Informationsmodell (Regler-ObjectType) statt flacher Variablen.
 - Historisierung / `HistoryRead` auf dem Messwert.
-- Hochstufung des Reglermodells von ORME in eine geteilte `mock_lib_*` (es ist
-  heute zwischen ORME und diesem Instrument dupliziert).

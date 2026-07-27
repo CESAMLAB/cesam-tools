@@ -19,17 +19,16 @@ mod config;
 #[cfg(feature = "gui")]
 mod gui;
 mod i18n;
-mod regulator;
 mod s7_server;
 
 use std::sync::{Arc, Mutex};
 
 use anyhow::Context;
+use mock_lib_regulator::Regulator;
 use ractor::Actor;
 
 use actors::{S7ServerActor, S7ServerArgs, SimulationActor, SimulationArgs};
 use config::{AppConfig, ServerStatus};
-use regulator::Regulator;
 
 #[cfg(feature = "gui")]
 use gui::S7Gui;

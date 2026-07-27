@@ -20,7 +20,7 @@ use mock_lib_update::UpdateStatus;
 use crate::actors::{S7ServerMsg, SharedSnapshot, SharedStatus, SimulationMsg};
 use crate::config::AppConfig;
 use crate::i18n::{self, Lang, Msg};
-use crate::regulator::{Command, Snapshot};
+use mock_lib_regulator::{Command, Snapshot};
 
 const HISTORY_LEN: usize = 3000;
 

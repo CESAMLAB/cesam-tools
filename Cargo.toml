@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "mock_lib_control",
+    "mock_lib_regulator",
     "mock_lib_update",
     "mock_bin_ru_modbus",
     "mock_bin_su_namur",
@@ -64,6 +65,7 @@ env_logger = "0.11"
 
 # --- Membres internes ---
 mock_lib_control = { path = "mock_lib_control" }
+mock_lib_regulator = { path = "mock_lib_regulator" }
 mock_lib_update = { path = "mock_lib_update" }
 
 # Profil release : binaire de simulation léger et rapide.

@@ -20,7 +20,7 @@ use tokio::task::{JoinHandle, JoinSet};
 
 use crate::config::{Allowlist, NetworkConfig, ServerStatus};
 use crate::eip_server;
-use crate::regulator::Snapshot;
+use mock_lib_regulator::Snapshot;
 
 use super::{SharedAllowlist, SharedSnapshot, SharedStatus, SimulationMsg};
 
@@ -145,7 +145,7 @@ struct ListenerParams {
 fn current_snapshot(snapshot: &SharedSnapshot) -> Snapshot {
     match snapshot.lock() {
         Ok(g) => *g,
-        Err(_) => crate::regulator::Regulator::default().snapshot(),
+        Err(_) => mock_lib_regulator::Regulator::default().snapshot(),
     }
 }
 
@@ -231,7 +231,7 @@ mod tests {
     use super::*;
     use crate::actors::{SimulationActor, SimulationArgs};
     use crate::config::{NetworkConfig, ServerStatus};
-    use crate::regulator::{Regulator, RegulatorConfig};
+    use mock_lib_regulator::{Regulator, RegulatorConfig};
 
     async fn free_port() -> u16 {
         let l = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();

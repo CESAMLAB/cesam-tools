@@ -30,7 +30,7 @@
 //! | `SetpointMin`/`SetpointMax` | REAL | R | bornes de consigne |
 //! | `Kp`/`Ki`/`Kd` | REAL | R | gains PID |
 
-use crate::regulator::{Command, Snapshot};
+use mock_lib_regulator::{Command, Snapshot};
 
 // --- Constantes encapsulation --------------------------------------------------
 
@@ -253,7 +253,7 @@ fn write_tag(tag: &str, type_id: u16, data: &[u8]) -> (u8, Vec<Command>) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::regulator::{Regulator, RegulatorConfig};
+    use mock_lib_regulator::{Regulator, RegulatorConfig};
 
     fn snap() -> Snapshot {
         Regulator::new(RegulatorConfig::default()).snapshot()

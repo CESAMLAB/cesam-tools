@@ -1,4 +1,4 @@
-//! Régulateur de procédé simulé exposé en **Siemens S7** — marque **OREE**
+//! Régulateur de procédé simulé exposé en **EtherNet/IP** — marque **OREE**
 //! (*Open Regulator EtherNet/IP Emulator*) ; nom technique : RU/EtherNet/IP.
 //!
 //! Assemble :
@@ -18,18 +18,17 @@ mod branding;
 mod config;
 #[cfg(feature = "gui")]
 mod gui;
-mod i18n;
-mod regulator;
 mod eip_server;
+mod i18n;
 
 use std::sync::{Arc, Mutex};
 
 use anyhow::Context;
+use mock_lib_regulator::Regulator;
 use ractor::Actor;
 
 use actors::{EipServerActor, EipServerArgs, SimulationActor, SimulationArgs};
 use config::{AppConfig, ServerStatus};
-use regulator::Regulator;
 
 #[cfg(feature = "gui")]
 use gui::EipGui;

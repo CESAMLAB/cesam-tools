@@ -21,9 +21,14 @@ authenticatie, ondertekening en versleuteling (voorzien in Fase 2).
 
 ---
 
-## 2. Fysisch model ([`regulator.rs`](../../src/regulator.rs))
+## 2. Fysisch model ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
 
-Het **proces** hergebruikt [`mock_lib_control::FirstOrderProcess`] (gedeeld met
+Het bedrijfsmodel (toestand, configuratie, commando's, simulatiestap) bevindt
+zich in de gedeelde crate [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs),
+**ongewijzigd hergebruikt** door ORUE, ORSE (Sparkplug B), ORSS (S7comm) en
+OREE (EtherNet/IP): deze vier instrumenten hebben onderling geen enkele
+bedrijfsmatige nieuwigheid, alleen het netwerktransport verandert. Het
+**proces** hergebruikt [`mock_lib_control::FirstOrderProcess`] (gedeeld met
 ORME): eersteorde-overdrachtsfunctie met zuivere dode tijd
 
 ```text
@@ -54,10 +59,11 @@ GUI (egui) ───Command(cast)──►  SimulationActor ──refresh──�
 OPC UA-server ─Command(cast)─►   (Regulator)    ──refresh──► SharedSnapshot ──► OPC UA-lezingen
 ```
 
-- **`SimulationActor`** ([`actors/simulation.rs`](../../src/actors/simulation.rs)):
-  **enige** eigenaar van de `Regulator`; laat de simulatie vorderen op een opnieuw
-  geladen one-shot timer (geen losgekoppelde timer) en publiceert bij elke stap een
-  `SharedSnapshot`.
+- **`SimulationActor`** ([`mock_lib_regulator::SimulationActor`](../../../mock_lib_regulator/src/simulation.rs),
+  opnieuw geëxporteerd door [`actors/mod.rs`](../../src/actors/mod.rs)):
+  **enige** eigenaar van de `Regulator`; laat de simulatie vorderen op een
+  opnieuw geladen one-shot timer (geen losgekoppelde timer) en publiceert bij
+  elke stap een `SharedSnapshot`.
 - **`OpcuaServerActor`** ([`actors/network.rs`](../../src/actors/network.rs)):
   bezit de OPC UA-server (tokio-taak `server.run()`); warm herstartbaar
   (`Reconfigure`: rebind als IP/poort verandert); behoudt de `JoinHandle` (afbreken
@@ -126,5 +132,3 @@ floats). Bestand: `mock_ru_opcua.toml` (te overschrijven via `MOCK_CONFIG`).
 - OPC UA-methoden (`Reset`, `Autotune`) naast de variabelen.
 - Getypeerd informatiemodel (ObjectType regelaar) in plaats van platte variabelen.
 - Historisering / `HistoryRead` op de meting.
-- Promotie van het ORME-regelaarmodel naar een gedeelde `mock_lib_*` (het is
-  vandaag gedupliceerd tussen ORME en dit instrument).

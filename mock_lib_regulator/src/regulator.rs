@@ -2,8 +2,10 @@
 //! [`mock_lib_control`] (PID + procédé du premier ordre avec retard).
 //!
 //! Un PID asservit la **mesure** (PV) d'un procédé thermique vers une **consigne**
-//! (SP) en pilotant une **sortie** 0-100 %. Aucune nouveauté métier : l'instrument
-//! se distingue par son **transport MQTT Sparkplug B**, pas par sa physique.
+//! (SP) en pilotant une **sortie** 0-100 %. Ce modèle est **partagé** par les
+//! instruments RU dont le seul distinguo est le transport réseau (ORUE/OPC UA,
+//! ORSE/Sparkplug B, ORSS/S7, OREE/EtherNet-IP) : aucune nouveauté métier d'un
+//! instrument à l'autre, seule la surface protocolaire change.
 
 use mock_lib_control::{FirstOrderProcess, Pid, PidConfig};
 
@@ -51,7 +53,7 @@ impl Default for RegulatorConfig {
     }
 }
 
-/// Commande appliquée au régulateur (depuis l'IHM ou un client Sparkplug B via NCMD).
+/// Commande appliquée au régulateur (depuis l'IHM ou un client réseau).
 ///
 /// Le préfixe `Set` commun aux variantes est volontaire (pattern « commande »).
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -78,7 +80,7 @@ pub enum Command {
     },
 }
 
-/// Instantané de l'état, partagé **en lecture** avec l'IHM et l'edge node Sparkplug B.
+/// Instantané de l'état, partagé **en lecture** avec l'IHM et le serveur réseau.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Snapshot {
     pub run: bool,

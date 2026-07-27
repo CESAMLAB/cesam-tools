@@ -23,17 +23,16 @@ mod config;
 #[cfg(feature = "gui")]
 mod gui;
 mod i18n;
-mod regulator;
 mod sparkplug_node;
 
 use std::sync::{Arc, Mutex};
 
 use anyhow::Context;
+use mock_lib_regulator::Regulator;
 use ractor::Actor;
 
 use actors::{SimulationActor, SimulationArgs, SparkplugActor, SparkplugArgs};
 use config::{AppConfig, ServerStatus};
-use regulator::Regulator;
 
 #[cfg(feature = "gui")]
 use gui::SparkplugGui;

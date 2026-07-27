@@ -16,7 +16,7 @@ use sparkplug_rs::payload::{metric::Value, Metric};
 use sparkplug_rs::protobuf::Message;
 use sparkplug_rs::{NodeMessageType, Payload, TopicNamespace};
 
-use crate::regulator::{Command, Snapshot};
+use mock_lib_regulator::{Command, Snapshot};
 
 /// Codes `DataType` Sparkplug B (Eclipse Tahu) utilisés ici. Le `.proto` stocke le
 /// type en `uint32` brut ; ces constantes en fixent la sémantique.
@@ -265,7 +265,7 @@ impl SeqCounter {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::regulator::{Regulator, RegulatorConfig};
+    use mock_lib_regulator::{Regulator, RegulatorConfig};
 
     fn sample() -> Snapshot {
         Regulator::new(RegulatorConfig::default()).snapshot()

@@ -21,10 +21,15 @@ podpis i szyfrowanie (przewidziane w Fazie 2).
 
 ---
 
-## 2. Model fizyczny ([`regulator.rs`](../../src/regulator.rs))
+## 2. Model fizyczny ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
 
-**Proces** ponownie wykorzystuje [`mock_lib_control::FirstOrderProcess`]
-(współdzielony z ORME): funkcja przejścia pierwszego rzędu z czystym opóźnieniem
+Model biznesowy (stan, konfiguracja, komendy, krok symulacji) znajduje się we
+współdzielonej crate [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs),
+**wykorzystywanej bez zmian** przez ORUE, ORSE (Sparkplug B), ORSS (S7comm) i
+OREE (EtherNet/IP): te cztery instrumenty nie mają między sobą żadnej nowości
+biznesowej, zmienia się jedynie transport sieciowy. **Proces** ponownie
+wykorzystuje [`mock_lib_control::FirstOrderProcess`] (współdzielony z ORME):
+funkcja przejścia pierwszego rzędu z czystym opóźnieniem
 
 ```text
 PV(s) / U(s) = K · e^(−L·s) / (1 + τ·s)
@@ -54,7 +59,8 @@ GUI (egui) ───Command(cast)──►  SimulationActor ──refresh──�
 Serwer OPC UA ─Command(cast)─►   (Regulator)    ──refresh──► SharedSnapshot ──► odczyty OPC UA
 ```
 
-- **`SimulationActor`** ([`actors/simulation.rs`](../../src/actors/simulation.rs)):
+- **`SimulationActor`** ([`mock_lib_regulator::SimulationActor`](../../../mock_lib_regulator/src/simulation.rs),
+  reeksportowany przez [`actors/mod.rs`](../../src/actors/mod.rs)):
   **wyłączny** właściciel `Regulator`; przesuwa symulację na jednorazowym,
   ponownie uzbrajanym timerze (brak odłączonego timera) i publikuje
   `SharedSnapshot` przy każdym kroku.
@@ -126,5 +132,3 @@ wczytywaniu** (`AppConfig::sanitized`: granice uporządkowane, `τ ≥ 1e-3`,
 - Metody OPC UA (`Reset`, `Autotune`) oprócz zmiennych.
 - Typowany model informacyjny (ObjectType regulatora) zamiast płaskich zmiennych.
 - Historyzacja / `HistoryRead` na pomiarze.
-- Promocja modelu regulatora ORME do współdzielonej `mock_lib_*` (jest on dziś
-  duplikowany między ORME a tym instrumentem).

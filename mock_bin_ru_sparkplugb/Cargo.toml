@@ -23,6 +23,7 @@ gui = ["dep:eframe", "dep:egui_plot", "dep:image", "dep:mock_lib_update"]
 
 [dependencies]
 mock_lib_control = { workspace = true, features = ["serde"] }
+mock_lib_regulator = { workspace = true }
 rumqttc = { workspace = true }
 sparkplug-rs = { workspace = true }
 tokio = { workspace = true, features = ["signal"] }

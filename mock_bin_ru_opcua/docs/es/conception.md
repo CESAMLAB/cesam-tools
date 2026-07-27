@@ -21,10 +21,15 @@ la autenticación, la firma y el cifrado (previstos en la Fase 2).
 
 ---
 
-## 2. Modelo físico ([`regulator.rs`](../../src/regulator.rs))
+## 2. Modelo físico ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
 
-El **proceso** reutiliza [`mock_lib_control::FirstOrderProcess`] (compartido con
-ORME): función de transferencia de primer orden con retardo puro
+El modelo de negocio (estado, configuración, comandos, paso de simulación) vive
+en la crate compartida [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs),
+**reutilizada tal cual** por ORUE, ORSE (Sparkplug B), ORSS (S7comm) y OREE
+(EtherNet/IP): estos cuatro instrumentos no tienen ninguna novedad de negocio
+entre ellos, solo cambia el transporte de red. El **proceso** reutiliza
+[`mock_lib_control::FirstOrderProcess`] (compartido con ORME): función de
+transferencia de primer orden con retardo puro
 
 ```text
 PV(s) / U(s) = K · e^(−L·s) / (1 + τ·s)
@@ -54,9 +59,10 @@ IHM (egui) ───Command(cast)──►  SimulationActor ──refresh──�
 Servidor OPC UA ─Command(cast)─►   (Regulator)    ──refresh──► SharedSnapshot ──► lecturas OPC UA
 ```
 
-- **`SimulationActor`** ([`actors/simulation.rs`](../../src/actors/simulation.rs)):
-  propietario **único** del `Regulator`; avanza la simulación con un temporizador
-  one-shot rearmado (sin temporizador desligado) y publica un `SharedSnapshot` en cada
+- **`SimulationActor`** ([`mock_lib_regulator::SimulationActor`](../../../mock_lib_regulator/src/simulation.rs),
+  reexportado por [`actors/mod.rs`](../../src/actors/mod.rs)): propietario
+  **único** del `Regulator`; avanza la simulación con un temporizador one-shot
+  rearmado (sin temporizador desligado) y publica un `SharedSnapshot` en cada
   paso.
 - **`OpcuaServerActor`** ([`actors/network.rs`](../../src/actors/network.rs)):
   posee el servidor OPC UA (tarea tokio `server.run()`); reiniciable en caliente
@@ -125,5 +131,3 @@ finitos). Archivo: `mock_ru_opcua.toml` (anulable mediante `MOCK_CONFIG`).
 - Métodos OPC UA (`Reset`, `Autotune`) además de las variables.
 - Modelo de información tipado (ObjectType regulador) en lugar de variables planas.
 - Historización / `HistoryRead` sobre la medida.
-- Promoción del modelo regulador de ORME a una `mock_lib_*` compartida (hoy está
-  duplicado entre ORME y este instrumento).

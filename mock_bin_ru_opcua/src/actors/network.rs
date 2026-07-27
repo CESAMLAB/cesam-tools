@@ -173,7 +173,7 @@ mod tests {
     use super::*;
     use crate::actors::{SimulationActor, SimulationArgs};
     use crate::config::{NetworkConfig, SecurityConfig, ServerStatus};
-    use crate::regulator::{Regulator, RegulatorConfig};
+    use mock_lib_regulator::{Regulator, RegulatorConfig};
 
     /// Attribue un port TCP libre sur la boucle locale (puis le relâche).
     async fn free_port() -> u16 {

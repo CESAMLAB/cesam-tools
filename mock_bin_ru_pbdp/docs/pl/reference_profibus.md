@@ -108,8 +108,19 @@ Pierwsze odebrane `Slave_Diag` powoduje przejście `Power_On` →
 
 ### `Set_Prm` (SAP 62)
 
-Żądanie: `SAP(62) Ident_Number(2, BE) WD_Fact_1(1) WD_Fact_2(1)`.
-Zapowiedziany watchdog, jeśli obecny, jest obliczany jako
+Żądanie (standardowy format DP-V0, **zgodny** z tym, co wysyła prawdziwy
+master — np. `profirust` — nie jest to konwencja specyficzna dla tego
+symulatora, w odróżnieniu od układu bloków I/O w §3):
+
+```
+SAP(62) Station_Status(1) WD_Fact_1(1) WD_Fact_2(1) Min_Tsdr(1) Ident_Number(2, BE) Groups(1) [User_Prm_Data...]
+```
+
+`Station_Status` (bity Lock_Req/Sync_Req/Freeze_Req/WD_On), `Min_Tsdr`,
+`Groups` i `User_Prm_Data` **nie są wykorzystywane** przez ten symulator
+(brak blokady, brak trybu Sync/Freeze, brak modelowanych grup); odczytywane
+są jedynie `WD_Fact_1`/`WD_Fact_2` oraz `Ident_Number`. Zapowiedziany
+watchdog, jeśli obecny, jest obliczany jako
 `watchdog_ms = WD_Fact_1 × WD_Fact_2 × 10` (jednostka 10 ms, standardowa
 konwencja DP); `WD_Fact_1 = 0` **lub** `WD_Fact_2 = 0` oznacza „brak
 watchdoga”. Odpowiedź: w każdym przypadku `ShortAck` (`SC`).
@@ -247,8 +258,10 @@ Pełna sekwencja dla stacji `5`, mastera `3`, aż do wymiany cyklicznej
 → TX  68 03 03 68 85 03 C0 3D FC 16
 ← RX  68 06 06 68 03 85 00 01 00 00 FF EE 01 F5 16   (Diag: Stat_1=0x01, Ident=0xEE01)
 
-# 2. Set_Prm (SD2, DAE=1, SAP=62, Ident=0xEE01, WD=1×30×10ms=300ms)
-→ TX  68 07 07 68 85 03 C0 3E EE 01 01 1E … 16
+# 2. Set_Prm (SD2, DAE=1, SAP=62, standardowy format DP-V0: Station_Status
+#    Lock_Req+WD_On=0x88, WD_Fact_1=1, WD_Fact_2=30 (300ms), Min_Tsdr=0,
+#    Ident=0xEE01, Groups=0)
+→ TX  68 0B 0B 68 85 03 C0 3E 88 01 1E 00 EE 01 00 … 16
 ← RX  E5                                              (ShortAck)
 
 # 3. Chk_Cfg (SD2, DAE=1, SAP=63, out_len=45, in_len=17)

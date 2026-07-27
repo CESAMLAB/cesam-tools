@@ -1,13 +1,15 @@
 //! Acteur de simulation : propriétaire exclusif du [`Regulator`].
 
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use ractor::concurrency::JoinHandle;
 use ractor::{Actor, ActorProcessingErr, ActorRef, MessagingErr};
 
-use crate::regulator::{Command, Regulator, RegulatorConfig};
+use crate::regulator::{Command, Regulator, RegulatorConfig, Snapshot};
 
-use super::SharedSnapshot;
+/// Instantané typé de l'état, partagé avec l'IHM et le serveur réseau.
+pub type SharedSnapshot = Arc<Mutex<Snapshot>>;
 
 /// Handle du timer one-shot du prochain `Tick` (conservé pour l'abandonner à l'arrêt).
 type TickTimer = JoinHandle<Result<(), MessagingErr<SimulationMsg>>>;
@@ -17,7 +19,7 @@ type TickTimer = JoinHandle<Result<(), MessagingErr<SimulationMsg>>>;
 pub enum SimulationMsg {
     /// Top d'horloge périodique : avance la simulation d'un pas.
     Tick,
-    /// Commande métier (depuis l'IHM ou un client EtherNet/IP).
+    /// Commande métier (depuis l'IHM ou le serveur réseau).
     Command(Command),
 }
 
@@ -35,7 +37,7 @@ pub struct SimulationState {
 }
 
 impl SimulationState {
-    /// Publie l'état courant dans l'instantané partagé (IHM + edge node Sparkplug B).
+    /// Publie l'état courant dans l'instantané partagé (IHM + serveur réseau).
     ///
     /// ⚠️ Le verrou n'est jamais tenu au-delà d'un `.await` (fonction synchrone).
     fn publish(&self) {

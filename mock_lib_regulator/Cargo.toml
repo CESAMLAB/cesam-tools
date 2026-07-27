@@ -1,0 +1,16 @@
+[package]
+name = "mock_lib_regulator"
+description = "Régulateur PID générique (état, configuration TOML, acteur ractor) réutilisé par les instruments RU « simple PID » (ORUE, ORSE, ORSS, OREE) qui n'ont pas de logique TOR/PWM double sens."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+mock_lib_control = { workspace = true, features = ["serde"] }
+ractor = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+log = { workspace = true }
+
+[dev-dependencies]

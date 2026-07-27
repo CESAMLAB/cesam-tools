@@ -29,7 +29,7 @@
 //! | `DBD32` | REAL | R | PID Ki |
 //! | `DBD36` | REAL | R | PID Kd |
 
-use crate::regulator::{Command, Snapshot};
+use mock_lib_regulator::{Command, Snapshot};
 
 // --- Constantes protocole ------------------------------------------------------
 
@@ -301,7 +301,7 @@ fn be_f32(b: &[u8]) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::regulator::{Regulator, RegulatorConfig};
+    use mock_lib_regulator::{Regulator, RegulatorConfig};
 
     fn snap() -> Snapshot {
         Regulator::new(RegulatorConfig::default()).snapshot()

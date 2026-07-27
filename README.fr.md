@@ -31,11 +31,12 @@ ou passerelles **sans matériel réel**.
 | [`mock_bin_ru_ethernetip`](mock_bin_ru_ethernetip) | **OREE** | Régulateur de procédé exposé en adaptateur EtherNet/IP (messagerie explicite CIP) | EtherNet/IP (adaptateur) | egui |
 | [`mock_bin_ru_pbdp`](mock_bin_ru_pbdp) | **ORPD** | Régulateur de procédé exposé en esclave PROFIBUS DP-V0 simulé sur liaison série | PROFIBUS DP (esclave, série) | egui |
 
-Bibliothèque partagée :
+Bibliothèques partagées :
 
 | Crate | Description |
 |-------|-------------|
 | [`mock_lib_control`](mock_lib_control) | Briques de régulation réutilisables : PID anti-emballement, tout-ou-rien à hystérésis, procédé du 1ᵉʳ ordre + retard pur (FOPDT). |
+| [`mock_lib_regulator`](mock_lib_regulator) | Régulateur PID prêt à l'emploi (état, configuration TOML, acteur `ractor`), réutilisé tel quel par ORUE, ORSE, ORSS et OREE. |
 
 ## ORME — le régulateur simulé
 

@@ -109,7 +109,18 @@ volgende wijzigen de toestand niet (slechts een diagnoselezing).
 
 ### `Set_Prm` (SAP 62)
 
-Verzoek: `SAP(62) Ident_Number(2, BE) WD_Fact_1(1) WD_Fact_2(1)`. De
+Verzoek (standaard DP-V0-formaat, **komt overeen** met wat een echte master
+verstuurt — bijv. `profirust` — geen conventie die specifiek is voor deze
+simulator, in tegenstelling tot de I/O-blokindeling in §3):
+
+```
+SAP(62) Station_Status(1) WD_Fact_1(1) WD_Fact_2(1) Min_Tsdr(1) Ident_Number(2, BE) Groups(1) [User_Prm_Data...]
+```
+
+`Station_Status` (bits Lock_Req/Sync_Req/Freeze_Req/WD_On), `Min_Tsdr`,
+`Groups` en `User_Prm_Data` worden door deze simulator **niet gebruikt**
+(geen vergrendeling, geen Sync-/Freeze-modus, geen groepen gemodelleerd);
+alleen `WD_Fact_1`/`WD_Fact_2` en `Ident_Number` worden gelezen. De
 aangekondigde watchdog, indien aanwezig, wordt berekend als
 `watchdog_ms = WD_Fact_1 × WD_Fact_2 × 10` (eenheid 10 ms, standaard-DP-
 conventie); `WD_Fact_1 = 0` **of** `WD_Fact_2 = 0` betekent «geen
@@ -251,8 +262,10 @@ bytes):
 → TX  68 03 03 68 85 03 C0 3D FC 16
 ← RX  68 06 06 68 03 85 00 01 00 00 FF EE 01 F5 16   (Diag: Stat_1=0x01, Ident=0xEE01)
 
-# 2. Set_Prm (SD2, DAE=1, SAP=62, Ident=0xEE01, WD=1×30×10ms=300ms)
-→ TX  68 07 07 68 85 03 C0 3E EE 01 01 1E … 16
+# 2. Set_Prm (SD2, DAE=1, SAP=62, standaard DP-V0-formaat: Station_Status
+#    Lock_Req+WD_On=0x88, WD_Fact_1=1, WD_Fact_2=30 (300ms), Min_Tsdr=0,
+#    Ident=0xEE01, Groups=0)
+→ TX  68 0B 0B 68 85 03 C0 3E 88 01 1E 00 EE 01 00 … 16
 ← RX  E5                                              (ShortAck)
 
 # 3. Chk_Cfg (SD2, DAE=1, SAP=63, out_len=45, in_len=17)

@@ -107,8 +107,19 @@ seguintes não alteram o estado (apenas uma leitura de diagnóstico).
 
 ### `Set_Prm` (SAP 62)
 
-Pedido: `SAP(62) Ident_Number(2, BE) WD_Fact_1(1) WD_Fact_2(1)`. O
-watchdog anunciado, se presente, calcula-se como
+Pedido (formato DP-V0 padrão, **corresponde** ao que um mestre real emite —
+p. ex. `profirust` — não é uma convenção própria deste simulador, ao
+contrário da disposição dos blocos de E/S do §3):
+
+```
+SAP(62) Station_Status(1) WD_Fact_1(1) WD_Fact_2(1) Min_Tsdr(1) Ident_Number(2, BE) Groups(1) [User_Prm_Data...]
+```
+
+`Station_Status` (bits Lock_Req/Sync_Req/Freeze_Req/WD_On), `Min_Tsdr`,
+`Groups` e `User_Prm_Data` **não são utilizados** por este simulador (sem
+bloqueio, sem modo Sync/Freeze nem grupos modelados); só são lidos
+`WD_Fact_1`/`WD_Fact_2` e `Ident_Number`. O watchdog anunciado, se presente,
+calcula-se como
 `watchdog_ms = WD_Fact_1 × WD_Fact_2 × 10` (unidade 10 ms, convenção
 padrão DP); `WD_Fact_1 = 0` **ou** `WD_Fact_2 = 0` significa «sem
 watchdog». Resposta: `ShortAck` (`SC`) em todos os casos.
@@ -244,8 +255,10 @@ Sequência completa para estação `5`, mestre `3`, até à troca cíclica
 → TX  68 03 03 68 85 03 C0 3D FC 16
 ← RX  68 06 06 68 03 85 00 01 00 00 FF EE 01 F5 16   (Diag: Stat_1=0x01, Ident=0xEE01)
 
-# 2. Set_Prm (SD2, DAE=1, SAP=62, Ident=0xEE01, WD=1×30×10ms=300ms)
-→ TX  68 07 07 68 85 03 C0 3E EE 01 01 1E … 16
+# 2. Set_Prm (SD2, DAE=1, SAP=62, formato DP-V0 padrão: Station_Status
+#    Lock_Req+WD_On=0x88, WD_Fact_1=1, WD_Fact_2=30 (300ms), Min_Tsdr=0,
+#    Ident=0xEE01, Groups=0)
+→ TX  68 0B 0B 68 85 03 C0 3E 88 01 1E 00 EE 01 00 … 16
 ← RX  E5                                              (ShortAck)
 
 # 3. Chk_Cfg (SD2, DAE=1, SAP=63, out_len=45, in_len=17)

@@ -104,11 +104,21 @@ ne changent pas l'état (juste une lecture de diagnostic).
 
 ### `Set_Prm` (SAP 62)
 
-Requête : `SAP(62) Ident_Number(2, BE) WD_Fact_1(1) WD_Fact_2(1)`. Le chien de
-garde annoncé, s'il est présent, se calcule `watchdog_ms = WD_Fact_1 ×
-WD_Fact_2 × 10` (unité 10 ms, convention DP standard) ; `WD_Fact_1 = 0` **ou**
-`WD_Fact_2 = 0` signifie « pas de chien de garde ». Réponse : `ShortAck` (`SC`)
-dans tous les cas.
+Requête (format DP-V0 standard, **conforme** à ce qu'émet un vrai maître —
+ex. `profirust` — pas une convention propre à ce simulateur, contrairement à
+la disposition des blocs I/O du §3) :
+
+```
+SAP(62) Station_Status(1) WD_Fact_1(1) WD_Fact_2(1) Min_Tsdr(1) Ident_Number(2, BE) Groups(1) [User_Prm_Data...]
+```
+
+`Station_Status` (bits Lock_Req/Sync_Req/Freeze_Req/WD_On), `Min_Tsdr`,
+`Groups` et `User_Prm_Data` ne sont **pas exploités** par ce simulateur (pas de
+verrouillage, de mode Sync/Freeze ni de groupes modélisés) ; seuls
+`WD_Fact_1`/`WD_Fact_2` et `Ident_Number` sont lus. Le chien de garde annoncé,
+s'il est présent, se calcule `watchdog_ms = WD_Fact_1 × WD_Fact_2 × 10` (unité
+10 ms, convention DP standard) ; `WD_Fact_1 = 0` **ou** `WD_Fact_2 = 0` signifie
+« pas de chien de garde ». Réponse : `ShortAck` (`SC`) dans tous les cas.
 
 - Si `Ident_Number` **correspond** au profil figé de l'esclave (§4) : état →
   `Wait_Cfg`, et le chien de garde éventuel est transmis à la session
@@ -236,8 +246,10 @@ Séquence complète station `5`, maître `3`, jusqu'à l'échange cyclique
 → TX  68 03 03 68 85 03 C0 3D FC 16
 ← RX  68 06 06 68 03 85 00 01 00 00 FF EE 01 F5 16   (Diag : Stat_1=0x01, Ident=0xEE01)
 
-# 2. Set_Prm (SD2, DAE=1, SAP=62, Ident=0xEE01, WD=1×30×10ms=300ms)
-→ TX  68 07 07 68 85 03 C0 3E EE 01 01 1E … 16
+# 2. Set_Prm (SD2, DAE=1, SAP=62, format DP-V0 standard : Station_Status
+#    Lock_Req+WD_On=0x88, WD_Fact_1=1, WD_Fact_2=30 (300ms), Min_Tsdr=0,
+#    Ident=0xEE01, Groups=0)
+→ TX  68 0B 0B 68 85 03 C0 3E 88 01 1E 00 EE 01 00 … 16
 ← RX  E5                                              (ShortAck)
 
 # 3. Chk_Cfg (SD2, DAE=1, SAP=63, out_len=45, in_len=17)

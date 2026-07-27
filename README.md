@@ -30,11 +30,12 @@ demonstrating supervisors, PLCs or gateways **without real hardware**.
 | [`mock_bin_ru_ethernetip`](mock_bin_ru_ethernetip) | **OREE** | Process regulator exposed as an EtherNet/IP adapter (explicit messaging CIP) | EtherNet/IP (adapter) | egui |
 | [`mock_bin_ru_pbdp`](mock_bin_ru_pbdp) | **ORPD** | Process regulator exposed as a simulated PROFIBUS DP-V0 slave over a serial link | PROFIBUS DP (slave, serial) | egui |
 
-Shared library:
+Shared libraries:
 
 | Crate | Description |
 |-------|-------------|
 | [`mock_lib_control`](mock_lib_control) | Reusable control building blocks: anti-windup PID, on/off with hysteresis, first-order process + pure dead time (FOPDT). |
+| [`mock_lib_regulator`](mock_lib_regulator) | Ready-to-use PID regulator (state, TOML config, `ractor` actor), shared as-is by ORUE, ORSE, ORSS and OREE. |
 
 ## ORME — the simulated controller
 

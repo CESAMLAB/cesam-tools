@@ -42,16 +42,19 @@ El servidor `async-opcua` está **siempre** presente (la feature `server` de
 ```
 mock_bin_ru_opcua/src/
 ├── main.rs            # Ensambla runtime Tokio + actores + IHM/headless
-├── regulator.rs       # Modelo de negocio síncrono (PID + proceso), comandos, paso
 ├── config.rs          # AppConfig (TOML), sanitized(), ServerStatus
 ├── i18n.rs            # Catálogo i18n (8 idiomas), Lang + Msg + tr()
 ├── opcua_server.rs    # Servidor OPC UA: build + espacio de direcciones + callbacks
 ├── gui.rs             # IHM egui (feature gui)
 ├── branding.rs        # Logos embebidos (feature gui)
 └── actors/
-    ├── simulation.rs  #   bucle de regulación (tick 0,5 s)
     └── network.rs     #   servidor OPC UA (re)configurable en caliente
 ```
+
+El modelo de negocio síncrono (PID + proceso, comandos, paso de simulación) y el
+`SimulationActor` no están en esta crate: proceden de la crate compartida
+[`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs), reexportada por
+`actors/mod.rs`.
 
 ---
 
@@ -100,8 +103,11 @@ callback de escritura (`on_write_*`) que emita un `Command`. Reflejar la tabla e
 
 ### 6.2 Añadir un comando de negocio
 
-Extender el enum `Command` ([`regulator.rs`](../../src/regulator.rs)), gestionar el caso
-en `Regulator::apply` (con saneamiento), añadir una prueba.
+Extender el enum `Command` en
+[`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs), gestionar
+el caso en `Regulator::apply` (con saneamiento), añadir una prueba. ⚠️ Esta
+crate está **compartida** por ORUE/ORSE/ORSS/OREE: cualquier cambio repercute
+en los cuatro instrumentos.
 
 ### 6.3 Añadir una cadena de interfaz (i18n)
 
@@ -124,10 +130,11 @@ tokens X.509.
 
 ## 7. Estrategia de pruebas
 
-El núcleo de negocio (`regulator.rs`) y la configuración (`config.rs`) son **puros y
-probados**: convergencia PID, clamp de consigna, relajación al parar, cambio de
-proceso sin salto de PV, saneamiento TOML, ida y vuelta TOML. La i18n verifica la
-no vacuidad y la ida y vuelta de idioma.
+El núcleo de negocio ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
+y la configuración (`config.rs`) son **puros y probados**: convergencia PID,
+clamp de consigna, relajación al parar, cambio de proceso sin salto de PV,
+saneamiento TOML, ida y vuelta TOML. La i18n verifica la no vacuidad y la ida y
+vuelta de idioma.
 
 Las **pruebas de integración** cubren además la capa de red: ida y vuelta
 cliente↔servidor en el endpoint **None** (conexión, escritura, relectura), paridad

@@ -21,10 +21,15 @@ Phase 2).
 
 ---
 
-## 2. Physical model ([`regulator.rs`](../../src/regulator.rs))
+## 2. Physical model ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
 
-The **process** reuses [`mock_lib_control::FirstOrderProcess`] (shared with
-ORME): first-order transfer function with pure delay
+The business model (state, configuration, commands, simulation step) lives in
+the shared [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs)
+crate, **reused as-is** by ORUE, ORSE (Sparkplug B), ORSS (S7comm) and OREE
+(EtherNet/IP): these four instruments have no business novelty between them,
+only the network transport changes. The **process** reuses
+[`mock_lib_control::FirstOrderProcess`] (shared with ORME): first-order
+transfer function with pure delay
 
 ```text
 PV(s) / U(s) = K · e^(−L·s) / (1 + τ·s)
@@ -54,10 +59,10 @@ GUI (egui) ───Command(cast)──►  SimulationActor ──refresh──�
 OPC UA server ─Command(cast)─►   (Regulator)    ──refresh──► SharedSnapshot ──► OPC UA reads
 ```
 
-- **`SimulationActor`** ([`actors/simulation.rs`](../../src/actors/simulation.rs)):
-  **sole** owner of the `Regulator`; advances the simulation on a re-armed
-  one-shot timer (no detached timer) and publishes a `SharedSnapshot` at each
-  step.
+- **`SimulationActor`** ([`mock_lib_regulator::SimulationActor`](../../../mock_lib_regulator/src/simulation.rs),
+  re-exported by [`actors/mod.rs`](../../src/actors/mod.rs)): **sole** owner of
+  the `Regulator`; advances the simulation on a re-armed one-shot timer (no
+  detached timer) and publishes a `SharedSnapshot` at each step.
 - **`OpcuaServerActor`** ([`actors/network.rs`](../../src/actors/network.rs)):
   owns the OPC UA server (tokio task `server.run()`); restartable at runtime
   (`Reconfigure`: rebind if the IP/port changes); keeps the `JoinHandle` (aborted
@@ -125,5 +130,3 @@ floats). File: `mock_ru_opcua.toml` (overridable via `MOCK_CONFIG`).
 - OPC UA methods (`Reset`, `Autotune`) in addition to variables.
 - Typed information model (regulator ObjectType) rather than flat variables.
 - Historization / `HistoryRead` on the measurement.
-- Promotion of ORME's regulator model into a shared `mock_lib_*` (it is today
-  duplicated between ORME and this instrument).

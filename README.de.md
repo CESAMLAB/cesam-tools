@@ -31,11 +31,12 @@ Gateways **ohne reale Hardware**.
 | [`mock_bin_ru_ethernetip`](mock_bin_ru_ethernetip) | **OREE** | Prozessregler, exponiert als EtherNet/IP-Adapter (explizite CIP-Nachrichten) | EtherNet/IP (Adapter) | egui |
 | [`mock_bin_ru_pbdp`](mock_bin_ru_pbdp) | **ORPD** | Prozessregler, exponiert als simulierter PROFIBUS-DP-V0-Slave über serielle Verbindung | PROFIBUS DP (Slave, seriell) | egui |
 
-Geteilte Bibliothek:
+Geteilte Bibliotheken:
 
 | Crate | Beschreibung |
 |-------|--------------|
 | [`mock_lib_control`](mock_lib_control) | Wiederverwendbare Regelungsbausteine: PID mit Anti-Windup, Zweipunkt mit Hysterese, Prozess 1. Ordnung + reine Totzeit (FOPDT). |
+| [`mock_lib_regulator`](mock_lib_regulator) | Einsatzbereiter PID-Regler (Zustand, TOML-Konfiguration, `ractor`-Actor), unverändert gemeinsam genutzt von ORUE, ORSE, ORSS und OREE. |
 
 ## ORME — der simulierte Regler
 

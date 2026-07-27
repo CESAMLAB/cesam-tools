@@ -42,16 +42,19 @@ Le serveur `async-opcua` est **toujours** présent (la feature `server` de
 ```
 mock_bin_ru_opcua/src/
 ├── main.rs            # Assemble runtime Tokio + acteurs + IHM/headless
-├── regulator.rs       # Modèle métier synchrone (PID + procédé), commandes, pas
 ├── config.rs          # AppConfig (TOML), sanitized(), ServerStatus
 ├── i18n.rs            # Catalogue i18n (8 langues), Lang + Msg + tr()
 ├── opcua_server.rs    # Serveur OPC UA : build + espace d'adressage + callbacks
 ├── gui.rs             # IHM egui (feature gui)
 ├── branding.rs        # Logos embarqués (feature gui)
 └── actors/
-    ├── simulation.rs  #   boucle de régulation (tick 0,5 s)
     └── network.rs     #   serveur OPC UA (re)configurable à chaud
 ```
+
+Le modèle métier synchrone (PID + procédé, commandes, pas de simulation) et
+l'acteur `SimulationActor` ne sont **pas** dans cette crate : ils viennent de la
+crate partagée [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs),
+réexportée par `actors/mod.rs`.
 
 ---
 
@@ -100,8 +103,11 @@ callback d'écriture (`on_write_*`) qui émet une `Command`. Refléter la table 
 
 ### 6.2 Ajouter une commande métier
 
-Étendre l'enum `Command` ([`regulator.rs`](../../src/regulator.rs)), gérer le cas
-dans `Regulator::apply` (avec assainissement), ajouter un test.
+Étendre l'enum `Command` dans
+[`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs), gérer le
+cas dans `Regulator::apply` (avec assainissement), ajouter un test. ⚠️ Cette
+crate est **partagée** par ORUE/ORSE/ORSS/OREE : toute modification s'y répercute
+sur les quatre instruments.
 
 ### 6.3 Ajouter une chaîne d'interface (i18n)
 
@@ -123,10 +129,11 @@ Pistes restantes : politiques `Aes256Sha256RsaPss`, jetons X.509.
 
 ## 7. Stratégie de test
 
-Le cœur métier (`regulator.rs`) et la configuration (`config.rs`) sont **purs et
-testés** : convergence PID, clamp de consigne, relaxation à l'arrêt, changement de
-procédé sans saut de PV, assainissement TOML, aller-retour TOML. L'i18n vérifie la
-non-vacuité et l'aller-retour de langue.
+Le cœur métier ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
+et la configuration (`config.rs`) sont **purs et testés** : convergence PID, clamp
+de consigne, relaxation à l'arrêt, changement de procédé sans saut de PV,
+assainissement TOML, aller-retour TOML. L'i18n vérifie la non-vacuité et
+l'aller-retour de langue.
 
 Des **tests d'intégration** couvrent en plus la couche réseau : aller-retour
 client↔serveur sur l'endpoint **None** (connexion, écriture, relecture), parité de

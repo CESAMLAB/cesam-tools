@@ -42,16 +42,19 @@ The `async-opcua` server is **always** present (the `server` feature of
 ```
 mock_bin_ru_opcua/src/
 ├── main.rs            # Assembles Tokio runtime + actors + GUI/headless
-├── regulator.rs       # Synchronous business model (PID + process), commands, step
 ├── config.rs          # AppConfig (TOML), sanitized(), ServerStatus
 ├── i18n.rs            # i18n catalog (8 languages), Lang + Msg + tr()
 ├── opcua_server.rs    # OPC UA server: build + address space + callbacks
 ├── gui.rs             # egui GUI (gui feature)
 ├── branding.rs        # Embedded logos (gui feature)
 └── actors/
-    ├── simulation.rs  #   regulation loop (tick 0.5 s)
     └── network.rs     #   OPC UA server (re)configurable at runtime
 ```
+
+The synchronous business model (PID + process, commands, simulation step) and
+the `SimulationActor` are **not** in this crate: they come from the shared
+[`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs) crate,
+re-exported by `actors/mod.rs`.
 
 ---
 
@@ -101,8 +104,11 @@ wire up a read callback (`on_read_*`) and, if writable, a write callback
 
 ### 6.2 Add a business command
 
-Extend the `Command` enum ([`regulator.rs`](../../src/regulator.rs)), handle the
-case in `Regulator::apply` (with sanitization), add a test.
+Extend the `Command` enum in
+[`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs), handle the
+case in `Regulator::apply` (with sanitization), add a test. ⚠️ This crate is
+**shared** by ORUE/ORSE/ORSS/OREE: any change ripples across all four
+instruments.
 
 ### 6.3 Add an interface string (i18n)
 
@@ -125,10 +131,11 @@ policies, X.509 tokens.
 
 ## 7. Test strategy
 
-The business core (`regulator.rs`) and the configuration (`config.rs`) are **pure
-and tested**: PID convergence, setpoint clamp, relaxation at stop, process change
-without a PV jump, TOML sanitization, TOML round-trip. The i18n checks
-non-emptiness and the language round-trip.
+The business core ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
+and the configuration (`config.rs`) are **pure and tested**: PID convergence,
+setpoint clamp, relaxation at stop, process change without a PV jump, TOML
+sanitization, TOML round-trip. The i18n checks non-emptiness and the language
+round-trip.
 
 **Integration tests** additionally cover the network layer: client↔server
 round-trip on the **None** endpoint (connect, write, read back), network-actor

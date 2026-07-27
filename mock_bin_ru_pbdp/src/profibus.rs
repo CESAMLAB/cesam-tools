@@ -251,12 +251,20 @@ pub fn decode_request(bytes: &[u8]) -> Result<(u8, u8, Request), FrameError> {
     match sap {
         Some(SAP_SLAVE_DIAG) => Ok((station, sa, Request::SlaveDiag)),
         Some(SAP_SET_PRM) => {
-            if rest.len() < 4 {
+            // Vrai format DP-V0 standard (celui qu'émet un maître réel, p. ex.
+            // `profirust`) : `Station_Status(1) WD_Fact_1(1) WD_Fact_2(1)
+            // Min_Tsdr(1) Ident_Number(2, BE) Groups(1) [User_Prm_Data...]`.
+            // `Station_Status`/`Min_Tsdr`/`Groups`/`User_Prm_Data` ne sont pas
+            // exploités par ce simulateur (pas de Sync/Freeze/lock/groupes
+            // modélisés) ; seuls les facteurs de chien de garde et
+            // l'identifiant sont lus. `rest.len() >= 7` couvre le minimum
+            // (`User_Prm_Data` vide accepté).
+            if rest.len() < 7 {
                 return Err(FrameError::TooShort);
             }
-            let ident_number = u16::from_be_bytes([rest[0], rest[1]]);
-            let wd1 = rest[2];
-            let wd2 = rest[3];
+            let wd1 = rest[1];
+            let wd2 = rest[2];
+            let ident_number = u16::from_be_bytes([rest[4], rest[5]]);
             let watchdog_ms = if wd1 == 0 || wd2 == 0 {
                 None
             } else {
@@ -310,8 +318,6 @@ pub fn encode_request(station: u8, master: u8, req: &Request) -> Vec<u8> {
             watchdog_ms,
         } => {
             let da = station | ADDR_EXT;
-            let mut data = vec![SAP_SET_PRM];
-            data.extend_from_slice(&ident_number.to_be_bytes());
             let (wd1, wd2) = watchdog_ms
                 .map(|ms| {
                     let total = (ms / 10).max(1);
@@ -320,8 +326,14 @@ pub fn encode_request(station: u8, master: u8, req: &Request) -> Vec<u8> {
                     (1u8, wd2 as u8)
                 })
                 .unwrap_or((0, 0));
+            // Vrai format DP-V0 standard, voir `decode_request` (SAP_SET_PRM).
+            let mut data = vec![SAP_SET_PRM];
+            data.push(0); // Station_Status (Lock/Sync/Freeze/WD_On non modélisés)
             data.push(wd1);
             data.push(wd2);
+            data.push(0); // Min_Tsdr (timing non simulé)
+            data.extend_from_slice(&ident_number.to_be_bytes());
+            data.push(0); // Groups (non modélisé)
             encode_sd2(da, master, fc, &data)
         }
         Request::ChkCfg { out_len, in_len } => {

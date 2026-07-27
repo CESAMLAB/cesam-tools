@@ -24,16 +24,15 @@ mod config;
 mod gui;
 mod i18n;
 mod opcua_server;
-mod regulator;
 
 use std::sync::{Arc, Mutex};
 
 use anyhow::Context;
+use mock_lib_regulator::Regulator;
 use ractor::Actor;
 
 use actors::{OpcuaServerActor, OpcuaServerArgs, SimulationActor, SimulationArgs};
 use config::{AppConfig, ServerStatus};
-use regulator::Regulator;
 
 #[cfg(feature = "gui")]
 use gui::OpcuaGui;

@@ -22,7 +22,7 @@ use ractor::ActorRef;
 
 use crate::actors::{SharedSnapshot, SimulationMsg};
 use crate::config::{NetworkConfig, SecurityConfig};
-use crate::regulator::{Command, Snapshot};
+use mock_lib_regulator::{Command, Snapshot};
 
 /// Référence vers l'acteur de simulation, capturée par les callbacks d'écriture.
 type Sim = ActorRef<SimulationMsg>;
@@ -227,7 +227,7 @@ mod tests {
     use super::{build, install, NS_URI};
     use crate::actors::{SimulationActor, SimulationArgs};
     use crate::config::{NetworkConfig, SecurityConfig};
-    use crate::regulator::{Regulator, RegulatorConfig};
+    use mock_lib_regulator::{Regulator, RegulatorConfig};
 
     /// Attribue un port TCP libre sur la boucle locale.
     async fn free_port() -> u16 {

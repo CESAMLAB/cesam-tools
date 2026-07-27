@@ -42,16 +42,19 @@ ponieważ to racja bytu tego instrumentu.
 ```
 mock_bin_ru_opcua/src/
 ├── main.rs            # Składa środowisko Tokio + aktorzy + GUI/headless
-├── regulator.rs       # Synchroniczny model biznesowy (PID + proces), komendy, krok
 ├── config.rs          # AppConfig (TOML), sanitized(), ServerStatus
 ├── i18n.rs            # Katalog i18n (8 języków), Lang + Msg + tr()
 ├── opcua_server.rs    # Serwer OPC UA: build + przestrzeń adresowa + wywołania zwrotne
 ├── gui.rs             # GUI egui (feature gui)
 ├── branding.rs        # Wbudowane logo (feature gui)
 └── actors/
-    ├── simulation.rs  #   pętla regulacji (tick 0,5 s)
     └── network.rs     #   serwer OPC UA (re)konfigurowalny na gorąco
 ```
+
+Synchroniczny model biznesowy (PID + proces, komendy, krok symulacji) oraz
+`SimulationActor` nie znajdują się w tej crate: pochodzą ze współdzielonej
+crate [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs),
+reeksportowanej przez `actors/mod.rs`.
 
 ---
 
@@ -103,8 +106,11 @@ tablicę w [`reference_opcua.md`](reference_opcua.md).
 
 ### 6.2 Dodanie komendy biznesowej
 
-Rozszerz enum `Command` ([`regulator.rs`](../../src/regulator.rs)), obsłuż
-przypadek w `Regulator::apply` (z odkażaniem), dodaj test.
+Rozszerz enum `Command` w
+[`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs), obsłuż
+przypadek w `Regulator::apply` (z odkażaniem), dodaj test. ⚠️ Ta crate jest
+**współdzielona** przez ORUE/ORSE/ORSS/OREE: każda zmiana odbija się na
+wszystkich czterech instrumentach.
 
 ### 6.3 Dodanie ciągu interfejsu (i18n)
 
@@ -128,10 +134,11 @@ Pozostałe kierunki: polityki `Aes256Sha256RsaPss`, tokeny X.509.
 
 ## 7. Strategia testów
 
-Rdzeń biznesowy (`regulator.rs`) i konfiguracja (`config.rs`) są **czyste i
-testowane**: zbieżność PID, clamp wartości zadanej, relaksacja po zatrzymaniu,
-zmiana procesu bez skoku PV, odkażanie TOML, podróż tam i z powrotem TOML. i18n
-weryfikuje niepustość i podróż tam i z powrotem języka.
+Rdzeń biznesowy ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
+i konfiguracja (`config.rs`) są **czyste i testowane**: zbieżność PID, clamp
+wartości zadanej, relaksacja po zatrzymaniu, zmiana procesu bez skoku PV,
+odkażanie TOML, podróż tam i z powrotem TOML. i18n weryfikuje niepustość i
+podróż tam i z powrotem języka.
 
 **Testy integracyjne** pokrywają dodatkowo warstwę sieciową: podróż tam i z powrotem
 klient↔serwer na endpoincie **None** (połączenie, zapis, odczyt zwrotny), parytet

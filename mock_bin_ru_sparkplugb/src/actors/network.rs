@@ -24,7 +24,7 @@ use sparkplug_rs::NodeMessageType;
 use tokio::task::JoinHandle;
 
 use crate::config::{NetworkConfig, ServerStatus};
-use crate::regulator::{Snapshot, DEFAULT_DT};
+use mock_lib_regulator::{Snapshot, DEFAULT_DT};
 use crate::sparkplug_node as spb;
 
 use super::{SharedSnapshot, SharedStatus, SimulationMsg};
@@ -199,7 +199,7 @@ fn current_snapshot(snapshot: &SharedSnapshot) -> Snapshot {
     match snapshot.lock() {
         Ok(g) => *g,
         // Verrou empoisonné (ne devrait pas arriver) : instantané neutre.
-        Err(_) => crate::regulator::Regulator::default().snapshot(),
+        Err(_) => mock_lib_regulator::Regulator::default().snapshot(),
     }
 }
 
@@ -309,7 +309,7 @@ mod tests {
     use super::*;
     use crate::actors::{SimulationActor, SimulationArgs};
     use crate::config::{NetworkConfig, ServerStatus};
-    use crate::regulator::{Regulator, RegulatorConfig};
+    use mock_lib_regulator::{Regulator, RegulatorConfig};
 
     /// Démarrage de l'acteur **sans broker** : le statut s'initialise (déconnecté,
     /// bdSeq attribué) sans paniquer. Ne valide pas la connexion.

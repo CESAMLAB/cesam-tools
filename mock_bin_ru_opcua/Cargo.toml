@@ -24,6 +24,7 @@ gui = ["dep:eframe", "dep:egui_plot", "dep:image", "dep:mock_lib_update"]
 
 [dependencies]
 mock_lib_control = { workspace = true, features = ["serde"] }
+mock_lib_regulator = { workspace = true }
 async-opcua = { workspace = true }
 tokio = { workspace = true, features = ["signal"] }
 ractor = { workspace = true }

@@ -6,11 +6,10 @@
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
 
-use mock_lib_control::PidConfig;
+use mock_lib_regulator::{ProcessConfig, RegulationConfig, RegulatorConfig, DEFAULT_DT};
 use serde::{Deserialize, Serialize};
 
 use crate::i18n::Lang;
-use crate::regulator::{RegulatorConfig, DEFAULT_DT};
 
 const DEFAULT_CONFIG_FILE: &str = "mock_ru_ethernetip.toml";
 
@@ -115,48 +114,6 @@ fn pattern_matches(pattern: &str, ip: IpAddr) -> bool {
     }
 }
 
-/// Paramètres du procédé simulé (fonction de transfert du premier ordre + retard).
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-#[serde(default)]
-pub struct ProcessConfig {
-    pub k: f32,
-    pub tau: f32,
-    pub dead_time: f32,
-    pub ambient: f32,
-}
-
-impl Default for ProcessConfig {
-    fn default() -> Self {
-        let r = RegulatorConfig::default();
-        Self {
-            k: r.k,
-            tau: r.tau,
-            dead_time: r.dead_time,
-            ambient: r.ambient,
-        }
-    }
-}
-
-/// Paramètres de régulation persistés.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
-#[serde(default)]
-pub struct RegulationConfig {
-    pub sp_min: f32,
-    pub sp_max: f32,
-    pub pid: PidConfig,
-}
-
-impl Default for RegulationConfig {
-    fn default() -> Self {
-        let r = RegulatorConfig::default();
-        Self {
-            sp_min: r.sp_min,
-            sp_max: r.sp_max,
-            pid: r.pid,
-        }
-    }
-}
-
 /// Configuration complète de l'application.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
@@ -203,23 +160,9 @@ impl AppConfig {
     #[must_use]
     pub fn sanitized(mut self) -> Self {
         let before = self.clone();
-        let dp = ProcessConfig::default();
-        let dr = RegulationConfig::default();
 
-        self.process.k = finite_or(self.process.k, dp.k);
-        self.process.tau = finite_at_least(self.process.tau, 1e-3, dp.tau);
-        self.process.dead_time = finite_at_least(self.process.dead_time, 0.0, dp.dead_time);
-        self.process.ambient = finite_or(self.process.ambient, dp.ambient);
-
-        let mut s_min = finite_or(self.regulation.sp_min, dr.sp_min);
-        let mut s_max = finite_or(self.regulation.sp_max, dr.sp_max);
-        if s_min > s_max {
-            std::mem::swap(&mut s_min, &mut s_max);
-        }
-        self.regulation.sp_min = s_min;
-        self.regulation.sp_max = s_max;
-
-        self.regulation.pid = sanitize_pid(self.regulation.pid, dr.pid);
+        self.process = self.process.sanitized();
+        self.regulation = self.regulation.sanitized();
 
         if self != before {
             log::warn!("Configuration sanitized: out-of-range or non-finite values were corrected");
@@ -262,39 +205,6 @@ impl AppConfig {
     }
 }
 
-#[inline]
-fn finite_or(v: f32, default: f32) -> f32 {
-    if v.is_finite() {
-        v
-    } else {
-        default
-    }
-}
-
-#[inline]
-fn finite_at_least(v: f32, min: f32, default: f32) -> f32 {
-    if v.is_finite() {
-        v.max(min)
-    } else {
-        default
-    }
-}
-
-#[must_use]
-fn sanitize_pid(mut cfg: PidConfig, default: PidConfig) -> PidConfig {
-    cfg.kp = finite_at_least(cfg.kp, 0.0, default.kp);
-    cfg.ki = finite_at_least(cfg.ki, 0.0, default.ki);
-    cfg.kd = finite_at_least(cfg.kd, 0.0, default.kd);
-    let mut out_min = finite_or(cfg.out_min, default.out_min);
-    let mut out_max = finite_or(cfg.out_max, default.out_max);
-    if out_min > out_max {
-        std::mem::swap(&mut out_min, &mut out_max);
-    }
-    cfg.out_min = out_min;
-    cfg.out_max = out_max;
-    cfg
-}
-
 /// État courant du serveur EtherNet/IP, partagé avec l'IHM pour affichage.
 #[derive(Debug, Clone, Default)]
 pub struct ServerStatus {
@@ -331,7 +241,7 @@ mod tests {
         assert!(cfg.regulation.sp_min <= cfg.regulation.sp_max);
         assert!(cfg.process.tau.is_finite() && cfg.process.tau >= 1e-3);
         assert!(cfg.process.dead_time >= 0.0);
-        let _ = crate::regulator::Regulator::new(cfg.to_regulator_config());
+        let _ = mock_lib_regulator::Regulator::new(cfg.to_regulator_config());
     }
 
     #[test]

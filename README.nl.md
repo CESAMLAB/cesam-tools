@@ -31,11 +31,12 @@ demonstreren **zonder echte hardware**.
 | [`mock_bin_ru_ethernetip`](mock_bin_ru_ethernetip) | **OREE** | Procesregelaar, blootgesteld als EtherNet/IP-adapter (expliciete CIP-berichten) | EtherNet/IP (adapter) | egui |
 | [`mock_bin_ru_pbdp`](mock_bin_ru_pbdp) | **ORPD** | Procesregelaar, blootgesteld als gesimuleerde PROFIBUS-DP-V0-slave over seriële verbinding | PROFIBUS DP (slave, serieel) | egui |
 
-Gedeelde bibliotheek:
+Gedeelde bibliotheken:
 
 | Crate | Beschrijving |
 |-------|--------------|
 | [`mock_lib_control`](mock_lib_control) | Herbruikbare regelbouwstenen: PID met anti-windup, aan-uit met hysterese, eerste-orde-proces + zuivere dode tijd (FOPDT). |
+| [`mock_lib_regulator`](mock_lib_regulator) | Kant-en-klare PID-regelaar (status, TOML-configuratie, `ractor`-actor), ongewijzigd gedeeld door ORUE, ORSE, ORSS en OREE. |
 
 ## ORME — de gesimuleerde regelaar
 

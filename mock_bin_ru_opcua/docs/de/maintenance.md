@@ -42,16 +42,19 @@ Der Server `async-opcua` ist **immer** vorhanden (das Feature `server` von
 ```
 mock_bin_ru_opcua/src/
 ├── main.rs            # Baut Tokio-Runtime + Aktoren + IHM/headless zusammen
-├── regulator.rs       # Synchrones Fachmodell (PID + Prozess), Befehle, Schritt
 ├── config.rs          # AppConfig (TOML), sanitized(), ServerStatus
 ├── i18n.rs            # i18n-Katalog (8 Sprachen), Lang + Msg + tr()
 ├── opcua_server.rs    # OPC-UA-Server: Build + Adressraum + Callbacks
 ├── gui.rs             # IHM egui (Feature gui)
 ├── branding.rs        # Eingebettete Logos (Feature gui)
 └── actors/
-    ├── simulation.rs  #   Regelschleife (Tick 0,5 s)
     └── network.rs     #   OPC-UA-Server (neu) konfigurierbar im laufenden Betrieb
 ```
+
+Das synchrone Fachmodell (PID + Prozess, Befehle, Simulationsschritt) und der
+`SimulationActor` befinden sich **nicht** in dieser Crate: sie stammen aus der
+geteilten Crate [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs),
+reexportiert von `actors/mod.rs`.
 
 ---
 
@@ -101,8 +104,11 @@ einen Schreib-Callback (`on_write_*`), der ein `Command` aussendet. Die Tabelle 
 
 ### 6.2 Einen Fachbefehl hinzufügen
 
-Das Enum `Command` ([`regulator.rs`](../../src/regulator.rs)) erweitern, den Fall in
-`Regulator::apply` behandeln (mit Bereinigung), einen Test hinzufügen.
+Das Enum `Command` in
+[`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs) erweitern,
+den Fall in `Regulator::apply` behandeln (mit Bereinigung), einen Test
+hinzufügen. ⚠️ Diese Crate wird von ORUE/ORSE/ORSS/OREE **gemeinsam genutzt**:
+jede Änderung wirkt sich auf alle vier Instrumente aus.
 
 ### 6.3 Eine Oberflächen-Zeichenkette hinzufügen (i18n)
 
@@ -125,10 +131,11 @@ Richtlinien `Aes256Sha256RsaPss`, X.509-Token.
 
 ## 7. Teststrategie
 
-Der fachliche Kern (`regulator.rs`) und die Konfiguration (`config.rs`) sind **rein
-und getestet**: PID-Konvergenz, Sollwert-Klemmung, Entspannung im Stopp, Prozesswechsel
-ohne PV-Sprung, TOML-Bereinigung, TOML-Hin-und-Rückweg. Die i18n prüft die
-Nicht-Leere und den Sprach-Hin-und-Rückweg.
+Der fachliche Kern ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
+und die Konfiguration (`config.rs`) sind **rein und getestet**: PID-Konvergenz,
+Sollwert-Klemmung, Entspannung im Stopp, Prozesswechsel ohne PV-Sprung,
+TOML-Bereinigung, TOML-Hin-und-Rückweg. Die i18n prüft die Nicht-Leere und den
+Sprach-Hin-und-Rückweg.
 
 **Integrationstests** decken zusätzlich die Netzwerkschicht ab: Client↔Server-Hin-
 und-Rückweg am **None**-Endpunkt (Verbinden, Schreiben, Zurücklesen), Netzwerk-Aktor-

@@ -2603,6 +2603,7 @@ dependencies = [
  "image",
  "log",
  "mock_lib_control",
+ "mock_lib_regulator",
  "mock_lib_update",
  "ractor",
  "serde",
@@ -2642,6 +2643,7 @@ dependencies = [
  "image",
  "log",
  "mock_lib_control",
+ "mock_lib_regulator",
  "mock_lib_update",
  "ractor",
  "serde",
@@ -2679,6 +2681,7 @@ dependencies = [
  "image",
  "log",
  "mock_lib_control",
+ "mock_lib_regulator",
  "mock_lib_update",
  "ractor",
  "serde",
@@ -2697,6 +2700,7 @@ dependencies = [
  "image",
  "log",
  "mock_lib_control",
+ "mock_lib_regulator",
  "mock_lib_update",
  "ractor",
  "rumqttc",
@@ -2729,6 +2733,16 @@ dependencies = [
 name = "mock_lib_control"
 version = "0.2.0"
 dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "mock_lib_regulator"
+version = "0.2.0"
+dependencies = [
+ "log",
+ "mock_lib_control",
+ "ractor",
  "serde",
 ]
 

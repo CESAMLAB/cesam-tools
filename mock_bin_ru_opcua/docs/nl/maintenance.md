@@ -42,16 +42,19 @@ De `async-opcua`-server is **altijd** aanwezig (de feature `server` van
 ```
 mock_bin_ru_opcua/src/
 ├── main.rs            # Stelt Tokio-runtime + actoren + GUI/headless samen
-├── regulator.rs       # Synchroon bedrijfsmodel (PID + proces), commando's, stap
 ├── config.rs          # AppConfig (TOML), sanitized(), ServerStatus
 ├── i18n.rs            # i18n-catalogus (8 talen), Lang + Msg + tr()
 ├── opcua_server.rs    # OPC UA-server: build + adresruimte + callbacks
 ├── gui.rs             # egui-GUI (feature gui)
 ├── branding.rs        # Ingebedde logo's (feature gui)
 └── actors/
-    ├── simulation.rs  #   regellus (tick 0,5 s)
     └── network.rs     #   warm (her)configureerbare OPC UA-server
 ```
+
+Het synchrone bedrijfsmodel (PID + proces, commando's, simulatiestap) en de
+`SimulationActor` bevinden zich **niet** in deze crate: ze komen uit de
+gedeelde crate [`mock_lib_regulator`](../../../mock_lib_regulator/src/lib.rs),
+opnieuw geëxporteerd door `actors/mod.rs`.
 
 ---
 
@@ -101,8 +104,11 @@ schrijfcallback (`on_write_*`) die een `Command` uitzendt. Weerspiegel de tabel 
 
 ### 6.2 Een bedrijfscommando toevoegen
 
-Breid de enum `Command` uit ([`regulator.rs`](../../src/regulator.rs)), behandel het
-geval in `Regulator::apply` (met sanering), voeg een test toe.
+Breid de enum `Command` uit in
+[`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs), behandel
+het geval in `Regulator::apply` (met sanering), voeg een test toe. ⚠️ Deze
+crate wordt **gedeeld** door ORUE/ORSE/ORSS/OREE: elke wijziging werkt door in
+alle vier instrumenten.
 
 ### 6.3 Een interface-string toevoegen (i18n)
 
@@ -125,10 +131,11 @@ X.509-tokens.
 
 ## 7. Teststrategie
 
-De bedrijfskern (`regulator.rs`) en de configuratie (`config.rs`) zijn **puur en
-getest**: PID-convergentie, setpoint-clamp, relaxatie bij stilstand, proceswijziging
-zonder PV-sprong, TOML-sanering, TOML-heen-en-terug. De i18n controleert de
-niet-leegheid en het heen-en-terug van de taal.
+De bedrijfskern ([`mock_lib_regulator`](../../../mock_lib_regulator/src/regulator.rs))
+en de configuratie (`config.rs`) zijn **puur en getest**: PID-convergentie,
+setpoint-clamp, relaxatie bij stilstand, proceswijziging zonder PV-sprong,
+TOML-sanering, TOML-heen-en-terug. De i18n controleert de niet-leegheid en het
+heen-en-terug van de taal.
 
 **Integratietests** dekken daarnaast de netwerklaag af: client↔server heen-en-terug
 op het **None**-endpoint (verbinden, schrijven, teruglezen), netwerk-actor-pariteit

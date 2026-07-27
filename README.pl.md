@@ -31,11 +31,12 @@ tworzenia, testowania i demonstrowania systemów nadzoru, sterowników lub brame
 | [`mock_bin_ru_ethernetip`](mock_bin_ru_ethernetip) | **OREE** | Regulator obiektowy udostępniony jako adapter EtherNet/IP (jawna komunikacja CIP) | EtherNet/IP (adapter) | egui |
 | [`mock_bin_ru_pbdp`](mock_bin_ru_pbdp) | **ORPD** | Regulator obiektowy udostępniony jako symulowany slave PROFIBUS DP-V0 na łączu szeregowym | PROFIBUS DP (slave, szeregowy) | egui |
 
-Biblioteka współdzielona:
+Biblioteki współdzielone:
 
 | Crate | Opis |
 |-------|-------------|
 | [`mock_lib_control`](mock_lib_control) | Wielokrotnego użytku elementy regulacji: PID antynasyceniowy, dwustawny z histerezą, proces 1. rzędu + czyste opóźnienie (FOPDT). |
+| [`mock_lib_regulator`](mock_lib_regulator) | Gotowy do użycia regulator PID (stan, konfiguracja TOML, aktor `ractor`), współdzielony bez zmian przez ORUE, ORSE, ORSS i OREE. |
 
 ## ORME — symulowany regulator
 
