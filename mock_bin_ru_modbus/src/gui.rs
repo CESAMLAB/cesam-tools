@@ -654,12 +654,27 @@ impl RegulatorGui {
                     let pv: PlotPoints = self.history.iter().map(|s| [s.t, s.pv]).collect();
                     let out: PlotPoints = self.history.iter().map(|s| [s.t, s.output]).collect();
                     // Libellé = nom + dernière valeur ; la pastille colorée est ajoutée par la légende.
-                    plot_ui.line(Line::new(format!("{}   {sp_txt}", t(Msg::LegSetpoint)), sp).color(COLOR_SP));
+                    //
+                    // ⚠️ `Line::new(name, ...)` dérive l'identifiant persistant de la
+                    // légende (visibilité affichée/masquée) de `name` au moment de la
+                    // construction. Ce nom initial doit donc rester STABLE d'une frame à
+                    // l'autre (contrairement au libellé affiché, mis à jour via `.name()`
+                    // qui ne touche pas l'identifiant) : sinon la case cochée d'une courbe
+                    // repart à "visible" dès la frame suivante, rendant le masquage impossible.
                     plot_ui.line(
-                        Line::new(format!("{}   {:.2} u", t(Msg::LegMeasure), snap.pv), pv).color(COLOR_PV),
+                        Line::new("sp", sp)
+                            .name(format!("{}   {sp_txt}", t(Msg::LegSetpoint)))
+                            .color(COLOR_SP),
                     );
                     plot_ui.line(
-                        Line::new(format!("{}   {:+.1} %", t(Msg::LegOutput), snap.output), out).color(COLOR_OUT),
+                        Line::new("pv", pv)
+                            .name(format!("{}   {:.2} u", t(Msg::LegMeasure), snap.pv))
+                            .color(COLOR_PV),
+                    );
+                    plot_ui.line(
+                        Line::new("output", out)
+                            .name(format!("{}   {:+.1} %", t(Msg::LegOutput), snap.output))
+                            .color(COLOR_OUT),
                     );
                 });
         });
