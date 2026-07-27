@@ -26,6 +26,10 @@ o gateway **senza hardware reale**.
 | [`mock_bin_ru_modbus`](mock_bin_ru_modbus) | **ORME** | Regolatore (PID / TOR / PWM) su funzione di trasferimento | Modbus TCP & RTU (slave) | egui |
 | [`mock_bin_su_namur`](mock_bin_su_namur) | **OSNE** | Agitatore da laboratorio sospeso: funzione di trasferimento del motore, regolazione rapida della velocità, carico viscoso regolabile | NAMUR su TCP & seriale RS-232 (slave) | egui |
 | [`mock_bin_ru_opcua`](mock_bin_ru_opcua) | **ORUE** | Regolatore di processo (PID anti-windup) su processo del primo ordine, con sicurezza OPC UA configurabile | OPC UA (server) | egui |
+| [`mock_bin_ru_sparkplugb`](mock_bin_ru_sparkplugb) | **ORSE** | Regolatore di processo esposto come nodo periferico MQTT Sparkplug B (in uscita) | Sparkplug B / MQTT (client) | egui |
+| [`mock_bin_ru_s7`](mock_bin_ru_s7) | **ORSS** | Regolatore di processo esposto come server S7comm su ISO-on-TCP (RFC1006) | S7comm (server) | egui |
+| [`mock_bin_ru_ethernetip`](mock_bin_ru_ethernetip) | **OREE** | Regolatore di processo esposto come adattatore EtherNet/IP (messaggistica esplicita CIP) | EtherNet/IP (adattatore) | egui |
+| [`mock_bin_ru_pbdp`](mock_bin_ru_pbdp) | **ORPD** | Regolatore di processo esposto come slave PROFIBUS DP-V0 simulato su collegamento seriale | PROFIBUS DP (slave, seriale) | egui |
 
 Libreria condivisa:
 
@@ -141,9 +145,147 @@ IHM `egui`). Avvialo con `cargo run -p mock_bin_ru_opcua`; il server OPC UA asco
 su `0.0.0.0:4840` per impostazione predefinita. Lo spazio di indirizzi è documentato
 in [`mock_bin_ru_opcua/docs/it/reference_opcua.md`](mock_bin_ru_opcua/docs/it/reference_opcua.md).
 
+## ORSE — il nodo periferico Sparkplug B simulato
+
+<p align="center">
+  <img src="pic/ru_spb-logo.svg" alt="ORSE — Open Regulator Sparkplug Emulator" height="120">
+</p>
+
+> **ORSE** — *Open Regulator Sparkplug Emulator*.
+> Un regolatore di processo che esiste solo come nodo periferico MQTT Sparkplug B.
+
+Un regolatore di processo virtuale completo, stesso modello PID + processo del primo ordine di ORME:
+
+- **Nodo periferico MQTT Sparkplug B** (client in uscita, `rumqttc` +
+  `sparkplug-rs`, protobuf Eclipse Tahu, 100% Rust — senza `protoc`).
+  Pubblica `NBIRTH`/`NDATA` e un `NDEATH` portato dal **testamento MQTT**
+  (*Last Will*, robusto a qualsiasi perdita di collegamento); reagisce alle
+  scritture `NCMD` del broker. Contatori `bdSeq`/`seq` posseduti e testati in
+  uno strato di protocollo puro, non delegati a un framework.
+- **Una postura diversa da ORME/OSNE**: essendo un client e non un server,
+  **nessuna lista bianca di IP**. **MQTT in chiaro per impostazione
+  predefinita** (porta 1883, non cifrato, senza autenticazione) — un banner
+  IHM avverte finché TLS + credenziali non sono attivati per uscire da una
+  rete di fiducia.
+- **Interfaccia grafica** su una pagina: pilotaggio, **curva di andamento**
+  in tempo reale, e un **modale Parametri** (indirizzo/credenziali/TLS del
+  broker, funzione di trasferimento del processo, guadagni PID, limiti di
+  setpoint, i18n in 8 lingue).
+- **Configurazione persistita** in formato TOML (`mock_ru_sparkplugb.toml`),
+  ricaricata all'avvio, con pulsante di ripristino ai valori predefiniti.
+
+Avvialo con `cargo run -p mock_bin_ru_sparkplugb`; si connette in uscita al
+broker configurato in *Parametri* (`localhost:1883` per impostazione
+predefinita) — nessuna porta in ascolto.
+
+## ORSS — il regolatore S7 simulato
+
+<p align="center">
+  <img src="pic/ru_s7-logo.svg" alt="ORSS — Open Regulator S7 Server" height="120">
+</p>
+
+> **ORSS** — *Open Regulator S7 Server*.
+> Un regolatore di processo che esiste solo sulla vostra connessione S7comm.
+
+Un regolatore di processo virtuale completo, stesso modello PID + processo del primo ordine di ORME:
+
+- **Server S7comm fatto a mano** su ISO-on-TCP (RFC1006), porta 102: trame
+  TPKT, COTP (CR→CC, DT) e S7comm (Setup, Read/Write Var) su un'**immagine
+  di byte DB1**. Non esiste alcuna crate **server** S7 in Rust (solo
+  orientate al client): il sottoinsieme richiesto è quindi implementato
+  direttamente — analisi limitata, nessun panico su una trama malformata.
+- **Più client simultanei accettati** (comportamento di un vero PLC), a
+  differenza della politica mono-master a espulsione di ORME — vince
+  l'ultimo che scrive.
+- **Senza autenticazione né cifratura** (S7 «classico»): solo la **lista
+  bianca di IP** e la topologia di rete proteggono l'accesso; un banner IHM
+  avverte in caso di esposizione (`0.0.0.0` + lista bianca vuota).
+- **Interfaccia grafica** su una pagina: pilotaggio, **curva di andamento**
+  in tempo reale, e un **modale Parametri** (rete, lista bianca, funzione di
+  trasferimento del processo, guadagni PID, limiti di setpoint, i18n in 8
+  lingue).
+- **Configurazione persistita** in formato TOML (`mock_ru_s7.toml`),
+  ricaricata all'avvio, con pulsante di ripristino ai valori predefiniti.
+
+Avvialo con `cargo run -p mock_bin_ru_s7`; il server S7comm ascolta per
+impostazione predefinita su `0.0.0.0:102` (porta < 1024 richiede privilegi
+root).
+
+## OREE — il regolatore EtherNet/IP simulato
+
+<p align="center">
+  <img src="pic/ru_eip-logo.svg" alt="OREE — Open Regulator EtherNet/IP Emulator" height="120">
+</p>
+
+> **OREE** — *Open Regulator EtherNet/IP Emulator*.
+> Un regolatore di processo che esiste solo sulla vostra connessione EtherNet/IP.
+
+Un regolatore di processo virtuale completo, stesso modello PID + processo del primo ordine di ORME:
+
+- **Adattatore EtherNet/IP fatto a mano** (incapsulamento `RegisterSession`,
+  `SendRRData`/CPF, e CIP `Read Tag`/`Write Tag` per segmento simbolico,
+  **little-endian**), porta 44818. Non esiste alcuna crate di
+  **adattatore** EtherNet/IP in Rust (solo orientate a client/scanner): il
+  sottoinsieme richiesto è quindi implementato direttamente — analisi
+  limitata, nessun panico su un pacchetto malformato.
+- **Più client simultanei accettati** (comportamento di un adattatore), a
+  differenza della politica mono-master a espulsione di ORME — ogni
+  sessione riceve un *session handle*, vince l'ultimo che scrive.
+- **Senza autenticazione né cifratura** (EtherNet/IP «classico»): solo la
+  **lista bianca di IP** e la topologia di rete proteggono l'accesso; un
+  banner IHM avverte in caso di esposizione.
+- **Interfaccia grafica** su una pagina: pilotaggio, **curva di andamento**
+  in tempo reale, e un **modale Parametri** (rete, lista bianca, funzione di
+  trasferimento del processo, guadagni PID, limiti di setpoint, i18n in 8
+  lingue).
+- **Configurazione persistita** in formato TOML (`mock_ru_ethernetip.toml`),
+  ricaricata all'avvio, con pulsante di ripristino ai valori predefiniti.
+
+Avvialo con `cargo run -p mock_bin_ru_ethernetip`; l'adattatore EtherNet/IP
+ascolta per impostazione predefinita su `0.0.0.0:44818`.
+
+## ORPD — il regolatore PROFIBUS DP simulato
+
+<p align="center">
+  <img src="pic/ru_pbdp-logo.svg" alt="ORPD — Open Regulator Profibus DP" height="120">
+</p>
+
+> **ORPD** — *Open Regulator Profibus DP*.
+> Un regolatore di processo che esiste solo sulla vostra connessione PROFIBUS DP.
+
+Un regolatore di processo virtuale completo, stesso modello PID + processo del primo ordine di ORME:
+
+- **Simulatore software di trame PROFIBUS DP-V0** su collegamento seriale
+  (RS-485/RS-232): codec di trame (`SD1`/`SD2`/`SD3`/`SD4`/`SC`, FCS) e
+  macchina a stati dello slave
+  (`Power_On → Wait_Prm → Wait_Cfg → Data_Exchange`). ⚠️ **Non
+  interoperabile con hardware PROFIBUS DP reale**: la vera temporizzazione
+  di bus (slot time, `Tsdr`) richiede un ASIC dedicato che questo
+  simulatore puramente software non pretende di emulare — vedere
+  [`reference_profibus.md`](mock_bin_ru_pbdp/docs/it/reference_profibus.md) §6.
+- **Il collegamento seriale è l'unico trasporto** (nessun equivalente TCP
+  per PROFIBUS DP, a differenza di ORME/OSNE dove il seriale è una feature
+  opzionale accanto a un trasporto TCP sempre presente): `tokio-serial` è
+  una dipendenza diretta, non opzionale. Nessuna lista bianca di IP
+  (intrinsecamente punto-punto).
+- **Watchdog di protocollo** — una parte reale di DP-V0 (armato dal master
+  tramite `Set_Prm`), non un'aggiunta artigianale; forza lo stato sicuro
+  alla scadenza.
+- **Interfaccia grafica** su una pagina: pilotaggio, **curva di andamento**
+  in tempo reale, un **mini-terminale di trame** (registro esadecimale del
+  traffico RX/TX), e un **modale Parametri** (porta seriale, velocità,
+  indirizzo di stazione, funzione di trasferimento del processo, guadagni
+  PID, limiti di setpoint, i18n in 8 lingue).
+- **Configurazione persistita** in formato TOML (`mock_ru_pbdp.toml`),
+  ricaricata all'avvio, con pulsante di ripristino ai valori predefiniti.
+
+Avvialo con `cargo run -p mock_bin_ru_pbdp`; tenta di aprire la porta
+seriale configurata (per impostazione predefinita `/dev/ttyUSB0` o `COM3`,
+500 kbit/s, indirizzo di stazione 3).
+
 ## Download
 
-I binari precompilati sono disponibili nella pagina [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) — **nessuna toolchain Rust necessaria**. Ogni strumento ha il proprio eseguibile (`orme`, `osne`, `ru_opcua`).
+I binari precompilati sono disponibili nella pagina [**Releases**](https://github.com/CESAMLAB/cesam-tools/releases/latest) — **nessuna toolchain Rust necessaria**. Ogni strumento ha il proprio eseguibile (`orme`, `osne`, `ru_opcua`, `ru_spb`, `ru_s7`, `ru_eip`, `ru_pbdp`).
 
 **ORME** (regolatore Modbus):
 
@@ -169,8 +311,40 @@ I binari precompilati sono disponibili nella pagina [**Releases**](https://githu
 | Windows x86_64 | [`ru_opcua-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_opcua-windows-x86_64.exe) | — |
 | Raspberry Pi arm64 (Pi OS 64-bit) | [`ru_opcua-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_opcua-rpi-arm64) | [`ru_opcua-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_opcua-rpi-arm64-headless) |
 
+**ORSE** (nodo periferico Sparkplug B):
+
+| Piattaforma | GUI | Headless (solo client, senza GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`ru_spb-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_spb-linux-x86_64) | [`ru_spb-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_spb-linux-x86_64-headless) |
+| Windows x86_64 | [`ru_spb-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_spb-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`ru_spb-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_spb-rpi-arm64) | [`ru_spb-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_spb-rpi-arm64-headless) |
+
+**ORSS** (regolatore S7comm):
+
+| Piattaforma | GUI | Headless (solo TCP, senza GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`ru_s7-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_s7-linux-x86_64) | [`ru_s7-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_s7-linux-x86_64-headless) |
+| Windows x86_64 | [`ru_s7-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_s7-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`ru_s7-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_s7-rpi-arm64) | [`ru_s7-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_s7-rpi-arm64-headless) |
+
+**OREE** (adattatore EtherNet/IP):
+
+| Piattaforma | GUI | Headless (solo TCP, senza GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`ru_eip-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_eip-linux-x86_64) | [`ru_eip-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_eip-linux-x86_64-headless) |
+| Windows x86_64 | [`ru_eip-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_eip-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`ru_eip-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_eip-rpi-arm64) | [`ru_eip-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_eip-rpi-arm64-headless) |
+
+**ORPD** (regolatore PROFIBUS DP):
+
+| Piattaforma | GUI | Headless (collegamento seriale, senza GUI) |
+|----------|-----|-----------------------------|
+| Linux x86_64 | [`ru_pbdp-linux-x86_64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_pbdp-linux-x86_64) | [`ru_pbdp-linux-x86_64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_pbdp-linux-x86_64-headless) |
+| Windows x86_64 | [`ru_pbdp-windows-x86_64.exe`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_pbdp-windows-x86_64.exe) | — |
+| Raspberry Pi arm64 (Pi OS 64-bit) | [`ru_pbdp-rpi-arm64`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_pbdp-rpi-arm64) | [`ru_pbdp-rpi-arm64-headless`](https://github.com/CESAMLAB/cesam-tools/releases/latest/download/ru_pbdp-rpi-arm64-headless) |
+
 ```bash
-chmod +x orme-linux-x86_64        # Linux / Raspberry Pi (lo stesso per osne-*, ru_opcua-*)
+chmod +x orme-linux-x86_64        # Linux / Raspberry Pi (lo stesso per gli altri strumenti)
 ./orme-linux-x86_64
 ```
 
@@ -246,6 +420,34 @@ disponibile in otto lingue (`docs/<lingua>/`). Versioni italiane:
 - [Riferimento OPC UA](mock_bin_ru_opcua/docs/it/reference_opcua.md) — endpoint, namespace, nodi (letture/scritture, esempi).
 - [Manutenzione software](mock_bin_ru_opcua/docs/it/maintenance.md) — build, configurazione, estensione, risoluzione dei problemi.
 
+**ORSE** (nodo periferico Sparkplug B):
+
+- [**Manuale utente**](mock_bin_ru_sparkplugb/docs/it/manuel_utilisateur.md) — guida introduttiva, IHM, connessione al broker, FAQ.
+- [Documento di progettazione](mock_bin_ru_sparkplugb/docs/it/conception.md) — architettura ad attori, strato di protocollo, scelta delle librerie.
+- [Riferimento Sparkplug B](mock_bin_ru_sparkplugb/docs/it/reference_sparkplugb.md) — topic, metriche, NBIRTH/NDATA/NDEATH, mapping NCMD.
+- [Manutenzione software](mock_bin_ru_sparkplugb/docs/it/maintenance.md) — build, configurazione, estensione, risoluzione dei problemi.
+
+**ORSS** (regolatore S7comm):
+
+- [**Manuale utente**](mock_bin_ru_s7/docs/it/manuel_utilisateur.md) — guida introduttiva, IHM, connessione di un client S7, FAQ.
+- [Documento di progettazione](mock_bin_ru_s7/docs/it/conception.md) — architettura ad attori, strato di protocollo, politica di sessione.
+- [Riferimento S7comm](mock_bin_ru_s7/docs/it/reference_s7.md) — trame TPKT/COTP/S7comm, immagine DB1, esempi.
+- [Manutenzione software](mock_bin_ru_s7/docs/it/maintenance.md) — build, configurazione, estensione, risoluzione dei problemi.
+
+**OREE** (adattatore EtherNet/IP):
+
+- [**Manuale utente**](mock_bin_ru_ethernetip/docs/it/manuel_utilisateur.md) — guida introduttiva, IHM, connessione di un client CIP, FAQ.
+- [Documento di progettazione](mock_bin_ru_ethernetip/docs/it/conception.md) — architettura ad attori, strato di protocollo, politica di sessione.
+- [Riferimento EtherNet/IP](mock_bin_ru_ethernetip/docs/it/reference_ethernetip.md) — incapsulamento, CIP Read/Write Tag, esempi.
+- [Manutenzione software](mock_bin_ru_ethernetip/docs/it/maintenance.md) — build, configurazione, estensione, risoluzione dei problemi.
+
+**ORPD** (regolatore PROFIBUS DP):
+
+- [**Manuale utente**](mock_bin_ru_pbdp/docs/it/manuel_utilisateur.md) — guida introduttiva, IHM, avvertenza di non interoperabilità, FAQ.
+- [Documento di progettazione](mock_bin_ru_pbdp/docs/it/conception.md) — architettura ad attori, strato di protocollo, scelte di codec.
+- [Riferimento PROFIBUS DP-V0](mock_bin_ru_pbdp/docs/it/reference_profibus.md) — trame, sequenziamento, blocchi I/O, watchdog, esempio di sequenza.
+- [Manutenzione software](mock_bin_ru_pbdp/docs/it/maintenance.md) — build, configurazione, estensione, risoluzione dei problemi.
+
 ## Marchio & loghi
 
 I loghi sono in [`pic/`](pic/):
@@ -260,17 +462,37 @@ I loghi sono in [`pic/`](pic/):
   (quadrante del regolatore racchiuso in un anello di nodo OPC UA), anch'essa
   incorporata come icona di finestra di ORUE.
 - [`ru_opcua-logo.svg`](pic/ru_opcua-logo.svg) — logo ORUE completo (icona + testo).
+- [`ru_spb-icon.svg`](pic/ru_spb-icon.svg) / `ru_spb-icon.png` — icona ORSE
+  (quadrante di regolatore + fulmine Sparkplug con nodi pub/sub non collegati),
+  anch'essa incorporata come icona di finestra di ORSE.
+- [`ru_spb-logo.svg`](pic/ru_spb-logo.svg) — logo ORSE completo (icona + testo).
+- [`ru_s7-icon.svg`](pic/ru_s7-icon.svg) / `ru_s7-icon.png` — icona ORSS (quadrante
+  di regolatore + rack aperto di moduli quadrati, backplane S7), anch'essa
+  incorporata come icona di finestra di ORSS.
+- [`ru_s7-logo.svg`](pic/ru_s7-logo.svg) — logo ORSS completo (icona + testo).
+- [`ru_eip-icon.svg`](pic/ru_eip-icon.svg) / `ru_eip-icon.png` — icona OREE
+  (quadrante di regolatore + anello chiuso di rombi, DLR EtherNet/IP), anch'essa
+  incorporata come icona di finestra di OREE.
+- [`ru_eip-logo.svg`](pic/ru_eip-logo.svg) — logo OREE completo (icona + testo).
+- [`ru_pbdp-icon.svg`](pic/ru_pbdp-icon.svg) / `ru_pbdp-icon.png` — icona ORPD
+  (quadrante di regolatore con motivo PROFIBUS DP), anch'essa incorporata come
+  icona di finestra di ORPD.
+- [`ru_pbdp-logo.svg`](pic/ru_pbdp-logo.svg) — logo ORPD completo (icona + testo).
 - [`Logo-CESAM-Couleur-vect.png`](pic/Logo-CESAM-Couleur-vect.png) — logo CESAM-Lab.
 
 Ogni icona è **generata** dal proprio script `*-logo.gen.py`
 ([`pic/orme-logo.gen.py`](pic/orme-logo.gen.py),
 [`pic/osne-logo.gen.py`](pic/osne-logo.gen.py),
-[`pic/ru_opcua-logo.gen.py`](pic/ru_opcua-logo.gen.py)). Gli script OSNE e ORUE
-rasterizzano inoltre direttamente il proprio `-icon.png` (tramite Pillow); l'`.svg`
-di ORME viene rasterizzato in seguito.
+[`pic/ru_opcua-logo.gen.py`](pic/ru_opcua-logo.gen.py),
+[`pic/ru_spb-logo.gen.py`](pic/ru_spb-logo.gen.py),
+[`pic/ru_s7-logo.gen.py`](pic/ru_s7-logo.gen.py),
+[`pic/ru_eip-logo.gen.py`](pic/ru_eip-logo.gen.py),
+[`pic/ru_pbdp-logo.gen.py`](pic/ru_pbdp-logo.gen.py)). Tutti gli script tranne
+quello di ORME rasterizzano inoltre direttamente il proprio `-icon.png` (tramite
+Pillow); l'`.svg` di ORME viene rasterizzato in seguito.
 
 Sotto **Wayland**, installare l'icona della barra delle applicazioni di uno
-strumento con `scripts/install-desktop.sh [orme|osne|ru_opcua]`.
+strumento con `scripts/install-desktop.sh [orme|osne|ru_opcua|ru_spb|ru_s7|ru_eip|ru_pbdp]`.
 
 ## Licenza
 

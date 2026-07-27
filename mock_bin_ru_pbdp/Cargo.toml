@@ -1,0 +1,41 @@
+[package]
+name = "mock_bin_ru_pbdp"
+description = "Régulateur industriel simulé : régulation PID/TOR sur fonction de transfert, simulateur logiciel de trames PROFIBUS DP-V0 (non interopérable avec du matériel réel) et interface graphique."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+# Nom commercial de l'exécutable produit : marque documentaire ORPD (Open Regulator
+# Profibus DP). Le nom de paquet reste `mock_bin_ru_pbdp` (sélecteur `cargo -p`).
+[[bin]]
+name = "ru_pbdp"
+path = "src/main.rs"
+
+[features]
+# Interface graphique embarquée. Activée par défaut (poste de travail).
+# `--no-default-features` produit un binaire « headless » : machine à états
+# PROFIBUS + simulation tournent sans IHM. Contrairement à ORME/OSNE (dont la
+# liaison série est une feature optionnelle à côté d'un transport TCP toujours
+# présent), la liaison série n'est PAS optionnelle ici : c'est l'unique
+# transport de cet instrument (pas d'équivalent PROFIBUS-sur-TCP standard),
+# donc `tokio-serial` est une dépendance directe, non feature-gated.
+default = ["gui"]
+gui = ["dep:eframe", "dep:egui_plot", "dep:image", "dep:mock_lib_update"]
+
+[dependencies]
+mock_lib_control = { workspace = true, features = ["serde"] }
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["io-util"] }
+ractor = { workspace = true }
+tokio-serial = { workspace = true }
+eframe = { workspace = true, optional = true }
+egui_plot = { workspace = true, optional = true }
+image = { workspace = true, optional = true }
+# Vérification de mise à jour (feature `gui` uniquement : commodité poste de travail).
+mock_lib_update = { workspace = true, optional = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 240" width="760" height="240">
+  <title>ORPD — Open Regulator Profibus DP</title>
+  <style>
+    .ink { fill: #1A171B; }
+    .sub { fill: #6E6A70; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #ECECEC; }
+      .sub { fill: #B7B3B9; }
+    }
+  </style>
+  <g transform="translate(2,0)">
+    <g>
+    <circle cx="120" cy="92" r="52" fill="#1A171B"/>
+    <path d="M 73.33 138.67 A 66 66 0 1 1 166.67 138.67" fill="none" stroke="#F29400" stroke-width="11" stroke-linecap="round"/>
+    <line x1="94.54" y1="117.46" x2="87.47" y2="124.53" stroke="#F29400" stroke-width="4.2" stroke-linecap="round"/>
+    <line x1="85.76" y1="103.12" x2="76.25" y2="106.21" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="84.44" y1="86.37" x2="74.57" y2="84.8" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="90.88" y1="70.84" x2="82.79" y2="64.96" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="103.66" y1="59.92" x2="99.12" y2="51.01" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="120" y1="56" x2="120" y2="46" stroke="#F29400" stroke-width="4.2" stroke-linecap="round"/>
+    <line x1="136.34" y1="59.92" x2="140.88" y2="51.01" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="149.12" y1="70.84" x2="157.21" y2="64.96" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="155.56" y1="86.37" x2="165.43" y2="84.8" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="154.24" y1="103.12" x2="163.75" y2="106.21" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="145.46" y1="117.46" x2="152.53" y2="124.53" stroke="#F29400" stroke-width="4.2" stroke-linecap="round"/>
+    <polygon points="148.1,60.79 114.05,86.65 109.96,103.15 125.95,97.35" fill="#F29400"/>
+    <circle cx="120" cy="92" r="11" fill="#F29400"/>
+    <circle cx="120" cy="92" r="4.2" fill="#1A171B"/>
+    <line x1="12" y1="198" x2="228" y2="198" stroke="#F29400" stroke-width="6" stroke-linecap="round"/>
+    <rect x="7.5" y="187" width="9" height="22" rx="2" fill="#1A171B" stroke="#F29400" stroke-width="2.5"/>
+    <rect x="223.5" y="187" width="9" height="22" rx="2" fill="#1A171B" stroke="#F29400" stroke-width="2.5"/>
+    <line x1="52" y1="198" x2="52" y2="222" stroke="#F29400" stroke-width="4" stroke-linecap="round"/>
+    <rect x="44" y="214" width="16" height="16" rx="1.5" fill="#F29400"/>
+    <rect x="48.8" y="218.8" width="6.4" height="6.4" fill="#1A171B"/>
+    <line x1="120" y1="198" x2="120" y2="222" stroke="#F29400" stroke-width="4" stroke-linecap="round"/>
+    <rect x="112" y="214" width="16" height="16" rx="1.5" fill="#F29400"/>
+    <rect x="116.8" y="218.8" width="6.4" height="6.4" fill="#1A171B"/>
+    <line x1="188" y1="198" x2="188" y2="222" stroke="#F29400" stroke-width="4" stroke-linecap="round"/>
+    <rect x="180" y="214" width="16" height="16" rx="1.5" fill="#F29400"/>
+    <rect x="184.8" y="218.8" width="6.4" height="6.4" fill="#1A171B"/>
+  </g>
+  </g>
+  <text x="250" y="118" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="104" font-weight="800"
+        class="ink" letter-spacing="2">OR<tspan fill="#F29400">PD</tspan></text>
+  <text x="252" y="158" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="27" font-weight="600"
+        class="sub" letter-spacing="0.5"
+        textLength="400" lengthAdjust="spacingAndGlyphs">Open Regulator Profibus DP</text>
+  <text x="252" y="192" font-family="'DejaVu Sans','Segoe UI',Helvetica,Arial,sans-serif" font-size="23" font-weight="700"
+        fill="#F29400" font-style="italic">« Simulez le bus, pas le matériel. »</text>
+</svg>

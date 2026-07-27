@@ -37,6 +37,10 @@ INSTRUMENTS=(
   "mock_bin_ru_s7:ru_s7:102"
   # EtherNet/IP : adaptateur CIP (messagerie explicite), port standard 44818.
   "mock_bin_ru_ethernetip:ru_eip:44818"
+  # PROFIBUS DP : liaison série RS-485 uniquement, aucun port IP → 0. Le build
+  # Docker headless n'a d'intérêt qu'avec passthrough d'un périphérique série
+  # (`--device=/dev/ttyUSB0`) — voir mock_bin_ru_pbdp/docs/fr/maintenance.md.
+  "mock_bin_ru_pbdp:ru_pbdp:0"
 )
 
 IMAGE_PREFIX="${IMAGE_PREFIX:-}"

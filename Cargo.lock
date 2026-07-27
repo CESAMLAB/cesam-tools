@@ -2650,6 +2650,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "mock_bin_ru_pbdp"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "eframe",
+ "egui_plot",
+ "env_logger",
+ "image",
+ "log",
+ "mock_lib_control",
+ "mock_lib_update",
+ "ractor",
+ "serde",
+ "tokio",
+ "tokio-serial",
+ "toml",
+]
+
+[[package]]
 name = "mock_bin_ru_s7"
 version = "0.2.0"
 dependencies = [

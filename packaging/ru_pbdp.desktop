@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=ORPD
+GenericName=Régulateur simulé (PROFIBUS DP)
+Comment=Simulateur logiciel de trames PROFIBUS DP-V0 (non interopérable avec du matériel réel) — CESAM-Lab
+Exec=ru_pbdp
+Icon=ru_pbdp
+Terminal=false
+Categories=Utility;Engineering;Development;
+# Doit correspondre à l'app_id Wayland / WM_CLASS X11 défini dans main.rs.
+StartupWMClass=ru_pbdp

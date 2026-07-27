@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <title>ORPD — Open Regulator Profibus DP</title>
+  <g>
+    <circle cx="128" cy="100" r="52" fill="#1A171B"/>
+    <path d="M 81.33 146.67 A 66 66 0 1 1 174.67 146.67" fill="none" stroke="#F29400" stroke-width="11" stroke-linecap="round"/>
+    <line x1="102.54" y1="125.46" x2="95.47" y2="132.53" stroke="#F29400" stroke-width="4.2" stroke-linecap="round"/>
+    <line x1="93.76" y1="111.12" x2="84.25" y2="114.21" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="92.44" y1="94.37" x2="82.57" y2="92.8" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="98.88" y1="78.84" x2="90.79" y2="72.96" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="111.66" y1="67.92" x2="107.12" y2="59.01" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="128" y1="64" x2="128" y2="54" stroke="#F29400" stroke-width="4.2" stroke-linecap="round"/>
+    <line x1="144.34" y1="67.92" x2="148.88" y2="59.01" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="157.12" y1="78.84" x2="165.21" y2="72.96" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="163.56" y1="94.37" x2="173.43" y2="92.8" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="162.24" y1="111.12" x2="171.75" y2="114.21" stroke="#4A464C" stroke-width="2.4" stroke-linecap="round"/>
+    <line x1="153.46" y1="125.46" x2="160.53" y2="132.53" stroke="#F29400" stroke-width="4.2" stroke-linecap="round"/>
+    <polygon points="156.1,68.79 122.05,94.65 117.96,111.15 133.95,105.35" fill="#F29400"/>
+    <circle cx="128" cy="100" r="11" fill="#F29400"/>
+    <circle cx="128" cy="100" r="4.2" fill="#1A171B"/>
+    <line x1="20" y1="206" x2="236" y2="206" stroke="#F29400" stroke-width="6" stroke-linecap="round"/>
+    <rect x="15.5" y="195" width="9" height="22" rx="2" fill="#1A171B" stroke="#F29400" stroke-width="2.5"/>
+    <rect x="231.5" y="195" width="9" height="22" rx="2" fill="#1A171B" stroke="#F29400" stroke-width="2.5"/>
+    <line x1="60" y1="206" x2="60" y2="230" stroke="#F29400" stroke-width="4" stroke-linecap="round"/>
+    <rect x="52" y="222" width="16" height="16" rx="1.5" fill="#F29400"/>
+    <rect x="56.8" y="226.8" width="6.4" height="6.4" fill="#1A171B"/>
+    <line x1="128" y1="206" x2="128" y2="230" stroke="#F29400" stroke-width="4" stroke-linecap="round"/>
+    <rect x="120" y="222" width="16" height="16" rx="1.5" fill="#F29400"/>
+    <rect x="124.8" y="226.8" width="6.4" height="6.4" fill="#1A171B"/>
+    <line x1="196" y1="206" x2="196" y2="230" stroke="#F29400" stroke-width="4" stroke-linecap="round"/>
+    <rect x="188" y="222" width="16" height="16" rx="1.5" fill="#F29400"/>
+    <rect x="192.8" y="226.8" width="6.4" height="6.4" fill="#1A171B"/>
+  </g>
+</svg>

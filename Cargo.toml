@@ -9,6 +9,7 @@ members = [
     "mock_bin_ru_sparkplugb",
     "mock_bin_ru_s7",
     "mock_bin_ru_ethernetip",
+    "mock_bin_ru_pbdp",
 ]
 
 [workspace.package]
